@@ -1,0 +1,572 @@
+/* ─────────────────────────────────────────────────────────────
+   CARD TYPES — Shared styles for all card content components
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Rich Text ─────────────────────────────────────────────── */
+.richText {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.richToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px 6px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.fmtBtn {
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-2);
+  line-height: 1.4;
+  transition: background 0.1s, color 0.1s;
+}
+
+.fmtBtn:hover {
+  background: var(--surface-3);
+  color: var(--text-1);
+}
+
+.richEditor {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-1);
+  outline: none;
+  min-height: 80px;
+  overflow-y: auto;
+}
+
+.richEditor[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.richEditor h2 { font-size: 16px; font-weight: 700; margin: 6px 0 2px; }
+.richEditor h3 { font-size: 14px; font-weight: 600; margin: 4px 0 2px; }
+.richEditor ul,
+.richEditor ol { padding-left: 20px; margin: 4px 0; }
+.richEditor li { margin: 2px 0; }
+.richEditor code {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  background: var(--surface-3);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.richEditor strong { font-weight: 700; }
+.richEditor em     { font-style: italic; }
+
+/* ── Task ───────────────────────────────────────────────────── */
+.task {
+  padding: 6px 8px 8px;
+}
+
+/* Checkbox style selector */
+.checkStyleRow {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.checkStyleBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-3);
+  font-size: 14px;
+  padding: 1px 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.checkStyleBtn:hover {
+  border-color: var(--accent);
+  color: var(--text-1);
+}
+
+.checkStyleActive {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: rgba(124, 106, 245, 0.1);
+}
+
+/* Custom checkbox shapes */
+.customCheck {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.checkSquare {
+  border: 1.5px solid var(--text-3);
+  border-radius: 2px;
+  color: var(--accent);
+}
+
+.checkSquare.customCheckDone {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.checkCircle {
+  border: 1.5px solid var(--text-3);
+  border-radius: 50%;
+  color: var(--accent);
+}
+
+.checkCircle.customCheckDone {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.checkStar {
+  border: none;
+  font-size: 15px;
+  color: var(--text-3);
+  width: 18px;
+  height: 18px;
+}
+
+.checkStar.customCheckDone {
+  color: #f59e0b;
+}
+
+/* Text styling when done */
+.checkTextDone {
+  text-decoration: line-through !important;
+  color: var(--text-3) !important;
+  opacity: 0.6;
+}
+
+.progressWrap {
+  position: relative;
+  height: 6px;
+  background: var(--surface-3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressBar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.progressLabel {
+  position: absolute;
+  right: 0;
+  top: -14px;
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checkDone .checkText {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.checkbox {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.checkText {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-1);
+  outline: none;
+  padding: 2px 0;
+}
+
+.checkRemove {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.checkItem:hover .checkRemove { opacity: 1; }
+
+.addRow {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.addInput {
+  flex: 1;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  outline: none;
+}
+
+.addInput:focus {
+  border-color: var(--accent);
+}
+
+.addBtn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* ── Table ──────────────────────────────────────────────────── */
+.table {
+  padding: 4px;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.tableEl {
+  border-collapse: collapse;
+  font-size: 12px;
+  width: 100%;
+}
+
+.colHeader {
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-weight: 600;
+  text-align: center;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  width: 64px;
+}
+
+.cell {
+  border: 1px solid var(--border);
+  padding: 0;
+  position: relative;
+}
+
+.cellInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-1);
+  padding: 4px 6px;
+  font-size: 12px;
+  outline: none;
+  font-family: var(--font-mono, monospace);
+  box-sizing: border-box;
+}
+
+.cellInput:focus {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.cellResult {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  font-size: 12px;
+  color: var(--accent);
+  pointer-events: none;
+  font-family: var(--font-mono, monospace);
+}
+
+/* Phase 3: Non-overlapping formula result — fills the entire cell,
+   clicking it re-focuses the edit mode. */
+.cellResultDisplay {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 12px;
+  color: var(--accent);
+  font-family: var(--font-mono, monospace);
+  cursor: text;
+  min-height: 28px;
+  box-sizing: border-box;
+}
+
+.cellResultDisplay:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.tableActions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.tableBtn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-2);
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.tableBtn:hover {
+  background: var(--surface-3);
+}
+
+/* ── Document Card ──────────────────────────────────────────── */
+.documentCard {
+  position: relative;
+  min-height: 180px;
+  max-height: 400px;
+  overflow: hidden;
+  background: #fafaf8;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ruled lines — fixed-height rows behind the text */
+.documentLines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.documentLine {
+  height: 24px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.documentEditor {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 24px;   /* matches documentLine height */
+  color: #1a1a1a;
+  outline: none;
+  overflow-y: auto;
+  min-height: 180px;
+  max-height: 400px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: transparent;
+  word-break: break-word;
+}
+
+.documentEditor[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #aaa;
+  pointer-events: none;
+  font-style: italic;
+}
+
+.documentEditor p,
+.documentEditor div { margin: 0; }
+
+/* ── Media ──────────────────────────────────────────────────── */
+.media {
+  display: flex;
+  flex-direction: column;
+}
+
+.mediaImgWrap {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 0 0 4px 4px;
+}
+
+.mediaImg {
+  width: 100%;
+  height: 100%;
+}
+
+.mediaControls {
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--border);
+}
+
+.mediaBtn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-2);
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.mediaBtn:hover { background: var(--surface-3); }
+
+.mediaEmpty {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.mediaUploadZone {
+  width: 100%;
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text-3);
+  font-size: 12px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.mediaUploadZone:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.mediaUploadIcon { font-size: 28px; }
+
+.mediaOr {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.mediaUrlInput {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.mediaUrlInput:focus { border-color: var(--accent); }
+
+.mediaFileInput { display: none; }
+
+/* ── Link ───────────────────────────────────────────────────── */
+.link {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.linkIcon {
+  font-size: 24px;
+  text-align: center;
+}
+
+.linkUrl {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--accent);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: var(--font-mono, monospace);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.linkUrl:focus { border-color: var(--accent); }
+
+.linkDesc {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.linkDesc:focus { border-color: var(--accent); }
+
+.linkOpen {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.linkOpen:hover { opacity: 0.85; }

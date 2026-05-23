@@ -1,0 +1,31 @@
+.canvas {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  cursor: default;
+  /* Prevent text selection during drag */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  /* Radial gradient dots — pure CSS, no images */
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+  pointer-events: none;  /* Clicks fall through to canvas */
+}
+
+.world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* No width/height — the world is conceptually infinite */
+  width: 0;
+  height: 0;
+  /* z-index 2 ensures cards sit ABOVE the connector SVG (z-index 1),
+     so the arrow tail is hidden behind the source card. */
+  z-index: 2;
+  /* GPU compositing layer — keeps transforms smooth */
+  will-change: transform;
+}

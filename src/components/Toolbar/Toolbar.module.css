@@ -1,0 +1,185 @@
+.toolbar {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 6px 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sep {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all var(--transition);
+  position: relative;
+}
+
+.btn:hover {
+  background: var(--surface2);
+  color: var(--text-1);
+}
+
+.active {
+  background: rgba(124, 106, 245, 0.15);
+  color: var(--accent);
+}
+
+.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+/* ── Connect mode ── */
+.connecting {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #f59e0b !important;
+}
+
+.connectBanner {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1001;
+  box-shadow: 0 4px 16px rgba(245,158,11,0.2);
+  white-space: nowrap;
+}
+
+.connectCancel {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #f87171;
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.connectCancel:hover {
+  background: rgba(239,68,68,0.2);
+}
+
+/* ── Note dropdown ── */
+.dropdownWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border-h);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1100;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  background: transparent;
+  border: none;
+  width: 100%;
+  transition: background var(--transition);
+}
+
+.dropdownItem:hover {
+  background: var(--surface2);
+}
+
+.dropdownIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.dropdownItem span {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dropdownItem strong {
+  font-size: 12px;
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+.dropdownItem small {
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+/* Tooltip via CSS attr() */
+.btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface2);
+  color: var(--text-1);
+  font-size: 11px;
+  font-family: var(--font-ui);
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  pointer-events: none;
+  z-index: 100;
+}

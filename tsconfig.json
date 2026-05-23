@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    // TypeScript is a "superset" of JavaScript — same syntax,
+    // plus type annotations. These options control strictness.
+
+    "target": "ES2020",          // Output modern JS (browsers support it)
+    "lib": ["ES2020", "DOM", "DOM.Iterable"], // Type definitions available
+    "module": "ESNext",          // Use ES modules (import/export)
+    "moduleResolution": "bundler", // Let Vite handle module resolution
+    "jsx": "react-jsx",          // Transform JSX → React.createElement
+    
+    // Strictness — these catch bugs at compile time, not runtime
+    "strict": true,              // Enable all strict type checks
+    "noUnusedLocals": true,      // Error on unused variables
+    "noUnusedParameters": true,  // Error on unused function params
+    "noFallthroughCasesInSwitch": true, // Prevent switch fallthrough bugs
+    
+    // Path aliases — matches vite.config.ts
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src"]
+}

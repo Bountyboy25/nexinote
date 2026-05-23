@@ -1,0 +1,31 @@
+/* ─────────────────────────────────────────────────────────────
+   CONNECTOR LAYER
+   z-index 1 keeps arrows BEHIND cards (world div is z-index 2).
+   This makes the tail invisible under the source card.
+   ───────────────────────────────────────────────────────────── */
+
+.layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;        /* Below cards (z-index 2) and all UI chrome */
+  overflow: visible;
+}
+
+/* ── Wave animation (flowing dashes) ── */
+@keyframes dashFlow {
+  to { stroke-dashoffset: -30; }
+}
+
+@keyframes dashFast {
+  to { stroke-dashoffset: -30; }
+}
+
+.dashSlow {
+  animation: dashFlow 2s linear infinite;
+}
+
+.dashFast {
+  animation: dashFast 0.5s linear infinite;
+}

@@ -1,0 +1,83 @@
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS
+   
+   CSS custom properties (variables) are the foundation of a
+   design system. They create a single source of truth for
+   every color, spacing, and animation value.
+   
+   Benefits:
+   - Change the accent color in one place → updates everywhere
+   - Easy theming (dark/light mode = swap variable values)
+   - Self-documenting (var(--accent) is more readable than #7c6af5)
+───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Colors ── */
+  --bg:        #0f0f11;
+  --surface:   #1a1a1f;
+  --surface2:  #22222a;
+  --border:    rgba(255, 255, 255, 0.07);
+  --border-h:  rgba(255, 255, 255, 0.16);
+  --dot:       rgba(255, 255, 255, 0.055);
+
+  /* ── Text ── */
+  --text-1: #f0ede8;   /* Primary — headings, active labels */
+  --text-2: #8a8890;   /* Secondary — body, descriptions */
+  --text-3: #4a4858;   /* Tertiary — placeholders, hints */
+
+  /* ── Accent ── */
+  --accent:   #7c6af5;   /* Primary brand color */
+  --accent-s: #5b4fd4;   /* Darker variant (hover states) */
+  --accent-g: #4dd9ac;   /* Green accent (success, tasks) */
+
+  /* ── Spacing & Shape ── */
+  --radius:    12px;
+  --radius-sm: 8px;
+
+  /* ── Typography ── */
+  --font-ui:   'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'DM Mono', 'Fira Code', monospace;
+
+  /* ── Elevation ── */
+  --shadow:    0 2px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.55);
+
+  /* ── Motion ── */
+  --transition: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CSS RESET — Normalize browser defaults
+───────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;    /* The canvas handles all scrolling */
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text-1);
+  /* Improve font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove default button styles — we style from scratch */
+button {
+  all: unset;
+  cursor: pointer;
+}
+
+/* Remove default input styles */
+input {
+  all: unset;
+}
