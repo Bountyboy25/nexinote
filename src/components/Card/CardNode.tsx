@@ -6,6 +6,7 @@ import { TableCardContent }    from './types/TableCardContent'
 import { MediaCardContent }    from './types/MediaCardContent'
 import { LinkCardContent }     from './types/LinkCardContent'
 import { DocumentCardContent } from './types/DocumentCardContent'
+import { ColumnCardContent }   from './types/ColumnCardContent'
 import type { Card } from '@/types'
 import styles from './CardNode.module.css'
 
@@ -29,6 +30,7 @@ const CARD_ICONS: Record<string, string> = {
   table:    '📊',
   media:    '🖼️',
   link:     '🔗',
+  column:   '▤',
 }
 
 // ── CardFactory — dispatches to the right content component ──
@@ -40,6 +42,7 @@ function CardContent({ card }: { card: Card }) {
     case 'table':    return <TableCardContent     card={card} />
     case 'media':    return <MediaCardContent     card={card} />
     case 'link':     return <LinkCardContent      card={card} />
+    case 'column':   return <ColumnCardContent    card={card as import('@/types').ColumnCard} />
   }
 }
 

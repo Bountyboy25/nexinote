@@ -69,9 +69,26 @@ export interface LinkCard extends BaseCard {
   content: { url: string; description: string }
 }
 
+// ── Column card ────────────────────────────────────────────────
+export interface ColumnItem {
+  id: string
+  type: 'note' | 'task' | 'link'
+  title: string
+  text: string    // plain-text body / url / task description
+  done?: boolean  // for task items
+  color?: string  // optional per-item accent
+}
+
+export interface ColumnCard extends BaseCard {
+  type: 'column'
+  content: {
+    items: ColumnItem[]
+  }
+}
+
 // Discriminated union — TypeScript narrows via card.type
-export type Card = NoteCard | TaskCard | TableCard | MediaCard | LinkCard | DocumentCard
-export type CardType = 'note' | 'task' | 'table' | 'media' | 'link' | 'document'
+export type Card = NoteCard | TaskCard | TableCard | MediaCard | LinkCard | DocumentCard | ColumnCard
+export type CardType = 'note' | 'task' | 'table' | 'media' | 'link' | 'document' | 'column'
 
 // ── Board ─────────────────────────────────────────────────────
 export interface Board {
@@ -104,6 +121,7 @@ export type ActiveTool =
   | 'table'
   | 'media'
   | 'link'
+  | 'column'
   | 'connect'
 
 // ── Full store shape ──────────────────────────────────────────
@@ -154,9 +172,9 @@ export interface CanvasStore {
   resetView: () => void
   zoomTo: (zoom: number, originX: number, originY: number) => void
 
-  // ── Tool actions ─────────────────────────────────────────
+  // ── Tool actions ────────────────────────────────────────
   setActiveTool: (tool: ActiveTool) => void
 
-  // ── Settings actions ─────────────────────────────────────
+  // ── Settings actions ────────────────────────────────────
   updateSettings: (patch: Partial<AppSettings>) => void
 }

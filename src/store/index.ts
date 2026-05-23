@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { nanoid } from 'nanoid'
 import type {
   CanvasStore, Card, CardType, Camera, ActiveTool,
-  NoteCard, DocumentCard, TaskCard, TableCard, MediaCard, LinkCard,
+  NoteCard, DocumentCard, TaskCard, TableCard, MediaCard, LinkCard, ColumnCard,
   Board, AppSettings, Connector,
 } from '@/types'
 
@@ -45,8 +45,10 @@ function createCard(
         content: { html: '<p>Start writing…</p>' } } satisfies NoteCard
 
     case 'document':
-      return { ...base, type: 'document', title: 'Document',
-        content: { html: '<p>Start writing your document…</p>' } } satisfies DocumentCard
+      return {
+        ...base, type: 'document', title: 'Document', width: 320,
+        content: { html: '' },
+      } satisfies DocumentCard
 
     case 'task':
       return { ...base, type: 'task', title: 'Tasks',
@@ -69,6 +71,12 @@ function createCard(
     case 'link':
       return { ...base, type: 'link', title: 'Link',
         content: { url: 'https://', description: '' } } satisfies LinkCard
+
+    case 'column':
+      return {
+        ...base, type: 'column', title: 'Column', width: 300,
+        content: { items: [] },
+      } satisfies ColumnCard
   }
 }
 

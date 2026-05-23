@@ -37,7 +37,7 @@ export function DocumentCardContent({ card }: Props) {
     <div className={styles.documentCard}>
       {/* Decorative horizontal lines — simulate ruled paper */}
       <div className={styles.documentLines} aria-hidden="true">
-        {Array.from({ length: 12 }).map((_, i) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className={styles.documentLine} />
         ))}
       </div>

@@ -30,9 +30,9 @@ export function Toolbar() {
     clearBoard, resetView, setConnectFrom,
   } = useCanvasStore.getState()
 
-  function placeCard(type: ActiveTool & ('note' | 'document' | 'task' | 'media' | 'link')) {
+  function placeCard(type: ActiveTool & ('note' | 'document' | 'task' | 'media' | 'link' | 'column')) {
     const center = getViewportCenter(camera)
-    addCard(type, center.x - 140, center.y - 60)
+    addCard(type, center.x - 150, center.y - 60)
     setActiveTool('select')
     if (connectFromId) setConnectFrom(null)
   }
@@ -149,6 +149,13 @@ export function Toolbar() {
             title="Link (L)"
           >🔗</button>
 
+          {/* Column */}
+          <button
+            className={`${styles.btn} ${activeTool === 'column' ? styles.active : ''}`}
+            onClick={() => placeCard('column')}
+            title="Column — card container"
+          >▤</button>
+
           {/* Connect */}
           <button
             className={`${styles.btn} ${activeTool === 'connect' ? styles.active : ''} ${connectFromId ? styles.connecting : ''}`}
@@ -179,6 +186,7 @@ export function Toolbar() {
         </div>
       </div>
 
+      {/* Modals */}
       {/* Modals */}
       {showTemplates   && <TemplatesModal onClose={() => setShowTemplates(false)} />}
       {showTableDialog && (

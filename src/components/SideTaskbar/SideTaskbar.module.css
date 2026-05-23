@@ -4,7 +4,7 @@
 
 .taskbar {
   position: fixed;
-  top: 52px;          /* below TopBar */
+  top: 52px;
   left: 0;
   bottom: 0;
   width: 56px;
@@ -12,7 +12,7 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--border);
-  z-index: 500;       /* above canvas (z-index 2), below modals */
+  z-index: 500;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,6 +21,15 @@
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+/* ── Custom scrollbar ─────────────────────────────────────── */
+.taskbar::-webkit-scrollbar        { width: 3px; }
+.taskbar::-webkit-scrollbar-track  { background: transparent; }
+.taskbar::-webkit-scrollbar-thumb  {
+  background: var(--border-h);
+  border-radius: 2px;
+}
+.taskbar::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
 /* Card type label badge */
 .typeLabel {
@@ -100,7 +109,100 @@
   border-color: rgba(239, 68, 68, 0.3);
 }
 
-/* Color swatches */
+/* ── Dropdown trigger ─────────────────────────────────────── */
+/* Wraps the icon button. The panel is position:fixed so it
+   escapes the overflow:hidden taskbar without needing a portal. */
+.dropTrigger {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ── Dropdown panel (flies out to the right) ──────────────── */
+.dropPanel {
+  position: fixed;
+  left: 64px;        /* sidebar width (56) + gap (8) */
+  background: rgba(14, 14, 18, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-h);
+  border-radius: 10px;
+  padding: 10px 12px;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+}
+
+.dropPanelLabel {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* ── Color grid ───────────────────────────────────────────── */
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 22px);
+  gap: 5px;
+}
+
+.colorDot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.colorDot:hover {
+  transform: scale(1.25);
+  border-color: rgba(255,255,255,0.6);
+}
+
+/* ── Size list ────────────────────────────────────────────── */
+.sizeList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 130px;
+}
+
+.sizeOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: all var(--transition);
+  width: 100%;
+  gap: 12px;
+}
+
+.sizeOption:hover {
+  background: var(--surface-3);
+  color: var(--text-1);
+  border-color: var(--border);
+}
+
+.sizeName {
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* Color swatches (legacy, kept for compat) */
 .colorSwatch {
   width: 22px;
   height: 22px;

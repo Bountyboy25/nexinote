@@ -23,6 +23,7 @@
   cursor: grab;
   display: flex;
   flex-direction: column;
+  overflow: hidden;  /* clips ::before accent bar to card's border-radius */
   transition:
     border-color var(--transition),
     box-shadow var(--transition),
@@ -50,6 +51,7 @@
 .table    { --card-accent: #f59e0b; }
 .media    { --card-accent: #fb923c; }
 .link     { --card-accent: #3b82f6; }
+.column   { --card-accent: #e879f9; }  /* fuchsia — container card */
 
 /* ── Connect-mode ring ── */
 .connectSource {
@@ -69,7 +71,6 @@
   left: 0; top: 0; bottom: 0;
   width: 3px;
   background: var(--card-accent, var(--accent));
-  border-radius: var(--radius) 0 0 var(--radius);
   opacity: 0.5;
   transition: opacity var(--transition);
 }
