@@ -45,7 +45,7 @@
 
 /* ── Card type accents (left border color) ── */
 .note     { --card-accent: var(--accent); }
-.document { --card-accent: #a3a3a3; }
+.document { --card-accent: #a78bfa; }  /* soft violet — long-form writing */
 .task     { --card-accent: var(--accent-g, #34d399); }
 .table    { --card-accent: #f59e0b; }
 .media    { --card-accent: #fb923c; }

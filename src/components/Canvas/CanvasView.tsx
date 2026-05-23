@@ -1,29 +1,23 @@
 import { useRef, useCallback } from 'react'
-import { useCanvasStore, useCards, useCamera } from '@/store'
+import { useCanvasStore, useCards, useCamera, useSelectedIds } from '@/store'
 import { useKeyboard }   from '@/hooks/useKeyboard'
 import { useCanvasPan }  from '@/hooks/useCanvasPan'
 import { useCanvasZoom } from '@/hooks/useCanvasZoom'
-import { CardNode }        from '@/components/Card/CardNode'
-import { ConnectorLayer }  from './ConnectorLayer'
-import { screenToWorld }   from '@/utils/canvas'
+import { CardNode }       from '@/components/Card/CardNode'
+import { ConnectorLayer } from './ConnectorLayer'
+import { screenToWorld }  from '@/utils/canvas'
 import styles from './CanvasView.module.css'
 
-// ─────────────────────────────────────────────────────────────
-// CANVAS VIEW — Phase 2: mounts ConnectorLayer
-//
-// Component hierarchy:
-//   App
-//   └── CanvasView          ← you are here
-//       ├── ConnectorLayer  (fixed full-screen SVG, screen space)
-//       ├── #grid           (dot background)
-//       └── #world          (moves with camera)
-//           └── CardNode[]
-// ─────────────────────────────────────────────────────────────
+const SIDEBAR_W = 56
 
 export function CanvasView() {
-  const cards   = useCards()
-  const camera  = useCamera()
+  const cards       = useCards()
+  const camera      = useCamera()
+  const selectedIds = useSelectedIds()
   const { addCard, deselectAll } = useCanvasStore.getState()
+
+  const sidebarOpen = selectedIds.size > 0
+  const leftOffset  = sidebarOpen ? SIDEBAR_W : 0
 
   const canvasRef = useRef<HTMLDivElement>(null)
 
@@ -53,12 +47,12 @@ export function CanvasView() {
   const worldTransform = {
     transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`,
     transformOrigin: '0 0',
-    willChange: 'transform' as const,  // ✅ valid JSX — was will-change="transform"
+    willChange: 'transform' as const,
   }
 
   const gridSize = 32 * camera.zoom
   const gridStyle = {
-    backgroundSize: `${gridSize}px ${gridSize}px`,
+    backgroundSize:     `${gridSize}px ${gridSize}px`,
     backgroundPosition: `${camera.x % gridSize}px ${camera.y % gridSize}px`,
   }
 
@@ -66,17 +60,13 @@ export function CanvasView() {
     <div
       ref={canvasRef}
       className={styles.canvas}
+      style={{ left: leftOffset, transition: 'left 140ms cubic-bezier(0.4,0,0.2,1)' }}
       onDoubleClick={onDoubleClick}
       onMouseDown={onMouseDown}
       onContextMenu={onContextMenu}
     >
-      {/* Connector SVG — rendered in screen space, above the world div */}
       <ConnectorLayer />
-
-      {/* Dot grid */}
       <div className={styles.grid} style={gridStyle} />
-
-      {/* World div — all cards live inside here */}
       <div className={styles.world} style={worldTransform}>
         {cards.map(card => (
           <CardNode key={card.id} card={card} />

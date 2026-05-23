@@ -29,6 +29,10 @@
   --accent-s: #5b4fd4;   /* Darker variant (hover states) */
   --accent-g: #4dd9ac;   /* Green accent (success, tasks) */
 
+  /* ── Surface aliases (dash form used in card components) ── */
+  --surface-2: #22222a;  /* Same as --surface2 */
+  --surface-3: #2a2a35;  /* One step darker — hover states, inputs */
+
   /* ── Spacing & Shape ── */
   --radius:    12px;
   --radius-sm: 8px;

@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid'
 import type {
   CanvasStore, Card, CardType, Camera, ActiveTool,
   NoteCard, DocumentCard, TaskCard, TableCard, MediaCard, LinkCard,
-  Board, AppSettings,
+  Board, AppSettings, Connector,
 } from '@/types'
 
 // ─────────────────────────────────────────────────────────────
@@ -70,6 +70,25 @@ function createCard(
       return { ...base, type: 'link', title: 'Link',
         content: { url: 'https://', description: '' } } satisfies LinkCard
   }
+}
+
+// ── Auto-save helper ───────────────────────────────────────────
+// Called after any card/connector mutation so work is never lost
+// even if the user closes the tab without navigating to BoardsView.
+function persistActiveBoard(
+  boards: Board[],
+  activeBoardId: string | null,
+  cards: Card[],
+  connectors: Connector[],
+): Board[] {
+  if (!activeBoardId) return boards
+  const updated = boards.map(b =>
+    b.id === activeBoardId
+      ? { ...b, cards, connectors, updatedAt: Date.now() }
+      : b
+  )
+  saveBoards(updated)
+  return updated
 }
 
 // ── Initial board helper ───────────────────────────────────────
@@ -193,35 +212,51 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
 
     addCard: (type: CardType, x: number, y: number, options?: Record<string, unknown>): Card => {
       const card = createCard(type, x, y, options)
-      set(state => ({ cards: [...state.cards, card] }))
+      set(state => {
+        const cards = [...state.cards, card]
+        return {
+          cards,
+          boards: persistActiveBoard(state.boards, state.activeBoardId, cards, state.connectors),
+        }
+      })
       return card
     },
 
     updateCard: (id: string, patch: Partial<Card>) => {
-      set(state => ({
-        cards: state.cards.map(card =>
-          card.id === id ? { ...card, ...patch } as Card : card
-        ),
-      }))
+      set(state => {
+        const cards = state.cards.map(c => c.id === id ? { ...c, ...patch } as Card : c)
+        return {
+          cards,
+          boards: persistActiveBoard(state.boards, state.activeBoardId, cards, state.connectors),
+        }
+      })
     },
 
     deleteCard: (id: string) => {
-      set(state => ({
-        cards:       state.cards.filter(c => c.id !== id),
-        connectors:  state.connectors.filter(c => c.fromId !== id && c.toId !== id),
-        selectedIds: new Set([...state.selectedIds].filter(sid => sid !== id)),
-      }))
+      set(state => {
+        const cards      = state.cards.filter(c => c.id !== id)
+        const connectors = state.connectors.filter(c => c.fromId !== id && c.toId !== id)
+        return {
+          cards, connectors,
+          selectedIds: new Set([...state.selectedIds].filter(sid => sid !== id)),
+          boards: persistActiveBoard(state.boards, state.activeBoardId, cards, connectors),
+        }
+      })
     },
 
     deleteSelected: () => {
       const { selectedIds } = get()
-      set(state => ({
-        cards:       state.cards.filter(c => !selectedIds.has(c.id)),
-        connectors:  state.connectors.filter(
+      set(state => {
+        const cards      = state.cards.filter(c => !selectedIds.has(c.id))
+        const connectors = state.connectors.filter(
           c => !selectedIds.has(c.fromId) && !selectedIds.has(c.toId)
-        ),
-        selectedIds: new Set<string>(),
-      }))
+        )
+        return {
+          cards, connectors,
+          selectedIds: new Set<string>(),
+          boards: persistActiveBoard(state.boards, state.activeBoardId, cards, connectors),
+        }
+      })
     },
 
     duplicateCard: (id: string) => {
@@ -235,11 +270,20 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
         y:         original.y + 24,
         createdAt: Date.now(),
       } as Card
-      set(state => ({ cards: [...state.cards, dup] }))
+      set(state => {
+        const cards = [...state.cards, dup]
+        return {
+          cards,
+          boards: persistActiveBoard(state.boards, state.activeBoardId, cards, state.connectors),
+        }
+      })
     },
 
     clearBoard: () => {
-      set({ cards: [], connectors: [], selectedIds: new Set<string>() })
+      set(state => ({
+        cards: [], connectors: [], selectedIds: new Set<string>(),
+        boards: persistActiveBoard(state.boards, state.activeBoardId, [], []),
+      }))
     },
 
     // ── CONNECTOR ACTIONS ──────────────────────────────────────
@@ -272,15 +316,23 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
         }
       }
 
-      set(state => ({
-        connectors: [...state.connectors, { id: nanoid(), fromId, toId, toAnchor }],
-      }))
+      set(state => {
+        const connectors = [...state.connectors, { id: nanoid(), fromId, toId, toAnchor }]
+        return {
+          connectors,
+          boards: persistActiveBoard(state.boards, state.activeBoardId, state.cards, connectors),
+        }
+      })
     },
 
     deleteConnector: (id: string) => {
-      set(state => ({
-        connectors: state.connectors.filter(c => c.id !== id),
-      }))
+      set(state => {
+        const connectors = state.connectors.filter(c => c.id !== id)
+        return {
+          connectors,
+          boards: persistActiveBoard(state.boards, state.activeBoardId, state.cards, connectors),
+        }
+      })
     },
 
     setConnectFrom: (id: string | null) => set({ connectFromId: id }),
