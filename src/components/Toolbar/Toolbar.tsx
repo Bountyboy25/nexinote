@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useCanvasStore, useActiveTool, useCamera, useConnectFrom } from '@/store'
 import { getViewportCenter } from '@/utils/canvas'
 import { TemplatesModal }   from '@/components/UI/TemplatesModal'
@@ -62,6 +62,15 @@ export function Toolbar() {
   function onNoteMouseLeave() {
     noteHoverTimer.current = setTimeout(() => setShowNoteDropdown(false), 200)
   }
+
+  // Make sure the hover timer doesn't fire after unmount (e.g. when the
+  // board is closed mid-hover) — would otherwise call setState on a
+  // dead component.
+  useEffect(() => {
+    return () => {
+      if (noteHoverTimer.current) clearTimeout(noteHoverTimer.current)
+    }
+  }, [])
 
   return (
     <>
@@ -186,7 +195,6 @@ export function Toolbar() {
         </div>
       </div>
 
-      {/* Modals */}
       {/* Modals */}
       {showTemplates   && <TemplatesModal onClose={() => setShowTemplates(false)} />}
       {showTableDialog && (

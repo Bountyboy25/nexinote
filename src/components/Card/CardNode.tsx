@@ -42,7 +42,7 @@ function CardContent({ card }: { card: Card }) {
     case 'table':    return <TableCardContent     card={card} />
     case 'media':    return <MediaCardContent     card={card} />
     case 'link':     return <LinkCardContent      card={card} />
-    case 'column':   return <ColumnCardContent    card={card as import('@/types').ColumnCard} />
+    case 'column':   return <ColumnCardContent    card={card} />
   }
 }
 

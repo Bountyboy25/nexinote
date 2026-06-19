@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { nanoid } from 'nanoid'
 import type {
-  CanvasStore, Card, CardType, Camera, ActiveTool,
+  CanvasStore, Card, CardType, Camera, ActiveTool, AnchorPoint,
   NoteCard, DocumentCard, TaskCard, TableCard, MediaCard, LinkCard, ColumnCard,
   Board, AppSettings, Connector,
 } from '@/types'
@@ -304,18 +304,18 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
       // Choose the closest of the 6 anchor points on the target card
       const from = cards.find(c => c.id === fromId)
       const to   = cards.find(c => c.id === toId)
-      let toAnchor: import('@/types').AnchorPoint = 'mid-left'
+      let toAnchor: AnchorPoint = 'mid-left'
       if (from && to) {
         const CARD_H = 160
         const srcCx = from.x + from.width / 2
         const srcCy = from.y + CARD_H / 2
-        const anchors: [import('@/types').AnchorPoint, number, number][] = [
-          ['top-left',  to.x,               to.y         ],
-          ['top-right', to.x + to.width,    to.y         ],
-          ['mid-left',  to.x,               to.y + CARD_H / 2],
-          ['mid-right', to.x + to.width,    to.y + CARD_H / 2],
-          ['bot-left',  to.x,               to.y + CARD_H],
-          ['bot-right', to.x + to.width,    to.y + CARD_H],
+        const anchors: [AnchorPoint, number, number][] = [
+          ['top-left',  to.x,            to.y             ],
+          ['top-right', to.x + to.width, to.y             ],
+          ['mid-left',  to.x,            to.y + CARD_H / 2],
+          ['mid-right', to.x + to.width, to.y + CARD_H / 2],
+          ['bot-left',  to.x,            to.y + CARD_H    ],
+          ['bot-right', to.x + to.width, to.y + CARD_H    ],
         ]
         let minDist = Infinity
         for (const [name, ax, ay] of anchors) {

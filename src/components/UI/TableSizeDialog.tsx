@@ -8,6 +8,20 @@ import styles from './TableSizeDialog.module.css'
 // User specifies rows (1–20) and columns (1–10), then confirms.
 // ─────────────────────────────────────────────────────────────
 
+const MAX_ROWS = 20
+const MAX_COLS = 10
+
+function clamp(v: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, v))
+}
+
+// parseInt without a radix coerces "0x10" -> 16 and similar surprises.
+// Always pass 10 for user-entered decimal text.
+function parseDecimal(value: string, fallback: number): number {
+  const n = parseInt(value, 10)
+  return Number.isFinite(n) ? n : fallback
+}
+
 interface Props {
   onConfirm: (rows: number, cols: number) => void
   onCancel:  () => void
@@ -17,10 +31,6 @@ export function TableSizeDialog({ onConfirm, onCancel }: Props) {
   const [rows, setRows] = useState(3)
   const [cols, setCols] = useState(3)
 
-  function clamp(v: number, min: number, max: number) {
-    return Math.min(max, Math.max(min, v))
-  }
-
   return (
     <div className={styles.overlay} onClick={onCancel}>
       <div className={styles.dialog} onClick={e => e.stopPropagation()}>
@@ -29,30 +39,30 @@ export function TableSizeDialog({ onConfirm, onCancel }: Props) {
         <div className={styles.field}>
           <label className={styles.label}>Rows</label>
           <div className={styles.stepper}>
-            <button className={styles.stepBtn} onClick={() => setRows(r => clamp(r - 1, 1, 20))}>−</button>
+            <button className={styles.stepBtn} onClick={() => setRows(r => clamp(r - 1, 1, MAX_ROWS))}>−</button>
             <input
               className={styles.stepInput}
               type="number"
-              min={1} max={20}
+              min={1} max={MAX_ROWS}
               value={rows}
-              onChange={e => setRows(clamp(parseInt(e.target.value) || 1, 1, 20))}
+              onChange={e => setRows(clamp(parseDecimal(e.target.value, 1), 1, MAX_ROWS))}
             />
-            <button className={styles.stepBtn} onClick={() => setRows(r => clamp(r + 1, 1, 20))}>+</button>
+            <button className={styles.stepBtn} onClick={() => setRows(r => clamp(r + 1, 1, MAX_ROWS))}>+</button>
           </div>
         </div>
 
         <div className={styles.field}>
           <label className={styles.label}>Columns</label>
           <div className={styles.stepper}>
-            <button className={styles.stepBtn} onClick={() => setCols(c => clamp(c - 1, 1, 10))}>−</button>
+            <button className={styles.stepBtn} onClick={() => setCols(c => clamp(c - 1, 1, MAX_COLS))}>−</button>
             <input
               className={styles.stepInput}
               type="number"
-              min={1} max={10}
+              min={1} max={MAX_COLS}
               value={cols}
-              onChange={e => setCols(clamp(parseInt(e.target.value) || 1, 1, 10))}
+              onChange={e => setCols(clamp(parseDecimal(e.target.value, 1), 1, MAX_COLS))}
             />
-            <button className={styles.stepBtn} onClick={() => setCols(c => clamp(c + 1, 1, 10))}>+</button>
+            <button className={styles.stepBtn} onClick={() => setCols(c => clamp(c + 1, 1, MAX_COLS))}>+</button>
           </div>
         </div>
 

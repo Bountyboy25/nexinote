@@ -27,8 +27,14 @@ function timeAgo(ts: number): string {
 
 // Tiny thumbnail: render a few dots to represent card positions
 function BoardThumbnail({ board }: { board: Board }) {
-  const maxX = Math.max(...board.cards.map(c => c.x + c.width), 1)
-  const maxY = Math.max(...board.cards.map(c => c.y + 160), 1)
+  // Compute the bounding box in one pass instead of two Math.max(...spread)
+  // calls — spread args blow up at very large card counts, and the seed
+  // value of 1 protects against an empty cards array (avoids -Infinity).
+  let maxX = 1, maxY = 1
+  for (const c of board.cards) {
+    if (c.x + c.width > maxX) maxX = c.x + c.width
+    if (c.y + 160      > maxY) maxY = c.y + 160
+  }
 
   return (
     <svg className={styles.thumbnail} viewBox={`0 0 ${maxX} ${maxY}`} preserveAspectRatio="xMidYMid meet">

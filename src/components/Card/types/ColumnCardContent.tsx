@@ -135,17 +135,25 @@ export function ColumnCardContent({ card }: Props) {
     setItems(items.filter(it => it.id !== id))
   }
 
-  const completedCount = items.filter(it => it.done).length
-  const taskItems = items.filter(it => it.type === 'task')
+  // One pass to compute both progress counters — used to be two filters
+  // building intermediate arrays.
+  let completedCount = 0
+  let taskCount = 0
+  for (const it of items) {
+    if (it.type === 'task') {
+      taskCount++
+      if (it.done) completedCount++
+    }
+  }
 
   return (
     <div className={styles.column} onMouseDown={e => e.stopPropagation()}>
       {/* ── Item count / progress ── */}
       <div className={styles.colMeta}>
         <span className={styles.colCount}>{items.length} {items.length === 1 ? 'card' : 'cards'}</span>
-        {taskItems.length > 0 && (
+        {taskCount > 0 && (
           <span className={styles.colProgress}>
-            {completedCount}/{taskItems.length} done
+            {completedCount}/{taskCount} done
           </span>
         )}
       </div>
