@@ -7,7 +7,5 @@ export default defineConfig({
     alias: {
       '@': '/src',
     },
-    // Prefer .tsx/.ts over the legacy .js copies in src/
-    extensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
   },
 })
