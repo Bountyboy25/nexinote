@@ -5,7 +5,13 @@
    ───────────────────────────────────────────────────────────── */
 
 .layer {
-  position: fixed;
+  /* absolute (not fixed) keeps the arrow layer in the SAME containing
+     block as .world (cards) and .grid, so all three share one
+     coordinate origin and the arrows stay locked to their cards.
+     A fixed layer is positioned against the viewport instead, which
+     let the arrows drift away from cards whenever the canvas offset
+     changed (e.g. when the editing toolbar opened). */
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;

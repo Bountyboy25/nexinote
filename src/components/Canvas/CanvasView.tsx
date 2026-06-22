@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from 'react'
-import { useCanvasStore, useCards, useCamera, useSelectedIds } from '@/store'
+import { useCanvasStore, useCards, useCamera } from '@/store'
 import { useKeyboard }   from '@/hooks/useKeyboard'
 import { useCanvasPan }  from '@/hooks/useCanvasPan'
 import { useCanvasZoom } from '@/hooks/useCanvasZoom'
@@ -9,17 +9,15 @@ import { screenToWorld, getViewportCenter }  from '@/utils/canvas'
 import { fileToImageDataURL, isImageSrc }    from '@/utils/image'
 import styles from './CanvasView.module.css'
 
-const SIDEBAR_W = 56
-
 export function CanvasView() {
   const cards       = useCards()
   const camera      = useCamera()
-  const selectedIds = useSelectedIds()
   const { addCard, updateCard, deselectAll } = useCanvasStore.getState()
 
-  const sidebarOpen = selectedIds.size > 0
-  const leftOffset  = sidebarOpen ? SIDEBAR_W : 0
-
+  // The SideTaskbar (position: fixed, z-index 500) overlays the left
+  // edge of the canvas. The canvas intentionally does NOT shift to make
+  // room for it — shifting caused all content (and connector arrows) to
+  // jump sideways each time a card was selected.
   const canvasRef = useRef<HTMLDivElement>(null)
   const [dropActive, setDropActive] = useState(false)
 
@@ -123,7 +121,6 @@ export function CanvasView() {
     <div
       ref={canvasRef}
       className={`${styles.canvas} ${dropActive ? styles.dropActive : ''}`}
-      style={{ left: leftOffset, transition: 'left 140ms cubic-bezier(0.4,0,0.2,1)' }}
       onDoubleClick={onDoubleClick}
       onMouseDown={onMouseDown}
       onContextMenu={onContextMenu}
