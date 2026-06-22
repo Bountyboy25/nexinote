@@ -1,58 +1,61 @@
-import { useRef, useCallback, useEffect } from 'react'
 import { useCanvasStore } from '@/store'
 import type { DocumentCard } from '@/types'
+import { htmlToText } from '@/utils/text'
 import styles from './CardTypes.module.css'
 
 // ─────────────────────────────────────────────────────────────
-// DOCUMENT CARD — Paper-like full-document card
+// DOCUMENT CARD — Milanote-style document tile
 //
-// Visually resembles a sheet of paper:
-//   • White/off-white background
-//   • Horizontal rule lines (decorative, behind text)
-//   • Internal scrolling when content overflows
-//   • Uses contentEditable for rich text (same as Note card)
+// On the board the document is a compact "page" tile showing a
+// short excerpt + word count. Writing happens in a dedicated
+// full-page editor (DocumentEditorModal), opened by:
+//   • double-clicking the tile, or
+//   • clicking the "Open" button.
 //
-// This card is designed for long-form writing.
+// This mirrors Milanote, where a document is a file you open into
+// a focused writing view — not an inline box you type into on the
+// canvas.
 // ─────────────────────────────────────────────────────────────
+
+const PREVIEW_CHARS = 280
 
 interface Props { card: DocumentCard }
 
 export function DocumentCardContent({ card }: Props) {
-  const updateCard = useCanvasStore(s => s.updateCard)
-  const editorRef  = useRef<HTMLDivElement>(null)
+  const openDocument = useCanvasStore(s => s.openDocument)
 
-  useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML === '') {
-      editorRef.current.innerHTML = card.content.html
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const save = useCallback(() => {
-    if (editorRef.current) {
-      updateCard(card.id, { content: { html: editorRef.current.innerHTML } })
-    }
-  }, [card.id, updateCard])
+  const text  = htmlToText(card.content.html)
+  const words = text ? text.split(/\s+/).length : 0
+  const open  = () => openDocument(card.id)
 
   return (
-    <div className={styles.documentCard}>
-      {/* Decorative horizontal lines — simulate ruled paper */}
-      <div className={styles.documentLines} aria-hidden="true">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className={styles.documentLine} />
-        ))}
+    <div
+      className={styles.docPreview}
+      onDoubleClick={e => { e.stopPropagation(); open() }}
+      title="Double-click to open"
+    >
+      <div className={styles.docPreviewPage} aria-hidden="true">
+        {text ? (
+          <p className={styles.docPreviewText}>
+            {text.slice(0, PREVIEW_CHARS)}{text.length > PREVIEW_CHARS ? '…' : ''}
+          </p>
+        ) : (
+          <p className={styles.docPreviewEmpty}>Empty document</p>
+        )}
       </div>
 
-      {/* Editable area sits above the lines */}
-      <div
-        ref={editorRef}
-        className={styles.documentEditor}
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={save}
-        onMouseDown={e => e.stopPropagation()}
-        onKeyDown={e => e.stopPropagation()}
-        data-placeholder="Start writing your document…"
-      />
+      <div className={styles.docPreviewFooter}>
+        <span className={styles.docPreviewMeta}>
+          {words} {words === 1 ? 'word' : 'words'}
+        </span>
+        <button
+          className={styles.docOpenBtn}
+          onClick={e => { e.stopPropagation(); open() }}
+          onMouseDown={e => e.stopPropagation()}
+        >
+          Open ↗
+        </button>
+      </div>
     </div>
   )
 }

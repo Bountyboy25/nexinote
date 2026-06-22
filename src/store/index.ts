@@ -46,7 +46,7 @@ function createCard(
 
     case 'document':
       return {
-        ...base, type: 'document', title: 'Document', width: 320,
+        ...base, type: 'document', title: 'Document', width: 240,
         content: { html: '' },
       } satisfies DocumentCard
 
@@ -124,6 +124,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
     activeTool:     'select',
     connectFromId:  null,
     draggingCardId: null,
+    openDocId:      null,
     settings:       loadSettings(),
 
     // ── BOARD ACTIONS ──────────────────────────────────────────
@@ -165,6 +166,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
         selectedIds:   new Set<string>(),
         activeTool:    'select',
         connectFromId: null,
+        openDocId:     null,
       })
     },
 
@@ -198,9 +200,9 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
             : b
         )
         saveBoards(updated)
-        set({ boards: updated, activeBoardId: null, selectedIds: new Set<string>() })
+        set({ boards: updated, activeBoardId: null, selectedIds: new Set<string>(), openDocId: null })
       } else {
-        set({ activeBoardId: null })
+        set({ activeBoardId: null, openDocId: null })
       }
     },
 
@@ -247,6 +249,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
         return {
           cards, connectors,
           selectedIds: new Set([...state.selectedIds].filter(sid => sid !== id)),
+          openDocId: state.openDocId === id ? null : state.openDocId,
           boards: persistActiveBoard(state.boards, state.activeBoardId, cards, connectors),
         }
       })
@@ -262,6 +265,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
         return {
           cards, connectors,
           selectedIds: new Set<string>(),
+          openDocId: state.openDocId && selectedIds.has(state.openDocId) ? null : state.openDocId,
           boards: persistActiveBoard(state.boards, state.activeBoardId, cards, connectors),
         }
       })
@@ -289,7 +293,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
 
     clearBoard: () => {
       set(state => ({
-        cards: [], connectors: [], selectedIds: new Set<string>(),
+        cards: [], connectors: [], selectedIds: new Set<string>(), openDocId: null,
         boards: persistActiveBoard(state.boards, state.activeBoardId, [], []),
       }))
     },
@@ -364,6 +368,11 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
 
     setDraggingCard: (id: string | null) => set({ draggingCardId: id }),
 
+    // ── DOCUMENT EDITOR ────────────────────────────────────────
+
+    openDocument: (id: string) => set({ openDocId: id }),
+    closeDocument: () => set({ openDocId: null }),
+
     // ── CAMERA ACTIONS ─────────────────────────────────────────
 
     setCamera: (patch: Partial<Camera>) =>
@@ -405,6 +414,7 @@ export const useConnectFrom  = () => useCanvasStore(s => s.connectFromId)
 export const useBoards       = () => useCanvasStore(s => s.boards)
 export const useActiveBoardId = () => useCanvasStore(s => s.activeBoardId)
 export const useDraggingCardId = () => useCanvasStore(s => s.draggingCardId)
+export const useOpenDocId    = () => useCanvasStore(s => s.openDocId)
 export const useSettings     = () => useCanvasStore(s => s.settings)
 
 // Stable action references (won't trigger re-renders)

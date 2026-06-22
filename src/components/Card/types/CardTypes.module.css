@@ -391,87 +391,85 @@
   background: var(--surface-3);
 }
 
-/* ── Document Card ──────────────────────────────────────────── */
-.documentCard {
+/* ── Document Card (compact tile) ───────────────────────────── */
+.docPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 10px;
+  cursor: pointer;
+}
+
+/* A small sheet-of-paper preview of the document body */
+.docPreviewPage {
   position: relative;
-  min-height: 200px;
-  max-height: 480px;
+  height: 120px;
   overflow: hidden;
   background: #fafaf8;
-  display: flex;
-  flex-direction: column;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 10px 12px;
 }
 
-/* Red left margin line — classic notebook style */
-.documentCard::before {
+/* Fade the bottom of the excerpt so it reads as "continues below" */
+.docPreviewPage::after {
   content: '';
   position: absolute;
-  left: 36px;
-  top: 0; bottom: 0;
-  width: 1px;
-  background: rgba(239, 68, 68, 0.25);
+  left: 0; right: 0; bottom: 0;
+  height: 28px;
+  background: linear-gradient(transparent, #fafaf8);
   pointer-events: none;
-  z-index: 2;
 }
 
-/* Ruled lines — fixed-height rows behind the text */
-.documentLines {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  padding: 8px 10px 8px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.documentLine {
-  height: 24px;
-  flex-shrink: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.documentEditor {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  padding: 8px 14px 8px 44px;  /* left-padded past the margin line */
-  font-size: 13px;
-  line-height: 24px;   /* matches documentLine height */
-  color: #1a1a1a;
-  outline: none;
-  overflow-y: auto;
-  min-height: 200px;
-  max-height: 480px;
+.docPreviewText {
   font-family: 'Georgia', 'Times New Roman', serif;
-  background: transparent;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #2a2a2a;
+  margin: 0;
+  white-space: pre-wrap;
   word-break: break-word;
 }
 
-.documentEditor::-webkit-scrollbar        { width: 3px; }
-.documentEditor::-webkit-scrollbar-track  { background: transparent; }
-.documentEditor::-webkit-scrollbar-thumb  { background: rgba(0,0,0,0.15); border-radius: 2px; }
-
-.documentEditor[data-placeholder]:empty::before {
-  content: attr(data-placeholder);
-  color: #bbb;
-  pointer-events: none;
+.docPreviewEmpty {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 12px;
   font-style: italic;
+  color: #aaa;
+  margin: 0;
 }
 
-.documentEditor p,
-.documentEditor div { margin: 0; }
+.docPreviewFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-/* Heading styles inside document editor */
-.documentEditor h1 { font-size: 18px; font-weight: 700; line-height: 24px; color: #111; margin: 0; }
-.documentEditor h2 { font-size: 15px; font-weight: 700; line-height: 24px; color: #222; margin: 0; }
-.documentEditor h3 { font-size: 13px; font-weight: 700; line-height: 24px; color: #333; margin: 0; }
-.documentEditor ul,
-.documentEditor ol { padding-left: 18px; margin: 0; }
-.documentEditor li { line-height: 24px; }
-.documentEditor strong { font-weight: 700; }
-.documentEditor em     { font-style: italic; }
-.documentEditor u      { text-decoration: underline; }
+.docPreviewMeta {
+  font-size: 11px;
+  color: var(--text-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.docOpenBtn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.docOpenBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(124, 106, 245, 0.08);
+}
 
 /* ── Column Card ────────────────────────────────────────────── */
 .column {
@@ -709,3 +707,112 @@
 }
 
 /* ── Media ──────────────────────────────────────────────────── */
+.media {
+  display: flex;
+  flex-direction: column;
+}
+
+.mediaImgWrap {
+  width: 100%;
+  height: 180px;
+  background: var(--surface-2);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mediaImg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mediaControls {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+}
+
+.mediaBtn {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.mediaBtn:hover {
+  background: var(--surface-3);
+  color: var(--text-1);
+  border-color: var(--border-h);
+}
+
+.mediaEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.mediaUploadZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 22px 12px;
+  border: 1.5px dashed var(--border-h);
+  border-radius: 8px;
+  color: var(--text-3);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition);
+}
+
+.mediaUploadZone:hover,
+.mediaUploadZoneActive {
+  border-color: var(--accent);
+  color: var(--text-1);
+  background: rgba(124, 106, 245, 0.08);
+}
+
+.mediaUploadZoneActive {
+  background: rgba(124, 106, 245, 0.14);
+}
+
+.mediaUploadIcon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.mediaOr {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mediaUrlInput {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  outline: none;
+  font-family: var(--font-ui);
+}
+
+.mediaUrlInput:focus {
+  border-color: var(--accent);
+}
+
+.mediaFileInput {
+  display: none;
+}
