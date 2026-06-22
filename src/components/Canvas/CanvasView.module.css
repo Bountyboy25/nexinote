@@ -16,6 +16,35 @@
   pointer-events: none;  /* Clicks fall through to canvas */
 }
 
+/* While dragging an image file over the canvas */
+.dropActive::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius);
+  background: rgba(124, 106, 245, 0.06);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.dropHint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 22px;
+  background: rgba(14, 14, 18, 0.92);
+  border: 1px solid var(--border-h);
+  border-radius: var(--radius);
+  color: var(--text-1);
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 6;
+  box-shadow: var(--shadow-lg);
+}
+
 .world {
   position: absolute;
   top: 0;

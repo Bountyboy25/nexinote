@@ -136,6 +136,7 @@ export interface CanvasStore {
   activeTool: ActiveTool
   connectFromId: string | null
   draggingCardId: string | null
+  openDocId: string | null      // Document card currently open in the full-page editor
   settings: AppSettings
 
   // ── Board actions ────────────────────────────────────────
@@ -166,6 +167,10 @@ export interface CanvasStore {
 
   // ── Drag tracking ─────────────────────────────────────────
   setDraggingCard: (id: string | null) => void
+
+  // ── Document editor ───────────────────────────────────────
+  openDocument: (id: string) => void
+  closeDocument: () => void
 
   // ── Camera actions ───────────────────────────────────────
   setCamera: (camera: Partial<Camera>) => void

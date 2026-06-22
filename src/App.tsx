@@ -7,6 +7,7 @@ import { MiniMap }      from '@/components/MiniMap/MiniMap'
 import { SideTaskbar }  from '@/components/SideTaskbar/SideTaskbar'
 import { BoardsView }   from '@/components/Boards/BoardsView'
 import { SettingsPanel } from '@/components/UI/SettingsPanel'
+import { DocumentEditorModal } from '@/components/UI/DocumentEditorModal'
 
 // ─────────────────────────────────────────────────────────────
 // APP — Phase 3 root
@@ -48,6 +49,7 @@ export function App() {
       <CanvasView />
       <Toolbar />
       <MiniMap />
+      <DocumentEditorModal />
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
     </>
   )

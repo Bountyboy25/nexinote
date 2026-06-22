@@ -1,14 +1,19 @@
 import { useRef, useState } from 'react'
 import { useCanvasStore } from '@/store'
+import { fileToImageDataURL, isImageSrc } from '@/utils/image'
 import type { MediaCard } from '@/types'
 import styles from './CardTypes.module.css'
 
 // ─────────────────────────────────────────────────────────────
 // MEDIA CARD CONTENT
 //
-// Two ways to set the image:
-//   1. Upload a file — FileReader converts to base64 data URI
-//   2. Paste / type a URL into the text input
+// Three ways to set the image:
+//   1. Upload a file — downscaled, then stored as a data URL
+//   2. Drag & drop an image file onto the empty card
+//   3. Paste / type a URL into the text input
+//
+// Large uploads are downscaled in fileToImageDataURL() so they
+// don't blow the localStorage quota when the board is saved.
 //
 // Fit toggle: cover (fills card, crops) / contain (letterbox)
 // ─────────────────────────────────────────────────────────────
@@ -21,6 +26,8 @@ export function MediaCardContent({ card }: Props) {
   const [urlInput, setUrlInput] = useState(
     card.content.src.startsWith('http') ? card.content.src : ''
   )
+  const [busy, setBusy]       = useState(false)
+  const [dragOver, setDragOver] = useState(false)
 
   function setSrc(src: string) {
     updateCard(card.id, { content: { ...card.content, src } })
@@ -35,12 +42,31 @@ export function MediaCardContent({ card }: Props) {
     })
   }
 
+  async function ingestFile(file: File) {
+    if (!file.type.startsWith('image/')) return
+    setBusy(true)
+    try {
+      setSrc(await fileToImageDataURL(file))
+    } catch {
+      /* ignore — leave the upload zone visible */
+    } finally {
+      setBusy(false)
+    }
+  }
+
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => setSrc(ev.target?.result as string)
-    reader.readAsDataURL(file)
+    if (file) ingestFile(file)
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOver(false)
+    const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/'))
+    if (file) { ingestFile(file); return }
+    const uri = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain')
+    if (uri && isImageSrc(uri)) setSrc(uri.trim())
   }
 
   function onUrlBlur() {
@@ -77,9 +103,15 @@ export function MediaCardContent({ card }: Props) {
         </>
       ) : (
         <div className={styles.mediaEmpty}>
-          <div className={styles.mediaUploadZone} onClick={() => fileRef.current?.click()}>
+          <div
+            className={`${styles.mediaUploadZone} ${dragOver ? styles.mediaUploadZoneActive : ''}`}
+            onClick={() => fileRef.current?.click()}
+            onDragOver={e => { e.preventDefault(); e.stopPropagation(); setDragOver(true) }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={onDrop}
+          >
             <span className={styles.mediaUploadIcon}>🖼️</span>
-            <span>Click to upload</span>
+            <span>{busy ? 'Processing…' : 'Click or drop an image'}</span>
           </div>
           <div className={styles.mediaOr}>— or paste URL —</div>
           <input
