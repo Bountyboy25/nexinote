@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git push *)",
-      "Bash(python -)"
+      "Bash(python -)",
+      "Bash(git ls-remote *)",
+      "Bash(git mv *)"
     ]
   }
 }

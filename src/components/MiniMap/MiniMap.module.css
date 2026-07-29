@@ -1,6 +1,13 @@
 .minimap {
   position: fixed;
-  bottom: 28px;
+  /* Sits ABOVE the toolbar row rather than beside it.
+     The toolbar is centred and ~716px wide (bottom: 28px, ~52px tall),
+     so on any viewport under ~1140px its left edge reaches back into
+     this corner — which includes 1920px displays at 175% OS scaling.
+     Clearing it horizontally would depend on viewport width; clearing
+     it vertically always works.
+       28 (toolbar offset) + 52 (toolbar height) + 12 (gap) = 92 */
+  bottom: 92px;
   left: 70px;   /* clear the 56px SideTaskbar */
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);

@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import { useCanvasStore, useBoards } from '@/store'
 import { Icon } from '@/UI/Icon'
-import { BoardIcon } from '@/UI/boardIcons'
-import { BoardIconPicker } from '@/UI/BoardIconPicker'
+import { GlyphIcon } from '@/UI/glyphs'
+import { IconPicker } from '@/UI/IconPicker'
 import type { BoardCard } from '@/types'
 import styles from './CardTypes.module.css'
 
@@ -102,7 +102,7 @@ export function BoardCardContent({ card }: Props) {
           </svg>
         ) : (
           <span className={styles.boardEmpty}>
-            <BoardIcon name={child.icon} accent={child.accent} size={22} />
+            <GlyphIcon name={child.icon} accent={child.accent} size={22} />
             Empty board
           </span>
         )}
@@ -119,11 +119,11 @@ export function BoardCardContent({ card }: Props) {
             title="Change this board's icon"
             aria-label="Change board icon"
           >
-            <BoardIcon name={child.icon} accent={child.accent} size={17} />
+            <GlyphIcon name={child.icon} accent={child.accent} size={17} />
           </button>
 
           {picking && (
-            <BoardIconPicker
+            <IconPicker
               icon={child.icon}
               accent={child.accent}
               anchorRef={iconBtnRef}

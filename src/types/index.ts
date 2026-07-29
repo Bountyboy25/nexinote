@@ -60,7 +60,14 @@ export interface NoteCard extends BaseCard {
 
 export interface DocumentCard extends BaseCard {
   type: 'document'
-  content: { html: string }
+  content: {
+    html: string
+    // Same vocabulary as Board.icon: a GLYPHS key or an uploaded data URL,
+    // plus an accent color. A board full of documents is a shelf of files,
+    // and files are told apart by their icons.
+    icon?: string
+    accent?: string
+  }
 }
 
 export interface TaskCard extends BaseCard {
@@ -225,9 +232,11 @@ export interface Board {
   // Root boards leave it null/undefined — the gallery shows only those,
   // which is the whole point of nesting: sub-boards don't add clutter.
   parentId?: string | null
-  // Key into BOARD_ICONS (see UI/boardIcons.tsx). Stored as a plain string
-  // rather than a union so a board saved with an icon that a later build
-  // renames or removes falls back to the default instead of failing to load.
+  // Key into GLYPHS (see UI/glyphs.tsx), or a data: URL for an uploaded
+  // image. Stored as a plain string rather than a union so a board saved
+  // with a glyph that a later build renames or removes falls back to the
+  // default instead of failing to load — and so the same field can carry
+  // a custom image without a second shape.
   icon?: string
   // CSS color for the icon — a theme var like var(--nx-core), or a hex.
   accent?: string

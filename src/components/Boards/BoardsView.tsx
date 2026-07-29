@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import { useCanvasStore, useBoards } from '@/store'
 import { Icon } from '@/UI/Icon'
-import { BoardIcon } from '@/UI/boardIcons'
-import { BoardIconPicker } from '@/UI/BoardIconPicker'
+import { GlyphIcon } from '@/UI/glyphs'
+import { IconPicker } from '@/UI/IconPicker'
 import type { Board } from '@/types'
 import styles from './BoardsView.module.css'
 
@@ -98,11 +98,11 @@ function BoardIconButton({
         aria-label="Change board icon"
         onClick={e => { e.stopPropagation(); setOpen(v => !v) }}
       >
-        <BoardIcon name={board.icon} accent={board.accent} size={18} />
+        <GlyphIcon name={board.icon} accent={board.accent} size={18} />
       </button>
 
       {open && (
-        <BoardIconPicker
+        <IconPicker
           icon={board.icon}
           accent={board.accent}
           anchorRef={btnRef}
@@ -211,7 +211,7 @@ export function BoardsView({ onOpenSettings }: { onOpenSettings: () => void }) {
                   ? <BoardThumbnail board={board} />
                   : <div className={styles.emptyThumb}>
                       <span className={styles.emptyIcon}>
-                        <BoardIcon name={board.icon} accent={board.accent} size={30} />
+                        <GlyphIcon name={board.icon} accent={board.accent} size={30} />
                       </span>
                       <span className={styles.emptyText}>Empty board</span>
                     </div>

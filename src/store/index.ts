@@ -16,16 +16,26 @@ const CARD_WIDTH   = 280
 const LS_BOARDS    = 'nexinote_boards'
 const LS_SETTINGS  = 'nexinote_settings'
 
+// Document cards are deliberately the smallest type on the canvas.
+// OLD_DOC_CARD_WIDTH is the previous default, kept so the migration can
+// recognise untouched cards and leave hand-resized ones alone.
+const DOC_CARD_WIDTH     = 150
+const OLD_DOC_CARD_WIDTH = 240
+
 // ── Legacy migration ───────────────────────────────────────────
-// Columns used to store three kinds of text stub (ColumnItem) instead of
-// real cards. Boards saved before that change still hold them, so they
+// One pass over saved boards, fixing up shapes from earlier versions so
+// old work keeps opening. Runs once at load; the results persist on the
+// next save.
+//
+// 1. Columns used to store three kinds of text stub (ColumnItem) instead
+//    of real cards. Boards saved before that change still hold them, so they
 // are converted once at load time. A stub is identified by the absence
 // of `content` — every real Card has one.
 //
 // The mapping is deliberately lossless in the direction that matters:
 // whatever text the user typed survives, and the item becomes a card
 // they can now actually edit with the full editor for its type.
-function migrateLegacyColumns(boards: Board[]): Board[] {
+function migrateBoards(boards: Board[]): Board[] {
   let touched = false
 
   const convert = (raw: unknown): Card | null => {
@@ -67,6 +77,19 @@ function migrateLegacyColumns(boards: Board[]): Board[] {
     }
   }
 
+  // Document cards shrank when their excerpt preview was replaced by an
+  // icon and word count. Cards still sitting at the OLD default were
+  // never resized by hand, so bringing them down matches what the user
+  // now sees on every newly created one. Anything at another width was
+  // chosen deliberately and is left alone.
+  const shrinkDoc = (card: Card): Card => {
+    if (card.type === 'document' && card.width === OLD_DOC_CARD_WIDTH) {
+      touched = true
+      return { ...card, width: DOC_CARD_WIDTH }
+    }
+    return card
+  }
+
   const next = boards.map(board => ({
     ...board,
     cards: board.cards.map(card =>
@@ -77,10 +100,11 @@ function migrateLegacyColumns(boards: Board[]): Board[] {
               ...card.content,
               items: (card.content.items as unknown[])
                 .map(convert)
-                .filter((c): c is Card => c !== null),
+                .filter((c): c is Card => c !== null)
+                .map(shrinkDoc),
             },
           }
-        : card
+        : shrinkDoc(card)
     ),
   }))
 
@@ -98,7 +122,7 @@ function escapeHtml(s: string): string {
 // ── Persistence helpers ────────────────────────────────────────
 function loadBoards(): Board[] {
   try {
-    return migrateLegacyColumns(JSON.parse(localStorage.getItem(LS_BOARDS) ?? '[]'))
+    return migrateBoards(JSON.parse(localStorage.getItem(LS_BOARDS) ?? '[]'))
   } catch { return [] }
 }
 
@@ -150,7 +174,10 @@ function createCard(
 
     case 'document':
       return {
-        ...base, type: 'document', title: 'Document', width: 240,
+        // The smallest card on the board by design: a document tile is an
+        // icon and a word count, so it only needs to be big enough to
+        // recognise and click. Its contents open in the full-page editor.
+        ...base, type: 'document', title: 'Document', width: DOC_CARD_WIDTH,
         content: { html: '' },
       } satisfies DocumentCard
 

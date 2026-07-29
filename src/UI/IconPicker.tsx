@@ -1,12 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  BOARD_ICON_KEYS, BOARD_ACCENTS, BoardIcon, isCustomIcon,
-  DEFAULT_BOARD_ICON, DEFAULT_BOARD_ACCENT,
-} from './boardIcons'
+  GLYPH_KEYS, ACCENTS, GlyphIcon, isCustomIcon,
+  DEFAULT_GLYPH, DEFAULT_ACCENT,
+} from './glyphs'
 import { Icon } from './Icon'
 import { fileToImageDataURL, ICON_MAX_DIM } from '@/utils/image'
-import styles from './BoardIconPicker.module.css'
+import styles from './IconPicker.module.css'
 
 // ─────────────────────────────────────────────────────────────
 // BOARD ICON PICKER — glyph grid + accent row
@@ -22,8 +22,8 @@ import styles from './BoardIconPicker.module.css'
 //     scale() transform and shrink with the zoom level.
 // Position is measured from the trigger and clamped to the viewport.
 //
-// The grid is driven by BOARD_ICON_KEYS, so adding a glyph to
-// boardIcons.tsx makes it appear here with no edit to this file.
+// The grid is driven by GLYPH_KEYS, so adding a glyph to
+// glyphs.tsx makes it appear here with no edit to this file.
 // ─────────────────────────────────────────────────────────────
 
 const WIDTH  = 214
@@ -39,15 +39,15 @@ interface Props {
   anchorRef: RefObject<HTMLElement | null>
 }
 
-export function BoardIconPicker({ icon, accent, onPick, onClose, anchorRef }: Props) {
+export function IconPicker({ icon, accent, onPick, onClose, anchorRef }: Props) {
   const ref     = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [pos, setPos]     = useState<{ top: number; left: number } | null>(null)
   const [error, setError] = useState('')
   const [busy, setBusy]   = useState(false)
 
-  const currentIcon   = icon   ?? DEFAULT_BOARD_ICON
-  const currentAccent = accent ?? DEFAULT_BOARD_ACCENT
+  const currentIcon   = icon   ?? DEFAULT_GLYPH
+  const currentAccent = accent ?? DEFAULT_ACCENT
   const custom        = isCustomIcon(icon)
 
   // Upload a custom image icon. Downscaled to ICON_MAX_DIM before it is
@@ -124,7 +124,7 @@ export function BoardIconPicker({ icon, accent, onPick, onClose, anchorRef }: Pr
     >
       <div className={styles.title}>Icon</div>
       <div className={styles.grid}>
-        {BOARD_ICON_KEYS.map(key => (
+        {GLYPH_KEYS.map(key => (
           <button
             key={key}
             className={`${styles.cell} ${!custom && key === currentIcon ? styles.cellOn : ''}`}
@@ -132,7 +132,7 @@ export function BoardIconPicker({ icon, accent, onPick, onClose, anchorRef }: Pr
             title={key}
             aria-label={key}
           >
-            <BoardIcon name={key} accent={currentAccent} size={17} />
+            <GlyphIcon name={key} accent={currentAccent} size={17} />
           </button>
         ))}
 
@@ -146,7 +146,7 @@ export function BoardIconPicker({ icon, accent, onPick, onClose, anchorRef }: Pr
           disabled={busy}
         >
           {custom
-            ? <BoardIcon name={icon} size={18} />
+            ? <GlyphIcon name={icon} size={18} />
             : <Icon name={busy ? 'reset-view' : 'plus'} size={15} />}
         </button>
       </div>
@@ -163,7 +163,7 @@ export function BoardIconPicker({ icon, accent, onPick, onClose, anchorRef }: Pr
 
       <div className={styles.title}>Color</div>
       <div className={styles.accents}>
-        {BOARD_ACCENTS.map(color => (
+        {ACCENTS.map(color => (
           <button
             key={color}
             className={`${styles.accent} ${color === currentAccent ? styles.accentOn : ''}`}

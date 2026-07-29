@@ -132,24 +132,36 @@ card, forming a tree. Consequences worth knowing before touching board code:
   (`promoteOrphanedSubBoards`), so the work resurfaces in the gallery rather than vanishing.
   `deleteCard`, `deleteSelected`, and `clearBoard` all route through it.
 
-### Board icons
+### Icons (boards and documents)
 
-Any board (root or nested) carries `icon` + `accent`. Glyphs live in one registry,
-[UI/boardIcons.tsx](src/UI/boardIcons.tsx) — **adding an icon is a single entry in
-`BOARD_GLYPHS`**, and it appears in the picker automatically. `Board.icon` is deliberately
-typed `string`, not a union of the current keys, so a board saved with an icon a later build
-renames still loads and falls back to `DEFAULT_BOARD_ICON`.
+Boards carry `icon` + `accent`; document cards carry the same pair on `content`. Both draw
+from one registry, [UI/glyphs.tsx](src/UI/glyphs.tsx) — **adding an icon is a single entry
+in `GLYPHS`**, and it appears in the picker automatically. The names are deliberately
+generic (`GLYPHS`, `GlyphIcon`, `IconPicker`) because this is no longer board-only.
 
-That loose typing is also how **custom uploaded images** work: if `icon` is a data URL
-(`isCustomIcon()`), `BoardIcon` renders an `<img>` instead of a glyph. Uploads are
-downscaled to `ICON_MAX_DIM` (96px) — icons render at ~30px, and the storage budget is
-shared with every card on every board.
+`icon` is typed `string`, not a union of the current keys, for two reasons: a board saved
+with a glyph a later build renames still loads (falling back to `DEFAULT_GLYPH`), and the
+same field carries **custom uploaded images** without a second shape — if it's a data URL
+(`isCustomIcon()`), `GlyphIcon` renders an `<img>`. Uploads are downscaled to `ICON_MAX_DIM`
+(96px); icons render at ~30px and the storage budget is shared with every card.
 
-[BoardIconPicker](src/UI/BoardIconPicker.tsx) portals to `document.body` with fixed
-positioning measured from its trigger. Both hosts (`CardNode`, gallery tile) set
-`overflow: hidden`, and a canvas card additionally inherits the world's `scale()` — an
-in-place popover would be clipped in the gallery and shrink with the zoom on canvas. Any
-future popover launched from inside a card needs the same treatment.
+[IconPicker](src/UI/IconPicker.tsx) portals to `document.body` with fixed positioning
+measured from its trigger. Every host (`CardNode`, gallery tile) sets `overflow: hidden`,
+and a canvas card additionally inherits the world's `scale()` — an in-place popover would be
+clipped and would shrink with the zoom. Any future popover launched from inside a card needs
+the same treatment.
+
+### Overlay geometry
+
+Fixed-position chrome shares the bottom of the screen, and the toolbar's width grew with the
+card count (~716px at 17 buttons). Because it is centre-anchored, **any horizontal
+separation from it depends on viewport width** — the minimap collided with it below ~1140px,
+which includes a 1920px display at 175% OS scaling. The minimap therefore clears it
+*vertically* (`bottom: 92px` = toolbar offset + height + gap), which holds at every width.
+Prefer that reasoning over widening gaps when placing new overlays.
+
+Do not add `overflow` to the toolbar to constrain it: its hover dropdowns are absolutely
+positioned children and would be clipped.
 
 ### Rich text
 

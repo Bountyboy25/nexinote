@@ -3,7 +3,7 @@ import {
 } from '@/store'
 import { fitCameraToCards } from '@/utils/canvas'
 import { Icon } from '@/UI/Icon'
-import { BoardIcon } from '@/UI/boardIcons'
+import { GlyphIcon } from '@/UI/glyphs'
 import styles from './TopBar.module.css'
 
 // ─────────────────────────────────────────────────────────────
@@ -66,14 +66,14 @@ export function TopBar({ onOpenSettings }: TopBarProps) {
                   onClick={() => openBoard(ancestor.id)}
                   title={`Back to ${ancestor.name}`}
                 >
-                  <BoardIcon name={ancestor.icon} accent={ancestor.accent} size={14} />
+                  <GlyphIcon name={ancestor.icon} accent={ancestor.accent} size={14} />
                   {ancestor.name}
                 </button>
               </span>
             ))}
 
             <span className={styles.sep}>/</span>
-            <BoardIcon
+            <GlyphIcon
               name={activeBoard?.icon}
               accent={activeBoard?.accent}
               size={15}

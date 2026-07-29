@@ -91,6 +91,9 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
     isConnectMode && !isConnectSource ? styles.connectTarget : '',
     dropColumnId === card.id ? styles.dropTarget : '',
     card.locked ? styles.locked : '',
+    // Document cards are the smallest type on the board, so their shell
+    // tightens to match — see .compact in the stylesheet.
+    card.type === 'document' ? styles.compact : '',
   ].filter(Boolean).join(' ')
 
   return (

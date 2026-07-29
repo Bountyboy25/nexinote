@@ -52,7 +52,7 @@ npm run preview
 | Card | What it's for |
 |------|---------------|
 | 📝 **Note** | Short rich-text note, edited inline on the card |
-| 📄 **Document** | Long-form writing — an icon and word count on the board, opens into a full-page editor |
+| 📄 **Document** | Long-form writing — the smallest card: a custom icon + word count, opens into a full-page editor |
 | ✅ **Task** | Checklist with square / circle / star checkbox styles + progress bar |
 | 📊 **Table** | Editable grid of cells |
 | 🖼️ **Image** | Uploaded (downscaled & embedded) or linked by URL; cover / contain fit |
@@ -96,6 +96,12 @@ thoughts. A **document** behaves like a file: on the board it's just an icon and
 word count, and **clicking it** launches a focused full-page editor with a
 formatting toolbar. Keeping the contents out of the tile is deliberate — a board
 full of documents should read as a shelf of files, not a wall of 12px text.
+
+Because the icon is the only thing telling one document from another at a glance,
+it's **customizable**: hover a document card and click the swatch button to pick any
+glyph, accent color, or your own uploaded image — the same picker boards use. Document
+cards are the smallest type on the canvas, sized to the icon rather than to content
+they no longer display.
 
 ### Drawing up close
 

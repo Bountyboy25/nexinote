@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
 // each glyph takes the board's accent and re-themes with the app.
 //
 // ── ADDING YOUR OWN ──────────────────────────────────────────
-// Drop one entry into BOARD_GLYPHS below and it appears in the
+// Drop one entry into GLYPHS below and it appears in the
 // picker automatically — nothing else to touch:
 //
 //     myIcon: <path d="M4 4 L20 20" />,
@@ -21,28 +21,38 @@ import type { ReactNode } from 'react'
 //
 // Board.icon stores the KEY as a plain string (not a union type) so a
 // board saved with an icon that a later build renames still loads —
-// it just falls back to DEFAULT_BOARD_ICON.
+// it just falls back to DEFAULT_GLYPH.
 //
 // That same loose typing is what lets a board use a CUSTOM IMAGE: if
-// the stored value is a data URL instead of a registry key, BoardIcon
+// the stored value is a data URL instead of a registry key, GlyphIcon
 // renders an <img>. Uploads are downscaled to ICON_MAX_DIM first
 // (see utils/image.ts) so a custom icon costs a couple of KB, not a
 // slice of the shared localStorage budget.
 // ─────────────────────────────────────────────────────────────
 
-export const DEFAULT_BOARD_ICON = 'board'
+export const DEFAULT_GLYPH = 'board'
 
 /** True when a board's icon is an uploaded image rather than a glyph. */
 export function isCustomIcon(icon?: string): boolean {
   return !!icon && icon.startsWith('data:image/')
 }
 
-export const BOARD_GLYPHS: Record<string, ReactNode> = {
+export const GLYPHS: Record<string, ReactNode> = {
   // Nested frames — the default, matches the board card glyph
   board: (
     <>
       <rect x="3" y="4.5" width="18" height="15" rx="2.5" />
       <rect x="7" y="8.5" width="10" height="7" rx="1.5" />
+    </>
+  ),
+
+  // Page with text lines — the default for document cards
+  document: (
+    <>
+      <path d="M14 2.5H7A2 2 0 0 0 5 4.5v15a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7.5l-5-5Z" />
+      <path d="M14 2.5v5h5" />
+      <path d="M9 13h6" />
+      <path d="M9 17h4" />
     </>
   ),
 
@@ -167,12 +177,12 @@ export const BOARD_GLYPHS: Record<string, ReactNode> = {
   ),
 }
 
-export const BOARD_ICON_KEYS = Object.keys(BOARD_GLYPHS)
+export const GLYPH_KEYS = Object.keys(GLYPHS)
 
 // Accents a board icon can take. Theme vars first, so most boards
 // re-color with the reactor; the last two are fixed hues for boards
 // that should stay recognizable across theme swaps.
-export const BOARD_ACCENTS = [
+export const ACCENTS = [
   'var(--nx-core)',
   'var(--nx-core-hot)',
   'var(--nx-hazard)',
@@ -183,7 +193,7 @@ export const BOARD_ACCENTS = [
   '#a78bfa',
 ]
 
-export const DEFAULT_BOARD_ACCENT = BOARD_ACCENTS[0]
+export const DEFAULT_ACCENT = ACCENTS[0]
 
 interface BoardIconProps {
   name?: string
@@ -192,7 +202,7 @@ interface BoardIconProps {
   className?: string
 }
 
-export function BoardIcon({ name, accent, size = 18, className }: BoardIconProps) {
+export function GlyphIcon({ name, accent, size = 18, className }: BoardIconProps) {
   // Uploaded image — rendered as a rounded tile rather than a glyph.
   // The accent doesn't apply: the image supplies its own color.
   if (isCustomIcon(name)) {
@@ -209,7 +219,7 @@ export function BoardIcon({ name, accent, size = 18, className }: BoardIconProps
     )
   }
 
-  const glyph = BOARD_GLYPHS[name ?? ''] ?? BOARD_GLYPHS[DEFAULT_BOARD_ICON]
+  const glyph = GLYPHS[name ?? ''] ?? GLYPHS[DEFAULT_GLYPH]
   return (
     <svg
       width={size}
@@ -221,7 +231,7 @@ export function BoardIcon({ name, accent, size = 18, className }: BoardIconProps
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      style={{ color: accent ?? DEFAULT_BOARD_ACCENT }}
+      style={{ color: accent ?? DEFAULT_ACCENT }}
       aria-hidden="true"
       focusable="false"
     >
