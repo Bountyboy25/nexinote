@@ -47,6 +47,19 @@
   box-shadow: var(--shadow-lg);
 }
 
+/* ── Drag boundary ──
+   The limit cards are clamped to (WORLD_BOUNDS in utils/canvas.ts),
+   shown only while a card is being dragged. Sits inside .world so it
+   pans and zooms with the board; the border WIDTH is set inline in
+   screen px / zoom so it stays hairline-thin at every zoom level. */
+.worldBounds {
+  position: absolute;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--nx-hazard) 45%, transparent);
+  border-radius: 24px;
+  pointer-events: none;
+}
+
 .world {
   position: absolute;
   top: 0;

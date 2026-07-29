@@ -83,6 +83,32 @@ same scrutiny.
 `CardNode` is `memo`'d on purpose — dragging replaces only that card's object, so other
 cards bail out on the shallow prop check instead of re-rendering per mousemove.
 
+### Dragging a card
+
+Two entry points, both from [useCardDrag](src/hooks/useCardDrag.ts), and the distinction
+matters:
+
+- `onMouseDown` (bubble) — plain card surface, drags immediately.
+- `onMouseDownCapture` (**capture**) — arms a 220ms press-and-hold, so a card can be grabbed
+  from on top of its own inputs and editors. Capture is not optional here: sixteen content
+  components call `stopPropagation()` on mousedown to protect their editors, so a
+  bubble-phase listener on the card root never sees those presses at all.
+
+The capture handler never calls `preventDefault`/`stopPropagation` — it is purely additive,
+so a short click still focuses and places a caret exactly as before. Moving more than
+`HOLD_SLOP` (5px) cancels the pending hold, which is what preserves click-drag text
+selection inside an input. Elements running their own drag gesture (resize grips, the column
+row grip) opt out with `data-no-card-drag`; the sketch and map surfaces are excluded already
+because the hold only arms over text-editable targets.
+
+Card positions are clamped to `WORLD_BOUNDS` (±12,000 world px, in
+[utils/canvas.ts](src/utils/canvas.ts)) so a fast drag can't fling a card somewhere it can
+never be found. `CanvasView` draws that boundary only while a drag is in progress, with
+`borderWidth` divided by zoom so it stays hairline at every scale.
+
+A drag also ends on `window.blur`. Without it, a mouseup that happens outside the window is
+never heard and the card keeps following the cursor when focus returns.
+
 `BaseCard.locked` pins a card's **position only** — [useCardDrag](src/hooks/useCardDrag.ts)
 still selects the card, then bails before starting a drag, and resize grips hide. Selection,
 editing, connecting and deleting all behave normally, so a lock never reads as a broken card.

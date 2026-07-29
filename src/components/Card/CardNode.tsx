@@ -1,5 +1,7 @@
 import { memo } from 'react'
-import { useCanvasStore, useSelectedIds, useConnectFrom, useDropColumnId } from '@/store'
+import {
+  useCanvasStore, useSelectedIds, useConnectFrom, useDropColumnId, useDraggingCardId,
+} from '@/store'
 import { useCardDrag } from '@/hooks/useCardDrag'
 import { CardContent } from './CardContent'
 import { Icon, type IconName } from '@/UI/Icon'
@@ -51,11 +53,17 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
   const selectedIds   = useSelectedIds()
   const connectFromId = useConnectFrom()
   const dropColumnId  = useDropColumnId()
+  // Confirms a press-and-hold actually engaged — without a visible change
+  // the hold feels like nothing happened. Flips twice per drag, so the
+  // extra render is negligible.
+  const draggingCardId = useDraggingCardId()
   const {
     updateCard, deleteCard, duplicateCard, toggleLock,
     addConnector, setConnectFrom, setActiveTool,
   } = useCanvasStore.getState()
-  const { onMouseDown } = useCardDrag(card)
+  // Two handlers on purpose — see useCardDrag. The capture one arms
+  // press-and-hold for presses that content components swallow.
+  const { onMouseDown, onMouseDownCapture } = useCardDrag(card)
 
   const isSelected      = selectedIds.has(card.id)
   const isConnectMode   = connectFromId !== null
@@ -91,6 +99,7 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
     isConnectMode && !isConnectSource ? styles.connectTarget : '',
     dropColumnId === card.id ? styles.dropTarget : '',
     card.locked ? styles.locked : '',
+    draggingCardId === card.id ? styles.dragging : '',
     // Document cards are the smallest type on the board, so their shell
     // tightens to match — see .compact in the stylesheet.
     card.type === 'document' ? styles.compact : '',
@@ -101,6 +110,7 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
       className={classNames}
       data-card={card.id}
       style={{ left: card.x, top: card.y, width: card.width }}
+      onMouseDownCapture={onMouseDownCapture}
       onMouseDown={onMouseDown}
       onClick={isConnectMode ? onCardClick : undefined}
     >

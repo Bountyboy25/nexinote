@@ -179,6 +179,8 @@ so work is never lost.
 
 | Key | Action |
 |-----|--------|
+| Drag a card | Move it — grab any blank part of the card |
+| Press & hold a card | Hold ~0.2s to drag from anywhere, including over its text |
 | Space + drag | Pan the canvas |
 | Scroll | Zoom toward cursor |
 | Double-click canvas | Add a note at the cursor |

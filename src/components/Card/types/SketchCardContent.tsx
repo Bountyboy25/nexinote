@@ -364,6 +364,7 @@ export function SketchCardContent({ card }: Props) {
       {!card.locked && !focus && (
         <div
           className={styles.sketchResize}
+          data-no-card-drag=""
           onPointerDown={onResizeDown}
           title="Drag to resize"
         />

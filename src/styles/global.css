@@ -184,3 +184,25 @@ input {
 [data-tip][data-tip-pos='bottom']:focus-visible::after {
   transform: translateX(-50%) translateY(0);
 }
+
+/* ─────────────────────────────────────────────────────────────
+   DRAGGING A CARD
+   Set on <body> by useCardDrag for the duration of a card drag.
+
+   A drag can now begin on top of an input or a contentEditable
+   (press-and-hold), so without this the pointer would paint a text
+   selection across the card while moving it. Killing selection
+   globally also stops the browser's own drag-image behaviour on any
+   text or image the pointer happens to cross.
+───────────────────────────────────────────────────────────── */
+body.nx-dragging {
+  cursor: grabbing !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body.nx-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}

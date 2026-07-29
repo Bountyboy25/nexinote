@@ -1,17 +1,18 @@
 import { useRef, useCallback, useEffect, useState } from 'react'
-import { useCanvasStore, useCards, useCamera } from '@/store'
+import { useCanvasStore, useCards, useCamera, useDraggingCardId } from '@/store'
 import { useKeyboard }   from '@/hooks/useKeyboard'
 import { useCanvasPan }  from '@/hooks/useCanvasPan'
 import { useCanvasZoom } from '@/hooks/useCanvasZoom'
 import { CardNode }       from '@/components/Card/CardNode'
 import { ConnectorLayer } from './ConnectorLayer'
-import { screenToWorld, getViewportCenter }  from '@/utils/canvas'
+import { screenToWorld, getViewportCenter, WORLD_BOUNDS }  from '@/utils/canvas'
 import { fileToImageDataURL, isImageSrc }    from '@/utils/image'
 import styles from './CanvasView.module.css'
 
 export function CanvasView() {
-  const cards       = useCards()
-  const camera      = useCamera()
+  const cards          = useCards()
+  const camera         = useCamera()
+  const draggingCardId = useDraggingCardId()
   const { addCard, updateCard, deselectAll } = useCanvasStore.getState()
 
   // The SideTaskbar (position: fixed, z-index 500) overlays the left
@@ -131,6 +132,26 @@ export function CanvasView() {
       <ConnectorLayer />
       <div className={styles.grid} style={gridStyle} />
       <div className={styles.world} style={worldTransform}>
+        {/* The edge cards can't be dragged past. Only drawn while a drag
+            is in progress — the rest of the time it is a 24,000px box
+            nobody needs to see, and it would just add noise. */}
+        {draggingCardId && (
+          <div
+            className={styles.worldBounds}
+            style={{
+              left:   WORLD_BOUNDS.minX,
+              top:    WORLD_BOUNDS.minY,
+              width:  WORLD_BOUNDS.maxX - WORLD_BOUNDS.minX,
+              height: WORLD_BOUNDS.maxY - WORLD_BOUNDS.minY,
+              // Keep the outline one screen pixel thick at any zoom;
+              // scaled by the world transform it would otherwise vanish
+              // when zoomed out and turn into a slab when zoomed in.
+              borderWidth: 2 / camera.zoom,
+            }}
+            aria-hidden="true"
+          />
+        )}
+
         {cards.map(card => (
           <CardNode key={card.id} card={card} />
         ))}

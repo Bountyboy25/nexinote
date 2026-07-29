@@ -112,6 +112,7 @@ function ItemRow({
       <div className={styles.colItemHeader}>
         <span
           className={styles.colItemGrip}
+          data-no-card-drag=""
           title="Drag to reorder"
           onMouseDown={() => setArmed(true)}
         >

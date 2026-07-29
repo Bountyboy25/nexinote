@@ -90,6 +90,25 @@
   height: 9px;
 }
 
+/* ── Being dragged ──
+   Lifts the card off the board and kills its transitions. The lift is
+   the confirmation that a press-and-hold engaged; the transition reset
+   matters because position updates land every mousemove and a
+   transition on transform would make the card lag the cursor. */
+.dragging {
+  z-index: 30;
+  transition: none !important;
+  transform: scale(1.02);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--nx-core),
+    0 0 22px var(--nx-core-soft) !important;
+}
+
+.dragging:hover {
+  transform: scale(1.02);
+}
+
 /* ── Locked — position pinned, contents still live ──
    The card keeps its normal hover glow so it doesn't read as disabled,
    but loses the grab cursor and the hover lift: nothing suggests it can

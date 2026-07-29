@@ -78,6 +78,40 @@ export function rectEdgePoint(
   return { x: cx + dx * t, y: cy + dy * t }
 }
 
+// ── World bounds ──────────────────────────────────────────────
+//
+// The canvas pans and zooms forever, but cards live inside a finite
+// area. Without a limit a drag can carry a card thousands of pixels
+// into empty space, where it is off-screen, off the minimap's useful
+// scale, and effectively lost — "Fit to screen" then zooms out so far
+// that the rest of the board becomes unreadable.
+//
+// 12,000 world px in each direction is ~40 screens wide at 100% zoom,
+// so the boundary is nowhere near reachable in ordinary use — it only
+// catches the runaway drag.
+export const WORLD_LIMIT = 12_000
+
+export const WORLD_BOUNDS = {
+  minX: -WORLD_LIMIT,
+  minY: -WORLD_LIMIT,
+  maxX: WORLD_LIMIT,
+  maxY: WORLD_LIMIT,
+}
+
+// Keep a card's whole footprint inside WORLD_BOUNDS. Takes the card's
+// size so the bottom-right corner is held in, not just the origin.
+export function clampCardToWorld(
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): { x: number; y: number } {
+  return {
+    x: clamp(x, WORLD_BOUNDS.minX, WORLD_BOUNDS.maxX - width),
+    y: clamp(y, WORLD_BOUNDS.minY, WORLD_BOUNDS.maxY - height),
+  }
+}
+
 // Clamp a zoom value within the allowed min/max range
 export function clampZoom(zoom: number): number {
   return Math.min(4.0, Math.max(0.1, zoom))

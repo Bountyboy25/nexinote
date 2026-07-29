@@ -293,6 +293,7 @@ export function MapCardContent({ card }: Props) {
       {!card.locked && (
         <div
           className={styles.mapResize}
+          data-no-card-drag=""
           onPointerDown={onResizeDown}
           title="Drag to resize"
         />
