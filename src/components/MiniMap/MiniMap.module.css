@@ -7,12 +7,24 @@
   overflow: hidden;
   z-index: 999;
   opacity: 0.65;
-  transition: opacity var(--transition);
+  /* Slow by default so the idle fade-out (and the fade back in when a
+     drag starts) reads as ambient rather than as a popup. */
+  transition: opacity 0.8s ease;
   box-shadow: var(--shadow);
 }
 
 .minimap:hover {
   opacity: 1;
+  /* Deliberate hover, though — that should feel immediate. */
+  transition: opacity 0.15s ease;
+}
+
+/* Faded out after 30s without a drag. pointer-events: none matters —
+   an invisible overlay that still swallowed canvas clicks would be a
+   dead zone in the bottom-left corner of the board. */
+.idle {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .canvas {

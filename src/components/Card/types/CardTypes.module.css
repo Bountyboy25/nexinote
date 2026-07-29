@@ -392,84 +392,74 @@
 }
 
 /* ── Document Card (compact tile) ───────────────────────────── */
-.docPreview {
+/* ── Document tile ───────────────────────────────────────────
+   Icon + word count only. The excerpt preview this replaced turned
+   every document card into a block of unreadable 12px text; the
+   contents belong in the editor, which one click away. */
+.docTile {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px 10px 10px;
-  cursor: pointer;
-}
-
-/* A small sheet-of-paper preview of the document body */
-.docPreviewPage {
-  position: relative;
-  height: 120px;
-  overflow: hidden;
-  background: var(--nx-bg-panel);
-  border-radius: 4px;
-  border: 1px solid var(--nx-line);
-  padding: 10px 12px;
-}
-
-/* Fade the bottom of the excerpt so it reads as "continues below" */
-.docPreviewPage::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 28px;
-  background: linear-gradient(transparent, var(--nx-bg-panel));
-  pointer-events: none;
-}
-
-.docPreviewText {
-  font-family: var(--nx-font-body);
-  font-size: 12px;
-  line-height: 1.55;
-  color: var(--nx-ink);
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.docPreviewEmpty {
-  font-family: var(--nx-font-body);
-  font-size: 12px;
-  font-style: italic;
-  color: color-mix(in srgb, var(--nx-ink-dim) 60%, transparent);
-  margin: 0;
-}
-
-.docPreviewFooter {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.docPreviewMeta {
-  font-size: 11px;
-  color: var(--text-3);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.docOpenBtn {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 5px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-2);
+  justify-content: center;
+  gap: 6px;
+  padding: 20px 12px 18px;
   cursor: pointer;
-  transition: all var(--transition);
+  outline: none;
+  transition: background var(--transition);
 }
 
-.docOpenBtn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: color-mix(in srgb, var(--nx-core) 8%, transparent);
+.docTile:hover,
+.docTile:focus-visible {
+  background: color-mix(in srgb, var(--nx-core) 6%, transparent);
 }
+
+.docTileIcon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  border: 1px solid var(--nx-line);
+  background: var(--nx-bg-panel);
+  color: var(--nx-core-hot);
+  transition: border-color var(--transition), box-shadow var(--transition),
+              transform var(--transition);
+}
+
+.docTile:hover .docTileIcon,
+.docTile:focus-visible .docTileIcon {
+  border-color: var(--nx-core);
+  box-shadow: 0 0 14px var(--nx-core-soft);
+  transform: translateY(-2px);
+}
+
+/* An untouched document reads as an outline, not a filled file */
+.docTileIconEmpty {
+  color: var(--text-3);
+  border-style: dashed;
+}
+
+.docTileCount {
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+/* Only shows on hover — the whole tile is the button, so this is a
+   hint rather than a control that needs permanent space. */
+.docTileHint {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.docTile:hover .docTileHint,
+.docTile:focus-visible .docTileHint { opacity: 1; }
 
 /* ── Column Card ────────────────────────────────────────────── */
 .column {
@@ -1079,15 +1069,26 @@
   background: color-mix(in srgb, var(--nx-hazard) 12%, transparent);
 }
 
+/* The surface is a WRAPPER div, not the svg itself: toLocal() recovers
+   the screen-to-local scale from its offsetWidth vs its client rect,
+   and only a plain element reports offsetWidth reliably. */
 .sketchSurface {
-  display: block;
+  position: relative;
   width: 100%;
   background:
     linear-gradient(var(--nx-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--nx-grid) 1px, transparent 1px);
-  background-size: 20px 20px;
+    linear-gradient(90deg, var(--nx-grid) 1px, transparent 1px),
+    var(--nx-bg-panel);
+  background-size: 20px 20px, 20px 20px, auto;
   cursor: crosshair;
+  overflow: hidden;
   touch-action: none;   /* pointer events drive drawing, not scrolling */
+}
+
+.sketchSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .sketchErasing { cursor: cell; }
@@ -1102,6 +1103,104 @@
   letter-spacing: 0.1em;
   color: var(--text-3);
   pointer-events: none;
+}
+
+/* ── Custom pen ──
+   The native colour input is invisible and stretched over its swatch,
+   so the swatch is what you see and the OS picker still anchors to it. */
+.sketchPenCustom {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  /* A ring marks it as "any colour" rather than one more preset. */
+  box-shadow: inset 0 0 0 1.5px var(--nx-bg-panel);
+}
+
+.sketchPenInput {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  opacity: 0;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ── Focus view ──
+   A magnifier, not a separate mode: the same surface at the same
+   coordinates, scaled up so fine strokes are workable. */
+.sketchAway {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.sketchFocusBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3400;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--nx-bg) 78%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: sketchFocusIn 0.16s ease;
+}
+
+@keyframes sketchFocusIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sketchFocusPanel {
+  display: flex;
+  flex-direction: column;
+  max-width: 96vw;
+  max-height: 94vh;
+  background: var(--nx-bg-raised);
+  border: 1px solid var(--nx-core);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 26px var(--nx-core-soft);
+  overflow: hidden;
+}
+
+.sketchFocusHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sketchFocusTitle {
+  font-family: var(--nx-font-display, var(--font-ui));
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-1);
+}
+
+.sketchFocusZoom {
+  font-family: var(--nx-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.sketchFocusStage {
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow: auto;
 }
 
 .sketchResize,

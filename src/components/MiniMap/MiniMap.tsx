@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useCards, useCamera } from '@/store'
+import { useCards, useCamera, useDraggingCardId } from '@/store'
 import styles from './MiniMap.module.css'
 
 // ─────────────────────────────────────────────────────────────
@@ -8,17 +8,23 @@ import styles from './MiniMap.module.css'
 // Uses the HTML5 Canvas 2D API (not our infinite canvas div!)
 // to draw a scaled-down overview of all card positions.
 //
-// Key concept: useEffect with dependencies
-// React re-runs the effect whenever [cards, camera] change.
-// Inside the effect we redraw the minimap canvas.
+// Two behaviours beyond plain drawing:
 //
-// This is the right pattern for "imperative" operations
-// (like drawing on a canvas) that need to sync with React state.
+//   • The card being dragged is drawn hot and filled, with a halo, so
+//     you can see where it is heading even when it is far outside the
+//     viewport rectangle.
+//   • The whole minimap fades out after IDLE_MS without a drag, and
+//     returns the moment one starts. It sits over the canvas, and a
+//     permanent overlay you have stopped consulting is just clutter.
+//     Hovering it also counts as activity, so it never fades while
+//     being read.
 // ─────────────────────────────────────────────────────────────
 
 const W = 140  // Minimap display width
 const H = 90   // Minimap display height
 const PAD = 8
+
+const IDLE_MS = 30_000
 
 /* Nuclear Nexus (spec §7 Minimap): blips are core-soft rects with core
    borders; the viewport rectangle strokes in core-hot. Canvas 2D can't
@@ -28,9 +34,13 @@ function nxToken(name: string): string {
 }
 
 export function MiniMap() {
-  const cards  = useCards()
-  const camera = useCamera()
+  const cards          = useCards()
+  const camera         = useCamera()
+  const draggingCardId = useDraggingCardId()
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  const [idle, setIdle] = useState(false)
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Bump a counter when the theme core swaps so the canvas redraws
   const [themeTick, setThemeTick] = useState(0)
@@ -43,9 +53,34 @@ export function MiniMap() {
     return () => observer.disconnect()
   }, [])
 
-  // Redraw whenever cards, camera, or theme changes. Pan/zoom fires this
-  // on every mousemove, so the draw is coalesced into one rAF per frame
-  // instead of running back-to-back for intermediate camera values.
+  // ── Idle fade ──
+  // Restart the countdown on every drag. The timer is deliberately keyed
+  // on dragging rather than on `cards` — card content changes constantly
+  // while typing, and a minimap that never fades while you write a note
+  // defeats the point.
+  useEffect(() => {
+    const wake = () => {
+      setIdle(false)
+      if (idleTimer.current) clearTimeout(idleTimer.current)
+      idleTimer.current = setTimeout(() => setIdle(true), IDLE_MS)
+    }
+    wake()
+    return () => { if (idleTimer.current) clearTimeout(idleTimer.current) }
+  }, [draggingCardId])
+
+  // Keep it awake while the pointer is on it — you're clearly using it.
+  const onEnter = () => {
+    setIdle(false)
+    if (idleTimer.current) clearTimeout(idleTimer.current)
+  }
+  const onLeave = () => {
+    if (idleTimer.current) clearTimeout(idleTimer.current)
+    idleTimer.current = setTimeout(() => setIdle(true), IDLE_MS)
+  }
+
+  // Redraw whenever cards, camera, drag target, or theme changes. Pan/zoom
+  // fires this on every mousemove, so the draw is coalesced into one rAF
+  // per frame instead of running back-to-back for intermediate values.
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -66,6 +101,7 @@ export function MiniMap() {
 
       const core    = nxToken('--nx-core')
       const coreHot = nxToken('--nx-core-hot')
+      const hazard  = nxToken('--nx-hazard')
 
       // Background — inset panel surface
       ctx.fillStyle = nxToken('--nx-bg-panel')
@@ -100,8 +136,10 @@ export function MiniMap() {
       const offX = PAD + (W - PAD * 2 - contentW * scale) / 2 - minX * scale
       const offY = PAD + (H - PAD * 2 - contentH * scale) / 2 - minY * scale
 
-      // Draw each card as a core-soft blip with a core border
+      // Draw each card as a core-soft blip with a core border. The
+      // dragged one is drawn last (below) so nothing can cover it.
       cards.forEach(card => {
+        if (card.id === draggingCardId) return
         ctx.beginPath()
         // roundRect draws a rectangle with rounded corners
         ctx.roundRect(
@@ -133,14 +171,44 @@ export function MiniMap() {
       const vpH = (window.innerHeight / camera.zoom) * scale
 
       ctx.strokeRect(vpX, vpY, vpW, vpH)
+
+      // ── The dragged card, on top of everything ──
+      // Solid hazard fill plus a glow: at 140×90 a blip can be 4px wide,
+      // so a border-only highlight would be invisible against the others.
+      const dragged = draggingCardId
+        ? cards.find(c => c.id === draggingCardId)
+        : undefined
+      if (!dragged) return
+
+      const dx = dragged.x * scale + offX
+      const dy = dragged.y * scale + offY
+      const dw = Math.max(dragged.width * scale, 4)
+      const dh = Math.max(CARD_HEIGHT_ESTIMATE * scale, 3)
+
+      ctx.globalAlpha = 1
+      ctx.shadowColor = hazard
+      ctx.shadowBlur = 8
+      ctx.beginPath()
+      ctx.roundRect(dx, dy, dw, dh, 2)
+      ctx.fillStyle = hazard
+      ctx.fill()
+      ctx.shadowBlur = 0
+
+      ctx.strokeStyle = hazard
+      ctx.lineWidth = 1.5
+      ctx.stroke()
     }
 
     const raf = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(raf)
-  }, [cards, camera, themeTick])  // Re-run when cards, camera, or theme changes
+  }, [cards, camera, draggingCardId, themeTick])
 
   return (
-    <div className={styles.minimap}>
+    <div
+      className={`${styles.minimap} ${idle ? styles.idle : ''}`}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
       <canvas ref={canvasRef} className={styles.canvas} />
     </div>
   )

@@ -29,7 +29,8 @@ npm run preview
 
 ## Features
 
-- **Infinite canvas** — pan, zoom-to-cursor, and a live minimap overview
+- **Infinite canvas** — pan, zoom-to-cursor, and a live minimap that highlights the card
+  you're dragging and fades away when you leave it alone
 - **Multiple boards** — a gallery of boards, each with its own cards + connectors, and
   **sub-boards** nested inside a board via a board card
 - **15 card types** — note, document, task list, table, image, link, column, sketch, color,
@@ -51,13 +52,13 @@ npm run preview
 | Card | What it's for |
 |------|---------------|
 | 📝 **Note** | Short rich-text note, edited inline on the card |
-| 📄 **Document** | Long-form writing — shows a compact preview tile on the board, opens into a full-page editor |
+| 📄 **Document** | Long-form writing — an icon and word count on the board, opens into a full-page editor |
 | ✅ **Task** | Checklist with square / circle / star checkbox styles + progress bar |
 | 📊 **Table** | Editable grid of cells |
 | 🖼️ **Image** | Uploaded (downscaled & embedded) or linked by URL; cover / contain fit |
 | 🔗 **Link** | URL with a description |
 | ▤ **Column** | A container that stacks whole cards of any type (except other columns) |
-| ✏️ **Sketch** | Freehand drawing surface — pens, nib sizes, eraser, undo, resizable |
+| ✏️ **Sketch** | Freehand drawing — pens, any color, nib sizes, eraser, undo, resizable, focus view |
 | 🎨 **Color** | A swatch with hex, picker, presets, click-to-copy, and a contrast preview |
 | 🔊 **Audio** | A small uploaded clip (≤2MB) or a track link |
 | 🎬 **Video** | YouTube / Vimeo / direct `.mp4` link — never embedded in storage |
@@ -91,10 +92,18 @@ deleting just the *card* releases its board back to the gallery instead of destr
 ### Notes vs. Documents
 
 A **note** is a small card you type into directly on the canvas — good for short
-thoughts. A **document** behaves like a file: on the board it's a compact preview
-tile showing an excerpt and word count, and **double-clicking it (or pressing
-"Open")** launches a focused full-page editor with a formatting toolbar. This
-mirrors how Milanote separates quick notes from long-form documents.
+thoughts. A **document** behaves like a file: on the board it's just an icon and a
+word count, and **clicking it** launches a focused full-page editor with a
+formatting toolbar. Keeping the contents out of the tile is deliberate — a board
+full of documents should read as a shelf of files, not a wall of 12px text.
+
+### Drawing up close
+
+Sketch cards have a **focus view** (the ⌖ button in the pen tray, Esc to leave): the
+same drawing, magnified to fill most of the screen, so fine strokes are actually
+workable. It's a magnifier, not a separate canvas — strokes stay exactly where they
+were. The pen tray also has a **color picker** beside the six theme pens for choosing
+any color at all.
 
 ---
 
