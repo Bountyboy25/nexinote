@@ -13,14 +13,20 @@ import styles from './SettingsPanel.module.css'
 //   • Reactor status — Nuclear Nexus gauge fed by real board load
 //   • Theme Core     — 4-core Nuclear Nexus theme picker
 //   • Animate Arrows — toggles the wave animation on connectors
+//   • Templates      — only when a board is open (see onOpenTemplates)
 // Settings are persisted to localStorage via the store.
 // ─────────────────────────────────────────────────────────────
 
 interface Props {
   onClose: () => void
+  /**
+   * Opens the templates modal. Omitted from the boards gallery, where
+   * there is no active board for a template to be applied to.
+   */
+  onOpenTemplates?: () => void
 }
 
-export function SettingsPanel({ onClose }: Props) {
+export function SettingsPanel({ onClose, onOpenTemplates }: Props) {
   const settings = useSettings()
   const cards = useCards()
   const connectors = useConnectors()
@@ -70,6 +76,23 @@ export function SettingsPanel({ onClose }: Props) {
             label="Animate Arrows"
             description="Flowing wave animation on connector lines. When off, arrows are static."
           />
+
+          {/* Templates — board-scoped, so hidden in the gallery */}
+          {onOpenTemplates && (
+            <div className={styles.row}>
+              <div className={styles.rowInfo}>
+                <div className={styles.rowLabel}>Templates</div>
+                <div className={styles.rowDesc}>
+                  Start this board from a preset layout. New boards are offered
+                  one automatically; use this to re-template an existing board.
+                  {cards.length > 0 && ' Applying one erases what is here now.'}
+                </div>
+              </div>
+              <button className={styles.rowAction} onClick={onOpenTemplates}>
+                Browse
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.footer}>

@@ -90,8 +90,20 @@ function migrateBoards(boards: Board[]): Board[] {
     return card
   }
 
+  // Boards that already hold work predate the "start with a template?"
+  // offer and are plainly not new, so they count as already asked.
+  // Without this, opening a long-established board would greet the user
+  // with an offer to erase it. Empty boards are still offered once.
+  const alreadyAsked = (board: Board): boolean => {
+    if (board.templatePrompted !== undefined) return board.templatePrompted
+    if (board.cards.length === 0) return false
+    touched = true
+    return true
+  }
+
   const next = boards.map(board => ({
     ...board,
+    templatePrompted: alreadyAsked(board),
     cards: board.cards.map(card =>
       card.type === 'column'
         ? {
@@ -621,6 +633,35 @@ export const useCanvasStore = create<CanvasStore>((set, get) => {
       })
     },
 
+    applyTemplate: (templateCards: Card[]) => {
+      set(state => ({
+        cards: templateCards,
+        connectors: [],
+        selectedIds: new Set<string>(),
+        openDocId: null,
+        // Two things this must not skip:
+        //   • persistActiveBoard — the old implementation wrote straight
+        //     to the store, so a template applied and then abandoned by
+        //     closing the tab was never saved.
+        //   • promoteOrphanedSubBoards — a template wipes the board, and
+        //     any board card on it takes a real child board with it.
+        boards: persistActiveBoard(
+          promoteOrphanedSubBoards(state.boards, state.cards),
+          state.activeBoardId, templateCards, [],
+        ),
+      }))
+    },
+
+    markTemplatePrompted: (boardId: string) => {
+      set(state => {
+        const boards = state.boards.map(b =>
+          b.id === boardId ? { ...b, templatePrompted: true } : b
+        )
+        saveBoards(boards)
+        return { boards }
+      })
+    },
+
     toggleLock: (id?: string) => {
       set(state => {
         const targets = id
@@ -898,6 +939,8 @@ const _actions = Object.freeze({
   deleteSelected:  _state.deleteSelected,
   duplicateCard:   _state.duplicateCard,
   clearBoard:      _state.clearBoard,
+  applyTemplate:   _state.applyTemplate,
+  markTemplatePrompted: _state.markTemplatePrompted,
   toggleLock:      _state.toggleLock,
   addConnector:    _state.addConnector,
   updateConnector: _state.updateConnector,

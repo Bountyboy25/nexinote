@@ -42,7 +42,9 @@ npm run preview
   (Ctrl/Cmd+L or the padlock in the card header). Contents stay fully editable
 - **Board icons** — give any board or sub-board a built-in glyph and accent color, or
   upload your own image, so a gallery of projects reads at a glance
-- **Templates** — start a board from a saved layout
+- **Templates** — offered automatically the first time you open a board or sub-board, and
+  available any time from Settings. Applying one replaces the board, so it always warns
+  first when there's work to lose
 - **Auto-save** — every change is persisted to `localStorage` immediately
 
 ---

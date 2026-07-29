@@ -151,6 +151,27 @@ and a canvas card additionally inherits the world's `scale()` — an in-place po
 clipped and would shrink with the zoom. Any future popover launched from inside a card needs
 the same treatment.
 
+### Templates
+
+There is no toolbar button — applying a template **erases the board**, which is not a thing
+to sit one stray click away in a tool dock. Two entry points instead:
+
+- **Automatic**, the first time a board or sub-board is opened. `Board.templatePrompted`
+  records that the offer was made (accepted *or* declined), so a board is asked exactly once.
+  `migrateBoards` back-fills it as `true` for pre-existing boards that already hold cards,
+  otherwise every established board would be greeted with an offer to wipe it.
+- **Deliberate**, from Settings. That row is hidden in the gallery, where there is no active
+  board to apply to.
+
+`TemplatesModal` takes `mode`: `'welcome'` (new board — nothing to lose, so picks apply
+immediately and declining gets its own button) or `'menu'`. When the board has content,
+either mode routes the pick through a confirmation naming the live card/connector counts.
+
+Apply goes through the store's `applyTemplate`, not a raw `setState`. The old path wrote
+`cards` directly, which skipped `persistActiveBoard` (a template applied and then abandoned
+by closing the tab was never saved) and `promoteOrphanedSubBoards` (wiping a board card
+stranded its child board).
+
 ### Overlay geometry
 
 Fixed-position chrome shares the bottom of the screen, and the toolbar's width grew with the

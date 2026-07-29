@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useCanvasStore, useActiveTool, useCamera, useConnectFrom } from '@/store'
 import { getViewportCenter } from '@/utils/canvas'
 import { Icon, type IconName } from '@/UI/Icon'
-import { TemplatesModal }   from '@/components/UI/TemplatesModal'
 import { TableSizeDialog }  from '@/components/UI/TableSizeDialog'
 import type { CardType } from '@/types'
 import styles from './Toolbar.module.css'
@@ -45,7 +44,6 @@ export function Toolbar() {
   const camera        = useCamera()
   const connectFromId = useConnectFrom()
 
-  const [showTemplates, setShowTemplates]     = useState(false)
   const [showTableDialog, setShowTableDialog] = useState(false)
   const [openMenu, setOpenMenu]               = useState<'note' | 'media' | null>(null)
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -260,7 +258,11 @@ export function Toolbar() {
 
         <div className={styles.sep} />
 
-        {/* ── View + templates ── */}
+        {/* ── View ──
+            Templates used to live here. They moved: a board is offered a
+            template when you first enter it, and Settings holds the
+            deliberate entry point. A toolbar button invited a board-erasing
+            action to be clicked by accident. */}
         <div className={styles.group}>
           <button
             className={styles.btn}
@@ -268,17 +270,10 @@ export function Toolbar() {
             data-tip="Reset view (Ctrl+0)"
             aria-label="Reset view"
           ><Icon name="reset-view" /></button>
-          <button
-            className={styles.btn}
-            onClick={() => setShowTemplates(true)}
-            data-tip="Templates"
-            aria-label="Templates"
-          ><Icon name="templates" /></button>
         </div>
       </div>
 
       {/* Modals */}
-      {showTemplates   && <TemplatesModal onClose={() => setShowTemplates(false)} />}
       {showTableDialog && (
         <TableSizeDialog
           onConfirm={handleTableConfirm}

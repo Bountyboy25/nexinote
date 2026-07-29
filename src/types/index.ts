@@ -240,6 +240,11 @@ export interface Board {
   icon?: string
   // CSS color for the icon — a theme var like var(--nx-core), or a hex.
   accent?: string
+  // Set once the "start with a template?" prompt has been shown for this
+  // board, whether it was accepted or declined. Boards are offered a
+  // template exactly once, when first entered — re-asking every time you
+  // open an empty board would be nagging, not helpful.
+  templatePrompted?: boolean
 }
 
 // ── App Settings ──────────────────────────────────────────────
@@ -291,6 +296,12 @@ export interface CanvasStore {
   deleteSelected: () => void
   duplicateCard: (id: string) => void
   clearBoard: () => void
+  // Replace the active board's entire contents with a template. This is
+  // destructive by definition — callers are responsible for warning first.
+  applyTemplate: (cards: Card[]) => void
+  // Record that this board has been offered a template, so it is only
+  // ever asked once.
+  markTemplatePrompted: (boardId: string) => void
   // Pin/unpin a card's position. With no id, toggles every selected card
   // (all to locked unless every one is already locked).
   toggleLock: (id?: string) => void
