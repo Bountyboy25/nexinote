@@ -111,7 +111,7 @@ export function CanvasView() {
     willChange: 'transform' as const,
   }
 
-  const gridSize = 32 * camera.zoom
+  const gridSize = 36 * camera.zoom
   const gridStyle = {
     backgroundSize:     `${gridSize}px ${gridSize}px`,
     backgroundPosition: `${camera.x % gridSize}px ${camera.y % gridSize}px`,

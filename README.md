@@ -30,11 +30,17 @@ npm run preview
 ## Features
 
 - **Infinite canvas** — pan, zoom-to-cursor, and a live minimap overview
-- **Multiple boards** — a gallery of boards, each with its own cards + connectors
-- **7 card types** — note, document, task list, table, image, link, and column
+- **Multiple boards** — a gallery of boards, each with its own cards + connectors, and
+  **sub-boards** nested inside a board via a board card
+- **15 card types** — note, document, task list, table, image, link, column, sketch, color,
+  audio, video, heading, comment, map, and board
 - **Connectors** — SVG arrows between cards with 6 anchor points (optionally animated)
 - **Image upload** — click-to-upload, **drag & drop onto the canvas**, or **paste from the clipboard**; large images are downscaled automatically so they fit in local storage
 - **Document editor** — documents open in a focused, full-page writing view (Milanote-style)
+- **Lock cards** — pin a card's position so it can't be nudged while you work around it
+  (Ctrl/Cmd+L or the padlock in the card header). Contents stay fully editable
+- **Board icons** — give any board or sub-board a built-in glyph and accent color, or
+  upload your own image, so a gallery of projects reads at a glance
 - **Templates** — start a board from a saved layout
 - **Auto-save** — every change is persisted to `localStorage` immediately
 
@@ -50,7 +56,37 @@ npm run preview
 | 📊 **Table** | Editable grid of cells |
 | 🖼️ **Image** | Uploaded (downscaled & embedded) or linked by URL; cover / contain fit |
 | 🔗 **Link** | URL with a description |
-| ▤ **Column** | A container that stacks mixed note / task / link items |
+| ▤ **Column** | A container that stacks whole cards of any type (except other columns) |
+| ✏️ **Sketch** | Freehand drawing surface — pens, nib sizes, eraser, undo, resizable |
+| 🎨 **Color** | A swatch with hex, picker, presets, click-to-copy, and a contrast preview |
+| 🔊 **Audio** | A small uploaded clip (≤2MB) or a track link |
+| 🎬 **Video** | YouTube / Vimeo / direct `.mp4` link — never embedded in storage |
+| 🅷 **Heading** | Section title for a region of the board — 3 sizes, 3 alignments |
+| 💬 **Comment** | Append-only thread of timestamped remarks |
+| 🗺️ **Map** | Real OpenStreetMap slippy map — search a place, drop and label pins |
+| 🗂️ **Board** | A board nested inside this one, to keep a big project uncluttered |
+
+### Sketch, color, and the storage budget
+
+Sketches are stored as **vector strokes**, not a canvas image — so they stay sharp at 400%
+zoom and cost a fraction of the space. That matters because everything shares one ~5MB
+`localStorage` budget, which is also why audio uploads are capped and video is link-only.
+
+### Columns hold real cards
+
+Drop **any** card onto a column — a table, a map, a sketch, a sub-board — and it moves in
+whole. Nothing is flattened or converted: a table dropped into a column is still an editable
+table. Columns are the one thing a column won't take, since containers inside containers have
+no sensible layout. Rows collapse to keep long stacks tidy (collapsed cards aren't rendered
+at all, so a column of maps stays fast), and the ↳ button lifts a card back onto the board.
+
+### Sub-boards
+
+A **board card** holds a real board inside the current one. Click it to descend; the top bar
+grows a breadcrumb trail to climb back out. Nested boards never appear in the main gallery,
+so a project can hold a dozen of them without turning the landing screen into a wall of
+tiles. Deleting a board deletes everything nested inside it (you'll be told how much);
+deleting just the *card* releases its board back to the gallery instead of destroying it.
 
 ### Notes vs. Documents
 
@@ -133,6 +169,7 @@ so work is never lost.
 | Drag image onto canvas | Add it as an image card |
 | Paste image | Add it as an image card at the viewport center |
 | Delete / Backspace | Delete selected cards |
+| Ctrl/Cmd + L | Lock / unlock the selected cards in place |
 | Ctrl/Cmd + A | Select all |
 | Ctrl/Cmd + 0 | Reset view |
 | Escape | Deselect all / close the document editor |

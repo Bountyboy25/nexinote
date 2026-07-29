@@ -99,7 +99,7 @@
 .checkStyleActive {
   border-color: var(--accent) !important;
   color: var(--accent) !important;
-  background: rgba(124, 106, 245, 0.1);
+  background: color-mix(in srgb, var(--nx-core) 10%, transparent);
 }
 
 /* Custom checkbox shapes */
@@ -125,7 +125,7 @@
 .checkSquare.customCheckDone {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
 }
 
 .checkCircle {
@@ -137,7 +137,7 @@
 .checkCircle.customCheckDone {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
 }
 
 .checkStar {
@@ -149,7 +149,7 @@
 }
 
 .checkStar.customCheckDone {
-  color: #f59e0b;
+  color: var(--nx-hazard);
 }
 
 /* Text styling when done */
@@ -260,7 +260,7 @@
 
 .addBtn {
   background: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
   border: none;
   border-radius: 4px;
   padding: 4px 8px;
@@ -405,9 +405,9 @@
   position: relative;
   height: 120px;
   overflow: hidden;
-  background: #fafaf8;
+  background: var(--nx-bg-panel);
   border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--nx-line);
   padding: 10px 12px;
 }
 
@@ -417,25 +417,25 @@
   position: absolute;
   left: 0; right: 0; bottom: 0;
   height: 28px;
-  background: linear-gradient(transparent, #fafaf8);
+  background: linear-gradient(transparent, var(--nx-bg-panel));
   pointer-events: none;
 }
 
 .docPreviewText {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: var(--nx-font-body);
   font-size: 12px;
   line-height: 1.55;
-  color: #2a2a2a;
+  color: var(--nx-ink);
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .docPreviewEmpty {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: var(--nx-font-body);
   font-size: 12px;
   font-style: italic;
-  color: #aaa;
+  color: color-mix(in srgb, var(--nx-ink-dim) 60%, transparent);
   margin: 0;
 }
 
@@ -468,7 +468,7 @@
 .docOpenBtn:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(124, 106, 245, 0.08);
+  background: color-mix(in srgb, var(--nx-core) 8%, transparent);
 }
 
 /* ── Column Card ────────────────────────────────────────────── */
@@ -497,7 +497,7 @@
 
 .colProgress {
   font-size: 10px;
-  color: var(--accent-g, #34d399);
+  color: var(--accent-g);
   font-weight: 600;
 }
 
@@ -543,9 +543,65 @@
 }
 
 .colItemIcon {
-  font-size: 13px;
   flex-shrink: 0;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  color: var(--card-accent, var(--text-2));
+}
+
+/* Reorder grip — appears on row hover, arms HTML5 drag */
+.colItemGrip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-3);
+  cursor: grab;
+  opacity: 0;
+  margin-left: -2px;
+  transition: opacity var(--transition), color var(--transition);
+}
+
+.colItem:hover .colItemGrip {
+  opacity: 1;
+}
+
+.colItemGrip:hover {
+  color: var(--text-1);
+}
+
+.colItemGrip:active {
+  cursor: grabbing;
+}
+
+/* Header checkbox for task items — slightly smaller than task-card size */
+.colItemCheck {
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+}
+
+/* Insertion indicator while reordering (box-shadow → no layout shift) */
+.colItemDropBefore {
+  box-shadow: 0 -2px 0 0 var(--accent);
+}
+
+.colListDropEnd {
+  box-shadow: inset 0 -2px 0 0 var(--accent);
+}
+
+/* Collapsed-task summary note — first glance at what the task says */
+.colItemSummary {
+  /* left-aligned with the title: header pad 6 + grip 10 + gap 5 + check 14 + gap 5 */
+  padding: 0 8px 6px 40px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .colItemTitle {
@@ -562,14 +618,24 @@
 
 .colItemExpand {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   background: transparent;
   border: none;
   color: var(--text-3);
-  font-size: 9px;
   cursor: pointer;
   padding: 2px 3px;
   border-radius: 3px;
   transition: all var(--transition);
+}
+
+.colItemExpand svg {
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.colItemChevronOpen {
+  transform: rotate(180deg);
 }
 
 .colItemExpand:hover {
@@ -579,10 +645,11 @@
 
 .colItemDelete {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   background: transparent;
   border: none;
   color: var(--text-3);
-  font-size: 11px;
   cursor: pointer;
   padding: 2px 3px;
   border-radius: 3px;
@@ -595,14 +662,42 @@
 }
 
 .colItemDelete:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  background: color-mix(in srgb, var(--nx-danger) 15%, transparent);
+  color: var(--nx-danger);
 }
 
+/* Eject — lift the embedded card back onto the canvas. Sits next to
+   delete and reveals on hover the same way, so a row never shows four
+   buttons at rest. */
+.colItemEject {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 2px 3px;
+  border-radius: 3px;
+  opacity: 0;
+  transition: all var(--transition);
+}
+
+.colItem:hover .colItemEject {
+  opacity: 1;
+}
+
+.colItemEject:hover {
+  background: var(--nx-core-soft);
+  color: var(--nx-core);
+}
+
+/* Holds a WHOLE embedded card (any type), so it only supplies the
+   separator and surface — each card type brings its own padding. */
 .colItemBody {
   border-top: 1px solid var(--border);
-  padding: 6px 8px;
   background: var(--surface);
+  overflow: hidden;
 }
 
 .colItemTaskRow {
@@ -671,14 +766,14 @@
 .colAddBtn:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(124, 106, 245, 0.05);
+  background: color-mix(in srgb, var(--nx-core) 5%, transparent);
 }
 
 .colAddMenu {
   position: absolute;
   bottom: calc(100% + 4px);
   left: 0; right: 0;
-  background: rgba(14, 14, 18, 0.97);
+  background: color-mix(in srgb, var(--nx-bg-raised) 97%, transparent);
   border: 1px solid var(--border-h);
   border-radius: 8px;
   overflow: hidden;
@@ -704,6 +799,66 @@
 
 .colAddOption:hover {
   background: var(--surface-2);
+}
+
+/* ── Link ───────────────────────────────────────────────────── */
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 12px;
+}
+
+.linkIcon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--card-accent, var(--accent));
+}
+
+.linkUrl {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  outline: none;
+}
+
+.linkUrl:focus {
+  border-color: var(--accent);
+}
+
+.linkDesc {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: var(--font-ui);
+  outline: none;
+  resize: none;
+}
+
+.linkDesc:focus {
+  border-color: var(--accent);
+  color: var(--text-1);
+}
+
+.linkOpen {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 2px 0;
+}
+
+.linkOpen:hover {
+  text-decoration: underline;
 }
 
 /* ── Media ──────────────────────────────────────────────────── */
@@ -778,11 +933,11 @@
 .mediaUploadZoneActive {
   border-color: var(--accent);
   color: var(--text-1);
-  background: rgba(124, 106, 245, 0.08);
+  background: color-mix(in srgb, var(--nx-core) 8%, transparent);
 }
 
 .mediaUploadZoneActive {
-  background: rgba(124, 106, 245, 0.14);
+  background: var(--nx-core-soft);
 }
 
 .mediaUploadIcon {
@@ -815,4 +970,962 @@
 
 .mediaFileInput {
   display: none;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   SKETCH CARD
+   ═════════════════════════════════════════════════════════════ */
+.sketch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.sketchTools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.sketchPens {
+  display: flex;
+  gap: 4px;
+}
+
+.sketchPen {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s var(--nx-ease-spring), box-shadow 0.12s;
+}
+
+.sketchPen:hover { transform: scale(1.18); }
+
+.sketchPenOn {
+  border-color: var(--nx-ink);
+  box-shadow: 0 0 0 2px var(--nx-bg-panel), 0 0 0 3px var(--accent);
+}
+
+.sketchWidths {
+  display: flex;
+  gap: 2px;
+}
+
+.sketchWidth {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sketchWidth span {
+  display: block;
+  border-radius: 50%;
+  background: var(--text-2);
+}
+
+.sketchWidth:hover { background: var(--surface-3); }
+
+.sketchWidthOn {
+  border-color: var(--accent);
+  background: var(--nx-core-soft);
+}
+
+.sketchWidthOn span { background: var(--accent); }
+
+.sketchActions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.sketchBtn {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.sketchBtn:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text-1);
+}
+
+.sketchBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.sketchBtnOn {
+  border-color: var(--nx-hazard);
+  color: var(--nx-hazard);
+  background: color-mix(in srgb, var(--nx-hazard) 12%, transparent);
+}
+
+.sketchSurface {
+  display: block;
+  width: 100%;
+  background:
+    linear-gradient(var(--nx-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--nx-grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+  cursor: crosshair;
+  touch-action: none;   /* pointer events drive drawing, not scrolling */
+}
+
+.sketchErasing { cursor: cell; }
+
+.sketchHint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.sketchResize,
+.mapResize {
+  height: 9px;
+  cursor: ns-resize;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  touch-action: none;
+}
+
+.sketchResize::after,
+.mapResize::after {
+  content: '';
+  width: 26px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border-h);
+}
+
+.sketchResize:hover::after,
+.mapResize:hover::after { background: var(--accent); }
+
+/* ═════════════════════════════════════════════════════════════
+   COLOR CARD
+   ═════════════════════════════════════════════════════════════ */
+.color {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.colorSwatch {
+  position: relative;
+  height: 86px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+
+.colorSwatch:hover { box-shadow: 0 0 0 2px var(--accent); }
+
+.colorAa {
+  font-family: var(--font-ui);
+  font-size: 26px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.colorCopied {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.colorSwatch:hover .colorCopied { opacity: 0.7; }
+.colorCopied[data-on] { opacity: 1; }
+
+.colorRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.colorPickWrap {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.colorPickDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+/* The native swatch is invisible; the label is the visible target, but
+   the input must stay in the layout for the OS picker to anchor to it. */
+.colorPick {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.colorHex,
+.colorLabel {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 12px;
+  outline: none;
+}
+
+.colorHex {
+  font-family: var(--font-mono);
+  text-transform: lowercase;
+}
+
+.colorLabel { font-family: var(--font-ui); }
+
+.colorHex:focus,
+.colorLabel:focus { border-color: var(--accent); }
+
+.colorPresets {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+}
+
+.colorPreset {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s var(--nx-ease-spring);
+}
+
+.colorPreset:hover { transform: scale(1.15); }
+.colorPresetOn { box-shadow: 0 0 0 2px var(--nx-bg-panel), 0 0 0 3px var(--accent); }
+
+/* ═════════════════════════════════════════════════════════════
+   HEADING CARD
+   ═════════════════════════════════════════════════════════════ */
+.heading {
+  display: flex;
+  flex-direction: column;
+}
+
+.headingText {
+  padding: 10px 12px;
+  color: var(--text-1);
+  font-family: var(--nx-font-display, var(--font-ui));
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  outline: none;
+  word-break: break-word;
+}
+
+.headingText[data-level='1'] { font-size: 30px; }
+.headingText[data-level='2'] { font-size: 22px; }
+.headingText[data-level='3'] {
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.headingText[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.headingTools {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.heading:hover .headingTools,
+.headingText:focus ~ .headingTools { opacity: 1; }
+
+.headingGroup { display: flex; gap: 2px; }
+
+.headingBtn {
+  min-width: 24px;
+  height: 21px;
+  padding: 0 5px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.headingBtn:hover { background: var(--surface-3); color: var(--text-1); }
+
+.headingBtnOn {
+  border-color: var(--accent);
+  background: var(--nx-core-soft);
+  color: var(--accent);
+}
+
+/* ═════════════════════════════════════════════════════════════
+   COMMENT CARD
+   ═════════════════════════════════════════════════════════════ */
+.comment {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px 10px;
+}
+
+.commentList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.commentEntry {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border-left: 2px solid var(--accent);
+}
+
+.commentHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.commentTime {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.commentDel {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s;
+}
+
+.commentEntry:hover .commentDel { opacity: 1; }
+.commentDel:hover { color: var(--nx-danger); }
+
+.commentText {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-1);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.commentEmpty {
+  margin: 0;
+  padding: 10px 2px;
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.commentCompose {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.commentInput {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 12.5px;
+  font-family: var(--font-ui);
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+.commentInput:focus { border-color: var(--accent); }
+
+.commentPost {
+  align-self: flex-end;
+  padding: 5px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--nx-core-soft);
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.14s, opacity 0.14s;
+}
+
+.commentPost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.commentPost:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   AUDIO CARD
+   ═════════════════════════════════════════════════════════════ */
+.audio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.audioPlayer {
+  width: 100%;
+  height: 34px;
+}
+
+.audioEmbed {
+  width: 100%;
+  height: 120px;
+  border: 0;
+  border-radius: var(--radius-sm);
+}
+
+.audioMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.audioName {
+  font-size: 11.5px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audioBtn,
+.videoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.audioBtn:hover,
+.videoBtn:hover {
+  color: var(--nx-danger);
+  border-color: var(--nx-danger);
+}
+
+.audioEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.audioDrop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 18px 10px;
+  border: 1px dashed var(--border-h);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.14s, background 0.14s, color 0.14s;
+}
+
+.audioDrop small {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.audioDrop:hover,
+.audioDropActive {
+  border-color: var(--accent);
+  color: var(--text-1);
+  background: var(--nx-core-soft);
+}
+
+.audioOr {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.audioUrl,
+.videoUrl {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.audioUrl:focus,
+.videoUrl:focus { border-color: var(--accent); }
+
+.hiddenFile { display: none; }
+
+.mediaError {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--nx-danger);
+}
+
+/* ═════════════════════════════════════════════════════════════
+   VIDEO CARD
+   ═════════════════════════════════════════════════════════════ */
+.video {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.videoFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
+.videoFrame iframe,
+.videoFrame video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.videoEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  aspect-ratio: 16 / 9;
+  border: 1px dashed var(--border-h);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.videoEmpty small {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.videoBar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   MAP CARD
+   ═════════════════════════════════════════════════════════════ */
+.map {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.mapBar {
+  display: flex;
+  gap: 5px;
+  padding: 7px 8px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.mapSearch {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-3);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.mapSearch:focus { border-color: var(--accent); }
+
+.mapBtn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 11.5px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+
+.mapBtn:hover:not(:disabled) {
+  color: var(--text-1);
+  border-color: var(--border-h);
+}
+
+.mapBtn:disabled { opacity: 0.4; cursor: default; }
+
+.mapBtnOn {
+  border-color: var(--accent);
+  background: var(--nx-core-soft);
+  color: var(--accent);
+}
+
+.mapHost {
+  width: 100%;
+  background: var(--surface-2);
+}
+
+.mapHostArmed { cursor: crosshair; }
+
+/* Leaflet ships its own global chrome — retint it so a map card doesn't
+   punch a bright hole in a dark board. */
+.mapHost :global(.leaflet-container) {
+  background: var(--surface-2);
+  font-family: var(--font-ui);
+  font-size: 11px;
+}
+
+.mapHost :global(.leaflet-control-attribution) {
+  background: color-mix(in srgb, var(--nx-bg-panel) 82%, transparent);
+  color: var(--text-3);
+  font-size: 9px;
+}
+
+.mapHost :global(.leaflet-control-attribution a) { color: var(--text-2); }
+
+.mapHost :global(.leaflet-bar a) {
+  background: var(--nx-bg-panel);
+  color: var(--text-1);
+  border-bottom-color: var(--border);
+}
+
+.mapHost :global(.leaflet-bar a:hover) {
+  background: var(--surface-3);
+  color: var(--accent);
+}
+
+/* Pin marker — a themed teardrop drawn entirely in CSS, which also
+   sidesteps Leaflet's default marker images breaking under bundlers. */
+.mapPinIcon {
+  position: relative;
+}
+
+.mapPinIcon i {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--nx-core);
+  border: 1.5px solid var(--nx-bg);
+  box-shadow: 0 0 6px var(--nx-core-glow);
+}
+
+.mapMsg {
+  margin: 0;
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--nx-hazard);
+}
+
+.mapPins {
+  list-style: none;
+  margin: 0;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 150px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+}
+
+.mapPinRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mapPinGo,
+.mapPinDel {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+
+.mapPinGo:hover { color: var(--accent); background: var(--surface-3); }
+.mapPinDel:hover { color: var(--nx-danger); background: var(--surface-3); }
+
+.mapPinLabel {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-1);
+  border-radius: 4px;
+  padding: 3px 5px;
+  font-size: 11.5px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.mapPinLabel:hover { background: var(--surface-2); }
+.mapPinLabel:focus { border-color: var(--accent); background: var(--surface-2); }
+
+/* ═════════════════════════════════════════════════════════════
+   BOARD CARD (nested board)
+   ═════════════════════════════════════════════════════════════ */
+.boardCard {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.boardPreview {
+  height: 92px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(var(--nx-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--nx-grid) 1px, transparent 1px),
+    var(--surface-2);
+  background-size: 16px 16px, 16px 16px, auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.boardCard:hover .boardPreview { border-color: var(--accent); }
+
+.boardThumb {
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+}
+
+.boardEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.boardNameRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Anchor for the icon picker popover */
+.boardIconWrap {
+  position: relative;
+  flex: none;
+}
+
+.boardIconBtn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.boardIconBtn:hover {
+  background: var(--surface-2);
+  border-color: var(--border-h);
+}
+
+.boardName {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-1);
+  border-radius: 5px;
+  padding: 3px 5px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.boardName:hover { background: var(--surface-2); }
+.boardName:focus { border-color: var(--accent); background: var(--surface-2); }
+
+.boardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.boardMeta {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.boardOpen {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 9px;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  background: var(--nx-core-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.14s;
+}
+
+.boardOpen:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+.boardMissing {
+  margin: 0;
+  padding: 18px 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--nx-danger);
 }

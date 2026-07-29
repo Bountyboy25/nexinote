@@ -48,6 +48,36 @@ export function getViewportCenter(camera: Camera): { x: number; y: number } {
   )
 }
 
+// Where does a ray leaving a rectangle's CENTER in direction (dx, dy)
+// cross that rectangle's border?
+//
+// This is what lets a connector head ride continuously around a card's
+// outline: as the source moves, the exit point slides along the edge and
+// wraps around the corners smoothly, instead of jumping between a handful
+// of fixed anchor points.
+//
+// dx/dy do not need to be normalized — only their ratio matters.
+export function rectEdgePoint(
+  cx: number,
+  cy: number,
+  halfW: number,
+  halfH: number,
+  dx: number,
+  dy: number
+): { x: number; y: number } {
+  const ax = Math.abs(dx)
+  const ay = Math.abs(dy)
+  if (ax < 1e-6 && ay < 1e-6) return { x: cx, y: cy }
+
+  // Scale the direction until it reaches whichever pair of sides it
+  // would hit first — vertical sides at halfW/|dx|, horizontal at halfH/|dy|.
+  const t = Math.min(
+    ax > 1e-6 ? halfW / ax : Infinity,
+    ay > 1e-6 ? halfH / ay : Infinity
+  )
+  return { x: cx + dx * t, y: cy + dy * t }
+}
+
 // Clamp a zoom value within the allowed min/max range
 export function clampZoom(zoom: number): number {
   return Math.min(4.0, Math.max(0.1, zoom))

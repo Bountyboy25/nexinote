@@ -11,8 +11,10 @@
 .grid {
   position: absolute;
   inset: 0;
-  /* Radial gradient dots — pure CSS, no images */
-  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+  /* Crossed 1px lines in --nx-grid (spec §4: 36px lattice) */
+  background-image:
+    linear-gradient(var(--dot) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dot) 1px, transparent 1px);
   pointer-events: none;  /* Clicks fall through to canvas */
 }
 
@@ -21,9 +23,9 @@
   content: '';
   position: absolute;
   inset: 8px;
-  border: 2px dashed var(--accent);
+  border: 2px dashed var(--nx-core);
   border-radius: var(--radius);
-  background: rgba(124, 106, 245, 0.06);
+  background: var(--nx-core-soft);
   pointer-events: none;
   z-index: 5;
 }
@@ -34,7 +36,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 12px 22px;
-  background: rgba(14, 14, 18, 0.92);
+  background: color-mix(in srgb, var(--nx-bg) 92%, transparent);
   border: 1px solid var(--border-h);
   border-radius: var(--radius);
   color: var(--text-1);

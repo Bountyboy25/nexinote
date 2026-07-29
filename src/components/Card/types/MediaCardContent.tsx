@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useCanvasStore } from '@/store'
 import { fileToImageDataURL, isImageSrc } from '@/utils/image'
+import { Icon } from '@/UI/Icon'
 import type { MediaCard } from '@/types'
 import styles from './CardTypes.module.css'
 
@@ -110,7 +111,7 @@ export function MediaCardContent({ card }: Props) {
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
           >
-            <span className={styles.mediaUploadIcon}>🖼️</span>
+            <span className={styles.mediaUploadIcon}><Icon name="media" size={24} /></span>
             <span>{busy ? 'Processing…' : 'Click or drop an image'}</span>
           </div>
           <div className={styles.mediaOr}>— or paste URL —</div>

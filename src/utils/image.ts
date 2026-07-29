@@ -16,6 +16,11 @@
 const MAX_DIM = 1600
 const KEEP_AS_IS = new Set(['image/gif', 'image/svg+xml'])
 
+// Board icons render at ~30px. Storing them at anything near photo
+// resolution would waste the shared localStorage budget on pixels no
+// one ever sees, so they get their own much smaller cap.
+export const ICON_MAX_DIM = 96
+
 function readAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -28,20 +33,25 @@ function readAsDataURL(file: File): Promise<string> {
 /**
  * Read an image File and return a (possibly downscaled) data URL.
  * Falls back to the raw data URL if anything about the resize fails.
+ *
+ * @param maxDim longest-edge cap in px. Defaults to MAX_DIM (photos on
+ *               the canvas); pass ICON_MAX_DIM for board icons.
  */
-export async function fileToImageDataURL(file: File): Promise<string> {
+export async function fileToImageDataURL(file: File, maxDim = MAX_DIM): Promise<string> {
   if (!file.type.startsWith('image/')) {
     throw new Error('Not an image file')
   }
 
   const dataUrl = await readAsDataURL(file)
+  // SVG is resolution-independent and GIF would lose its animation, so
+  // both are stored as-is — at icon sizes they're tiny anyway.
   if (KEEP_AS_IS.has(file.type)) return dataUrl
 
   return new Promise(resolve => {
     const img = new Image()
     img.onload = () => {
       const { width, height } = img
-      const scale = Math.min(1, MAX_DIM / Math.max(width, height))
+      const scale = Math.min(1, maxDim / Math.max(width, height))
 
       // Already small enough — store the original bytes.
       if (scale === 1) return resolve(dataUrl)

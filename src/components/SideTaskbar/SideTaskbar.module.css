@@ -8,7 +8,7 @@
   left: 0;
   bottom: 0;
   width: 56px;
-  background: rgba(15, 15, 17, 0.90);
+  background: color-mix(in srgb, var(--nx-bg-raised) 90%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--border);
@@ -20,6 +20,21 @@
   gap: 4px;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* Hazard strip across the top of the rail (.nx-hazard-strip) */
+.taskbar::before {
+  content: '';
+  position: sticky;
+  top: 0;
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: repeating-linear-gradient(
+    -45deg, var(--nx-hazard) 0 6px, transparent 6px 12px
+  );
+  opacity: 0.4;
 }
 
 /* ── Custom scrollbar ─────────────────────────────────────── */
@@ -35,9 +50,10 @@
 .typeLabel {
   font-size: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-3);
-  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--nx-core);
+  font-family: var(--nx-font-mono);
+  font-weight: 400;
   padding: 2px 0;
   text-align: center;
   writing-mode: vertical-lr;
@@ -64,10 +80,10 @@
 .sectionLabel {
   font-size: 7px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-3);
+  letter-spacing: 0.18em;
+  color: var(--nx-ink-dim);
+  font-family: var(--nx-font-mono);
   padding: 2px 0;
-  font-weight: 600;
 }
 
 /* Tool buttons */
@@ -92,21 +108,22 @@
 }
 
 .tool:hover {
-  background: var(--surface2);
-  color: var(--text-1);
-  border-color: var(--border);
+  background: var(--nx-core-soft);
+  color: var(--nx-ink);
+  border-color: var(--nx-line);
 }
 
 .toolActive {
-  background: rgba(124, 106, 245, 0.15) !important;
-  color: var(--accent) !important;
-  border-color: var(--accent) !important;
+  background: var(--nx-core-soft) !important;
+  color: var(--nx-core) !important;
+  border-color: var(--nx-core) !important;
+  box-shadow: 0 0 10px var(--nx-core-soft);
 }
 
 .toolDanger:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.3);
+  background: color-mix(in srgb, var(--nx-danger) 10%, transparent);
+  color: var(--nx-danger);
+  border-color: color-mix(in srgb, var(--nx-danger) 30%, transparent);
 }
 
 /* ── Dropdown trigger ─────────────────────────────────────── */
@@ -123,7 +140,7 @@
 .dropPanel {
   position: fixed;
   left: 64px;        /* sidebar width (56) + gap (8) */
-  background: rgba(14, 14, 18, 0.97);
+  background: color-mix(in srgb, var(--nx-bg-raised) 97%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-h);
@@ -137,9 +154,9 @@
 .dropPanelLabel {
   font-size: 9px;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-3);
-  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--nx-ink-dim);
+  font-family: var(--nx-font-mono);
   margin-bottom: 8px;
   display: block;
 }
@@ -163,7 +180,7 @@
 
 .colorDot:hover {
   transform: scale(1.25);
-  border-color: rgba(255,255,255,0.6);
+  border-color: color-mix(in srgb, var(--nx-ink) 60%, transparent);
 }
 
 /* ── Size list ────────────────────────────────────────────── */

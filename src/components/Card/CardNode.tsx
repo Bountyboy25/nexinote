@@ -1,12 +1,8 @@
-import { useCanvasStore, useSelectedIds, useConnectFrom } from '@/store'
+import { memo } from 'react'
+import { useCanvasStore, useSelectedIds, useConnectFrom, useDropColumnId } from '@/store'
 import { useCardDrag } from '@/hooks/useCardDrag'
-import { RichTextCard }        from './types/RichTextCard'
-import { TaskCardContent }     from './types/TaskCardContent'
-import { TableCardContent }    from './types/TableCardContent'
-import { MediaCardContent }    from './types/MediaCardContent'
-import { LinkCardContent }     from './types/LinkCardContent'
-import { DocumentCardContent } from './types/DocumentCardContent'
-import { ColumnCardContent }   from './types/ColumnCardContent'
+import { CardContent } from './CardContent'
+import { Icon, type IconName } from '@/UI/Icon'
 import type { Card } from '@/types'
 import styles from './CardNode.module.css'
 
@@ -23,37 +19,40 @@ import styles from './CardNode.module.css'
 // Adding a new card type = add one case in CardContent below.
 // ─────────────────────────────────────────────────────────────
 
-const CARD_ICONS: Record<string, string> = {
-  note:     '📝',
-  document: '📄',
-  task:     '✅',
-  table:    '📊',
-  media:    '🖼️',
-  link:     '🔗',
-  column:   '▤',
-}
-
-// ── CardFactory — dispatches to the right content component ──
-function CardContent({ card }: { card: Card }) {
-  switch (card.type) {
-    case 'note':     return <RichTextCard        card={card} />
-    case 'document': return <DocumentCardContent  card={card} />
-    case 'task':     return <TaskCardContent      card={card} />
-    case 'table':    return <TableCardContent     card={card} />
-    case 'media':    return <MediaCardContent     card={card} />
-    case 'link':     return <LinkCardContent      card={card} />
-    case 'column':   return <ColumnCardContent    card={card} />
-  }
+// Nuclear Nexus monoline glyphs (UI/Icon.tsx) — replaced the emoji set so
+// header icons follow the theme tokens + each card's accent color.
+const CARD_ICONS: Record<Card['type'], IconName> = {
+  note:     'note',
+  document: 'document',
+  task:     'task',
+  table:    'table',
+  media:    'media',
+  link:     'link',
+  column:   'column',
+  sketch:   'sketch',
+  color:    'color',
+  audio:    'audio',
+  video:    'video',
+  heading:  'heading',
+  comment:  'comment',
+  map:      'map',
+  board:    'board',
 }
 
 // ── Main card shell ───────────────────────────────────────────
 interface CardNodeProps { card: Card }
 
-export function CardNode({ card }: CardNodeProps) {
+// memo: dragging (or editing) one card replaces only that card's object
+// in the store, so every OTHER CardNode bails out on the shallow prop
+// check instead of re-rendering its whole content tree per mousemove.
+// Store-driven state (selection, connect mode) still updates normally
+// because those subscriptions live inside the component.
+export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
   const selectedIds   = useSelectedIds()
   const connectFromId = useConnectFrom()
+  const dropColumnId  = useDropColumnId()
   const {
-    updateCard, deleteCard, duplicateCard,
+    updateCard, deleteCard, duplicateCard, toggleLock,
     addConnector, setConnectFrom, setActiveTool,
   } = useCanvasStore.getState()
   const { onMouseDown } = useCardDrag(card)
@@ -90,6 +89,8 @@ export function CardNode({ card }: CardNodeProps) {
     isSelected      ? styles.selected      : '',
     isConnectSource ? styles.connectSource  : '',
     isConnectMode && !isConnectSource ? styles.connectTarget : '',
+    dropColumnId === card.id ? styles.dropTarget : '',
+    card.locked ? styles.locked : '',
   ].filter(Boolean).join(' ')
 
   return (
@@ -102,7 +103,7 @@ export function CardNode({ card }: CardNodeProps) {
     >
       {/* ── HEADER ───────────────────────────────────────── */}
       <div className={styles.header}>
-        <span className={styles.icon}>{CARD_ICONS[card.type]}</span>
+        <span className={styles.icon}><Icon name={CARD_ICONS[card.type]} size={15} /></span>
 
         <input
           className={styles.title}
@@ -112,13 +113,23 @@ export function CardNode({ card }: CardNodeProps) {
           spellCheck={false}
         />
 
+        {/* Lock — pins the card's position (contents stay editable) */}
+        <button
+          className={`${styles.connectBtn} ${card.locked ? styles.lockOn : ''}`}
+          onClick={e => { e.stopPropagation(); toggleLock(card.id) }}
+          onMouseDown={e => e.stopPropagation()}
+          title={card.locked ? 'Unlock position (Ctrl+L)' : 'Lock in place (Ctrl+L)'}
+          aria-label={card.locked ? 'Unlock card position' : 'Lock card position'}
+          aria-pressed={!!card.locked}
+        ><Icon name={card.locked ? 'lock' : 'unlock'} size={13} /></button>
+
         {/* Connect button — starts connect mode for this card */}
         <button
           className={styles.connectBtn}
           onClick={onConnectBtnClick}
           onMouseDown={e => e.stopPropagation()}
           title="Connect to another card"
-        >⟶</button>
+        ><Icon name="connect" size={13} /></button>
       </div>
 
       {/* ── BODY — rendered by CardFactory ───────────────── */}
@@ -143,4 +154,4 @@ export function CardNode({ card }: CardNodeProps) {
       </div>
     </div>
   )
-}
+})

@@ -31,6 +31,29 @@ interface DragState {
 // Native input/button tags we should NOT hijack with a drag.
 const INTERACTIVE_TAGS = new Set(['INPUT', 'BUTTON', 'TEXTAREA', 'SELECT', 'A'])
 
+// A column accepts every card type EXCEPT another column — nesting
+// containers has no sensible layout and no obvious way back out.
+function isAbsorbable(type: Card['type']): boolean {
+  return type !== 'column'
+}
+
+// Which column card (if any) is under the pointer right now?
+// Screen-space hit-test against the columns' rendered DOM rects — this
+// respects each column's real height (they grow with their items).
+function columnUnderPointer(clientX: number, clientY: number, draggedId: string): string | null {
+  const { cards } = useCanvasStore.getState()
+  for (const c of cards) {
+    if (c.type !== 'column' || c.id === draggedId) continue
+    const el = document.querySelector(`[data-card="${c.id}"]`)
+    if (!el) continue
+    const r = el.getBoundingClientRect()
+    if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+      return c.id
+    }
+  }
+  return null
+}
+
 export function useCardDrag(card: Card) {
   // Keep a ref to the card so listeners always see the latest position
   // without forcing a fresh useCallback every time x/y change. Refs are
@@ -63,6 +86,11 @@ export function useCardDrag(card: Card) {
     if (!e.shiftKey) store.deselectAll()
     store.selectCard(id, e.shiftKey)
 
+    // Locked cards still select, focus and edit — they just don't move.
+    // Selecting first (above) matters: a lock that also swallowed clicks
+    // would read as a broken card rather than a pinned one.
+    if (cardRef.current.locked) return
+
     // Record starting positions from the latest card snapshot
     drag.current = {
       active: true,
@@ -81,21 +109,37 @@ export function useCardDrag(card: Card) {
       if (!d.active) return
 
       // Read zoom freshly — it can change mid-drag if a wheel event fires.
-      const { zoom } = useCanvasStore.getState().camera
+      const store = useCanvasStore.getState()
+      const { zoom } = store.camera
 
       // Screen delta → world delta
       const dx = (ev.clientX - d.startMouseX) / zoom
       const dy = (ev.clientY - d.startMouseY) / zoom
 
-      useCanvasStore.getState().updateCard(cardRef.current.id, {
+      store.updateCard(cardRef.current.id, {
         x: d.startCardX + dx,
         y: d.startCardY + dy,
       })
+
+      // Track the column under the pointer so it can light up as a drop
+      // target. setDropColumn only writes when the value changes.
+      if (isAbsorbable(cardRef.current.type)) {
+        store.setDropColumn(columnUnderPointer(ev.clientX, ev.clientY, cardRef.current.id))
+      }
     }
 
     const onMouseUp = () => {
       drag.current.active = false
-      useCanvasStore.getState().setDraggingCard(null)
+      const store = useCanvasStore.getState()
+      store.setDraggingCard(null)
+
+      // Released over a column → the column swallows this card
+      const targetColumn = store.dropColumnId
+      if (targetColumn && isAbsorbable(cardRef.current.type)) {
+        store.absorbCardIntoColumn(cardRef.current.id, targetColumn)
+      }
+      store.setDropColumn(null)
+
       document.removeEventListener('mousemove', onMouseMove)
       document.removeEventListener('mouseup', onMouseUp)
     }

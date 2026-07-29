@@ -19,7 +19,7 @@
   justify-content: space-between;
   padding: 20px 40px;
   border-bottom: 1px solid var(--border);
-  background: rgba(15, 15, 17, 0.9);
+  background: color-mix(in srgb, var(--nx-bg) 90%, transparent);
   backdrop-filter: blur(20px);
   flex-shrink: 0;
 }
@@ -27,7 +27,7 @@
 .logo {
   font-size: 22px;
   font-weight: 700;
-  background: linear-gradient(90deg, #22c55e 0%, #9ca3af 55%, #111827 100%);
+  background: linear-gradient(90deg, var(--nx-core) 0%, var(--nx-ink) 60%, var(--nx-ink-dim) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -41,12 +41,14 @@
 }
 
 .settingsBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-2);
-  font-size: 16px;
   cursor: pointer;
   transition: all var(--transition);
 }
@@ -62,7 +64,7 @@
   border: none;
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -82,11 +84,12 @@
 }
 
 .sectionTitle {
-  font-size: 13px;
-  font-weight: 600;
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  font-weight: 400;
   color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.22em;
   margin-bottom: 4px;
 }
 
@@ -120,7 +123,7 @@
   border: none;
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -191,16 +194,51 @@
   color: var(--text-3);
 }
 
-.emptyIcon { font-size: 32px; }
+.emptyIcon {
+  display: grid;
+  place-items: center;
+}
+
 .emptyText { font-size: 11px; }
 
-/* Info row */
+/* Info row — icon on the left, name + meta stacked beside it */
 .info {
   padding: 12px 14px 10px;
   display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.infoText {
+  display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
   flex: 1;
+}
+
+/* Anchor for the icon picker popover */
+.iconWrap {
+  position: relative;
+  flex: none;
+}
+
+.iconBtn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.iconBtn:hover {
+  background: var(--surface2);
+  border-color: var(--border-h);
 }
 
 .boardName {
@@ -246,7 +284,7 @@
   height: 28px;
   border-radius: 6px;
   border: 1px solid var(--border);
-  background: rgba(15, 15, 17, 0.85);
+  background: color-mix(in srgb, var(--nx-bg) 85%, transparent);
   backdrop-filter: blur(8px);
   color: var(--text-2);
   font-size: 12px;
@@ -264,9 +302,9 @@
 }
 
 .actionDanger:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.3);
+  background: color-mix(in srgb, var(--nx-danger) 12%, transparent);
+  color: var(--nx-danger);
+  border-color: color-mix(in srgb, var(--nx-danger) 35%, transparent);
 }
 
 /* Empty state */

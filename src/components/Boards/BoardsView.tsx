@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useCanvasStore, useBoards } from '@/store'
+import { Icon } from '@/UI/Icon'
+import { BoardIcon } from '@/UI/boardIcons'
+import { BoardIconPicker } from '@/UI/BoardIconPicker'
 import type { Board } from '@/types'
 import styles from './BoardsView.module.css'
 
@@ -44,8 +47,8 @@ function BoardThumbnail({ board }: { board: Board }) {
           x={c.x} y={c.y}
           width={c.width} height={120}
           rx={8}
-          fill="rgba(124,106,245,0.25)"
-          stroke="rgba(124,106,245,0.5)"
+          fill="var(--nx-core-soft)"
+          stroke="color-mix(in srgb, var(--nx-core) 50%, transparent)"
           strokeWidth={4}
         />
       ))}
@@ -58,7 +61,7 @@ function BoardThumbnail({ board }: { board: Board }) {
             key={conn.id}
             x1={from.x + from.width / 2} y1={from.y + 60}
             x2={to.x   + to.width   / 2} y2={to.y   + 60}
-            stroke="rgba(124,106,245,0.4)" strokeWidth={4}
+            stroke="color-mix(in srgb, var(--nx-core) 40%, transparent)" strokeWidth={4}
           />
         )
       })}
@@ -66,11 +69,61 @@ function BoardThumbnail({ board }: { board: Board }) {
   )
 }
 
+// How many boards live under this one, at any depth.
+function countDescendants(boards: Board[], rootId: string): number {
+  let total = 0
+  const walk = (parentId: string) => {
+    for (const b of boards) {
+      if (b.parentId === parentId) { total++; walk(b.id) }
+    }
+  }
+  walk(rootId)
+  return total
+}
+
+// Each tile owns its own trigger ref and open state — the picker
+// portals out of the tile, so it needs a per-board anchor element.
+function BoardIconButton({
+  board, onPick,
+}: { board: Board; onPick: (icon: string, accent: string) => void }) {
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className={styles.iconWrap}>
+      <button
+        ref={btnRef}
+        className={styles.iconBtn}
+        title="Change icon"
+        aria-label="Change board icon"
+        onClick={e => { e.stopPropagation(); setOpen(v => !v) }}
+      >
+        <BoardIcon name={board.icon} accent={board.accent} size={18} />
+      </button>
+
+      {open && (
+        <BoardIconPicker
+          icon={board.icon}
+          accent={board.accent}
+          anchorRef={btnRef}
+          onPick={onPick}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
 interface RenamingState { id: string; name: string }
 
 export function BoardsView({ onOpenSettings }: { onOpenSettings: () => void }) {
-  const boards = useBoards()
-  const { createBoard, openBoard, renameBoard, deleteBoard } = useCanvasStore.getState()
+  const allBoards = useBoards()
+  const { createBoard, openBoard, renameBoard, deleteBoard, setBoardIcon } =
+    useCanvasStore.getState()
+
+  // Sub-boards are reached through their board card, not the gallery —
+  // keeping them out of here is the entire point of nesting.
+  const boards = allBoards.filter(b => !b.parentId)
 
   const [renaming, setRenaming] = useState<RenamingState | null>(null)
   const [newBoardName, setNewBoardName] = useState('')
@@ -92,7 +145,12 @@ export function BoardsView({ onOpenSettings }: { onOpenSettings: () => void }) {
 
   function handleDelete(id: string, e: React.MouseEvent) {
     e.stopPropagation()
-    if (!confirm('Delete this board? This cannot be undone.')) return
+    // Deleting cascades to every nested board, so say how much is going.
+    const nested = countDescendants(allBoards, id)
+    const warning = nested > 0
+      ? `Delete this board and its ${nested} sub-board${nested === 1 ? '' : 's'}? This cannot be undone.`
+      : 'Delete this board? This cannot be undone.'
+    if (!confirm(warning)) return
     deleteBoard(id)
   }
 
@@ -102,7 +160,15 @@ export function BoardsView({ onOpenSettings }: { onOpenSettings: () => void }) {
       <header className={styles.header}>
         <h1 className={styles.logo}>Nexinote</h1>
         <div className={styles.headerRight}>
-          <button className={styles.settingsBtn} onClick={onOpenSettings} title="Settings">⚙</button>
+          <button
+            className={styles.settingsBtn}
+            onClick={onOpenSettings}
+            data-tip="Settings"
+            data-tip-pos="bottom"
+            aria-label="Settings"
+          >
+            <Icon name="settings" size={16} />
+          </button>
           <button className={styles.createBtn} onClick={() => setShowCreate(true)}>
             + New Board
           </button>
@@ -144,7 +210,9 @@ export function BoardsView({ onOpenSettings }: { onOpenSettings: () => void }) {
                 {board.cards.length > 0
                   ? <BoardThumbnail board={board} />
                   : <div className={styles.emptyThumb}>
-                      <span className={styles.emptyIcon}>📋</span>
+                      <span className={styles.emptyIcon}>
+                        <BoardIcon name={board.icon} accent={board.accent} size={30} />
+                      </span>
                       <span className={styles.emptyText}>Empty board</span>
                     </div>
                 }
@@ -152,6 +220,12 @@ export function BoardsView({ onOpenSettings }: { onOpenSettings: () => void }) {
 
               {/* Info row */}
               <div className={styles.info}>
+                <BoardIconButton
+                  board={board}
+                  onPick={(icon, accent) => setBoardIcon(board.id, icon, accent)}
+                />
+
+                <div className={styles.infoText}>
                 {renaming?.id === board.id
                   ? (
                     <input
@@ -173,6 +247,7 @@ export function BoardsView({ onOpenSettings }: { onOpenSettings: () => void }) {
                 <span className={styles.meta}>
                   {board.cards.length} card{board.cards.length !== 1 ? 's' : ''} · {timeAgo(board.updatedAt)}
                 </span>
+                </div>
               </div>
 
               {/* Hover actions */}

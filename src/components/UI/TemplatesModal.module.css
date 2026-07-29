@@ -5,19 +5,19 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55); /* spec: modal backdrop = 55% black */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
 }
 
 .modal {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  border-radius: 20px; /* spec: modals = radius 20 */
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), 0 0 24px var(--nx-core-soft);
   width: min(560px, calc(100vw - 40px));
   max-height: calc(100vh - 80px);
   overflow: hidden;
@@ -34,8 +34,10 @@
 }
 
 .title {
-  font-size: 16px;
+  font-family: var(--nx-font-display);
+  font-size: 17px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--text-1);
   margin: 0;
 }
@@ -84,7 +86,7 @@
   background: var(--surface-3);
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 106, 245, 0.15);
+  box-shadow: 0 6px 20px var(--nx-core-soft);
 }
 
 .emoji {

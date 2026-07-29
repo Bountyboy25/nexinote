@@ -11,35 +11,37 @@
    - Self-documenting (var(--accent) is more readable than #7c6af5)
 ───────────────────────────────────────────────────────────── */
 :root {
-  /* ── Colors ── */
-  --bg:        #0f0f11;
-  --surface:   #1a1a1f;
-  --surface2:  #22222a;
-  --border:    rgba(255, 255, 255, 0.07);
-  --border-h:  rgba(255, 255, 255, 0.16);
-  --dot:       rgba(255, 255, 255, 0.055);
+  /* ── Colors — aliased to the Nuclear Nexus --nx-* theme tokens
+        (see styles/nuclear-base.css + theme/themes.ts) so the whole
+        app re-colors when the theme core switches ── */
+  --bg:        var(--nx-bg);
+  --surface:   var(--nx-bg-raised);
+  --surface2:  var(--nx-bg-panel);
+  --border:    var(--nx-line);
+  --border-h:  color-mix(in srgb, var(--nx-line), var(--nx-ink) 25%);
+  --dot:       var(--nx-grid);
 
   /* ── Text ── */
-  --text-1: #f0ede8;   /* Primary — headings, active labels */
-  --text-2: #8a8890;   /* Secondary — body, descriptions */
-  --text-3: #4a4858;   /* Tertiary — placeholders, hints */
+  --text-1: var(--nx-ink);       /* Primary — headings, active labels */
+  --text-2: var(--nx-ink-dim);   /* Secondary — body, descriptions */
+  --text-3: color-mix(in srgb, var(--nx-ink-dim) 60%, transparent);  /* Tertiary */
 
   /* ── Accent ── */
-  --accent:   #7c6af5;   /* Primary brand color */
-  --accent-s: #5b4fd4;   /* Darker variant (hover states) */
-  --accent-g: #4dd9ac;   /* Green accent (success, tasks) */
+  --accent:   var(--nx-core);      /* Primary brand color */
+  --accent-s: var(--nx-core-hot);  /* Hover-state variant */
+  --accent-g: var(--nx-core-hot);  /* Success/tasks accent, follows the core */
 
   /* ── Surface aliases (dash form used in card components) ── */
-  --surface-2: #22222a;  /* Same as --surface2 */
-  --surface-3: #2a2a35;  /* One step darker — hover states, inputs */
+  --surface-2: var(--nx-bg-panel);
+  --surface-3: color-mix(in srgb, var(--nx-bg-panel), var(--nx-ink) 6%);  /* hover, inputs */
 
   /* ── Spacing & Shape ── */
   --radius:    12px;
   --radius-sm: 8px;
 
   /* ── Typography ── */
-  --font-ui:   'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'DM Mono', 'Fira Code', monospace;
+  --font-ui:   var(--nx-font-body, 'DM Sans'), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--nx-font-mono, 'DM Mono'), 'Fira Code', monospace;
 
   /* ── Elevation ── */
   --shadow:    0 2px 16px rgba(0, 0, 0, 0.35);
@@ -75,13 +77,110 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Remove default button styles — we style from scratch */
+/* Remove default button styles — we style from scratch.
+   NOTE: `all: unset` also resets box-sizing to content-box (it is not
+   inherited), which made every `width: 100%` button with padding spill
+   its hover highlight outside its parent panel (toolbar dropdowns,
+   connector menu, column add-menu). Re-assert border-box after the reset. */
 button {
   all: unset;
+  box-sizing: border-box;
   cursor: pointer;
 }
 
-/* Remove default input styles */
+/* Remove default input styles (same box-sizing caveat as buttons) */
 input {
   all: unset;
+  box-sizing: border-box;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   NX TOOLTIP — Nuclear Nexus hover tooltip
+
+   Usage:  <button data-tip="Select (V)" aria-label="Select">…
+   Flip:   data-tip-pos="bottom" for elements near the top edge.
+
+   Uses data-tip (not title) so the browser's native tooltip
+   doesn't double up with ours; pair with aria-label so the
+   control keeps its accessible name.
+───────────────────────────────────────────────────────────── */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  background: var(--nx-bg-panel);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--nx-core) 35%, var(--nx-line));
+  /* black-alpha ambient shadow is spec-sanctioned; the glow follows the core */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 12px var(--nx-core-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease, transform 120ms ease;
+  z-index: 1500;
+}
+
+/* Caret — small rotated square sharing the bubble's surface + border */
+[data-tip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  transform: rotate(45deg);
+  background: var(--nx-bg-panel);
+  border-right: 1px solid color-mix(in srgb, var(--nx-core) 35%, var(--nx-line));
+  border-bottom: 1px solid color-mix(in srgb, var(--nx-core) 35%, var(--nx-line));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+  z-index: 1501;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  transition-delay: 300ms;
+}
+
+[data-tip]:hover::before,
+[data-tip]:focus-visible::before {
+  opacity: 1;
+  transition-delay: 300ms;
+}
+
+/* Flipped variant — bubble below the control, caret pointing up */
+[data-tip][data-tip-pos='bottom']::after {
+  bottom: auto;
+  top: calc(100% + 10px);
+  transform: translateX(-50%) translateY(-3px);
+}
+
+[data-tip][data-tip-pos='bottom']::before {
+  bottom: auto;
+  top: calc(100% + 7px);
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid color-mix(in srgb, var(--nx-core) 35%, var(--nx-line));
+  border-top: 1px solid color-mix(in srgb, var(--nx-core) 35%, var(--nx-line));
+}
+
+[data-tip][data-tip-pos='bottom']:hover::after,
+[data-tip][data-tip-pos='bottom']:focus-visible::after {
+  transform: translateX(-50%) translateY(0);
 }

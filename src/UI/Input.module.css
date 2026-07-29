@@ -1,0 +1,31 @@
+.field { display: flex; flex-direction: column; gap: 7px; }
+
+.label {
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--nx-ink-dim);
+}
+
+.input,
+.textarea {
+  background: var(--nx-bg-raised);
+  border: 1px solid var(--nx-line);
+  border-radius: 12px;
+  padding: 12px 15px;
+  color: var(--nx-ink);
+  font-family: var(--nx-font-body);
+  font-size: 15px;
+  transition: all 0.3s ease;
+  outline: none;
+  width: 100%;
+}
+.input::placeholder,
+.textarea::placeholder { color: var(--nx-ink-dim); opacity: 0.6; }
+.input:focus,
+.textarea:focus {
+  border-color: var(--nx-core);
+  box-shadow: 0 0 0 3px var(--nx-core-soft), 0 0 14px var(--nx-core-soft);
+}
+.textarea { resize: vertical; min-height: 84px; }

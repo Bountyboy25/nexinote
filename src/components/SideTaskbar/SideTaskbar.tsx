@@ -2,7 +2,8 @@ import { useCallback, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useCanvasStore, useSelectedIds, useCards } from '@/store'
 import { nanoid } from 'nanoid'
-import type { TaskCard, TableCard, ColumnCard, ColumnItem, CheckboxStyle } from '@/types'
+import { Icon } from '@/UI/Icon'
+import type { TaskCard, TableCard, ColumnCard, CheckboxStyle } from '@/types'
 import styles from './SideTaskbar.module.css'
 
 // ─────────────────────────────────────────────────────────────
@@ -325,18 +326,20 @@ function TaskTools({ card }: { card: TaskCard }) {
 }
 
 // ── Column tools ──────────────────────────────────────────────
+// A column now holds whole cards, so these are shortcuts for the types
+// people add to a stack most often. Everything else (and dropping an
+// existing card in) happens on the card itself.
 function ColumnTools({ card }: { card: ColumnCard }) {
-  const updateCard = useCanvasStore(s => s.updateCard)
+  const { updateCard, addCardToColumn } = useCanvasStore.getState()
   const items = card.content.items
 
-  function addItem(type: ColumnItem['type']) {
-    const label = type === 'note' ? 'Note' : type === 'task' ? 'Task' : 'Link'
-    const next = [...items, { id: nanoid(), type, title: label, text: '', done: false }]
-    updateCard(card.id, { content: { ...card.content, items: next } })
-  }
-
+  // Drop every embedded checklist whose entries are all ticked off.
   function clearDone() {
-    const next = items.filter(it => !it.done)
+    const next = items.filter(it =>
+      !(it.type === 'task' &&
+        it.content.items.length > 0 &&
+        it.content.items.every(t => t.done))
+    )
     updateCard(card.id, { content: { ...card.content, items: next } })
   }
 
@@ -344,14 +347,15 @@ function ColumnTools({ card }: { card: ColumnCard }) {
     <>
       <div className={styles.section}>
         <div className={styles.sectionLabel}>Add</div>
-        <button className={styles.tool} onClick={() => addItem('note')}  title="Add note">📝</button>
-        <button className={styles.tool} onClick={() => addItem('task')}  title="Add task">✅</button>
-        <button className={styles.tool} onClick={() => addItem('link')}  title="Add link">🔗</button>
+        <button className={styles.tool} onClick={() => addCardToColumn(card.id, 'note')} title="Add note"><Icon name="note" size={15} /></button>
+        <button className={styles.tool} onClick={() => addCardToColumn(card.id, 'task')} title="Add task list"><Icon name="task" size={15} /></button>
+        <button className={styles.tool} onClick={() => addCardToColumn(card.id, 'link')} title="Add link"><Icon name="link" size={15} /></button>
+        <button className={styles.tool} onClick={() => addCardToColumn(card.id, 'media')} title="Add image"><Icon name="media" size={15} /></button>
       </div>
       <div className={styles.divider} />
       <div className={styles.section}>
         <div className={styles.sectionLabel}>Items</div>
-        <button className={styles.tool} onClick={clearDone} title="Remove completed tasks">✓ Clr</button>
+        <button className={styles.tool} onClick={clearDone} title="Remove finished checklists">✓ Clr</button>
       </div>
     </>
   )

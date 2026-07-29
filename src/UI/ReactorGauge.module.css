@@ -1,0 +1,85 @@
+/* Reactor status gauge — signature Nuclear Nexus element.
+   Ring fill, pulsing core dot and % readout all follow the
+   active theme core via the --nx-* tokens. */
+
+.panel {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--nx-bg-panel);
+  border: 1px solid var(--nx-line);
+  border-radius: 16px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+}
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 15% 50%, var(--nx-core-soft), transparent 55%);
+  pointer-events: none;
+  transition: background 0.6s ease;
+}
+
+.ring {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  flex-shrink: 0;
+}
+.ring svg { transform: rotate(-90deg); }
+
+.track { stroke: var(--nx-line); }
+
+.fill {
+  stroke: var(--nx-core);
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px var(--nx-core-glow));
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.34, 1.3, 0.5, 1), stroke 0.6s ease;
+}
+
+.coreDot {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--nx-core);
+  box-shadow: 0 0 16px var(--nx-core-glow), 0 0 40px var(--nx-core-glow);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.7; }
+}
+
+.value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 38px;
+  font-family: var(--nx-font-mono);
+  font-size: 17px;
+  color: var(--nx-core-hot);
+}
+
+.meta { position: relative; min-width: 0; flex: 1; }
+.meta h3 {
+  font-family: var(--nx-font-display);
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0 0 3px;
+  color: var(--nx-ink);
+}
+.meta p {
+  color: var(--nx-ink-dim);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 12px;
+}
+.badges { display: flex; gap: 8px; flex-wrap: wrap; }
