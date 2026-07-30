@@ -227,8 +227,25 @@ export function useCardDrag(card: Card) {
   // ── Path 1 (bubble): plain card surface → drag immediately ──
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return
-    // Reaching the root means no content component claimed this press,
-    // so there is nothing to wait for.
+
+    // Editable targets are the hold path's business, never this one.
+    //
+    // In practice every content component wraps itself in a mousedown
+    // stopPropagation, so a press on an input shouldn't reach here at
+    // all — but relying on that makes correct behaviour depend on all
+    // sixteen of them remembering. Without this guard, one card type
+    // shipped without a wrapper guard silently turns click-to-edit
+    // into click-to-drag, which is exactly the bug this whole hold
+    // mechanism exists to remove.
+    const target = e.target as HTMLElement
+    if (
+      INTERACTIVE_TAGS.has(target.tagName) ||
+      target.isContentEditable ||
+      target.closest('[contenteditable="true"]')
+    ) return
+
+    // Reaching here means no content component claimed this press, so
+    // there is nothing to wait for.
     cancelHoldRef.current?.()
     e.stopPropagation() // Don't let the click bubble to the canvas
     beginDrag(e.clientX, e.clientY, e.shiftKey)

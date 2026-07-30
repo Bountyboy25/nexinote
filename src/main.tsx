@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { App } from './App'
 // Leaflet's own stylesheet — required for map cards to lay out their
 // tiles and controls. Loaded globally so every map card shares it.
-import 'leaflet/dist/leaflet.css'
 import './styles/nuclear-base.css'
 import './styles/global.css'
 import { initTheme } from './store/useThemeStore'

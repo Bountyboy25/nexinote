@@ -110,44 +110,6 @@
   line-height: 1.5;
 }
 
-/* Toggle switch */
-.toggle {
-  width: 44px;
-  height: 24px;
-  border-radius: 999px;
-  border: 1px solid var(--nx-line);
-  background: var(--nx-bg-panel);
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
-  transition: background 0.2s, border-color 0.2s;
-  padding: 0;
-}
-
-.toggleOn {
-  background: var(--nx-core-soft);
-  border-color: var(--nx-core);
-}
-
-.toggleThumb {
-  position: absolute;
-  top: 2px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--nx-ink-dim);
-  transition: transform var(--nx-speed) var(--nx-ease-spring), background 0.2s, box-shadow 0.2s;
-  display: block;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.toggleOn .toggleThumb {
-  transform: translateX(20px);
-  background: var(--nx-core);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 8px var(--nx-core-glow);
-}
-
 .footer {
   padding: 14px 24px;
   border-top: 1px solid var(--border);

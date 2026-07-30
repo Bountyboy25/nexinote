@@ -9,33 +9,6 @@
   height: 100%;
 }
 
-.richToolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  padding: 4px 6px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-}
-
-.fmtBtn {
-  padding: 2px 6px;
-  font-size: 11px;
-  font-weight: 600;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  cursor: pointer;
-  color: var(--text-2);
-  line-height: 1.4;
-  transition: background 0.1s, color 0.1s;
-}
-
-.fmtBtn:hover {
-  background: var(--surface-3);
-  color: var(--text-1);
-}
-
 .richEditor {
   flex: 1;
   padding: 8px 10px;
@@ -204,14 +177,6 @@
   opacity: 0.5;
 }
 
-.checkbox {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  cursor: pointer;
-  accent-color: var(--accent);
-}
-
 .checkText {
   flex: 1;
   border: none;
@@ -338,18 +303,6 @@
   content: '';
   display: block;
   min-height: 16px;
-}
-
-.cellResult {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 6px;
-  font-size: 12px;
-  color: var(--accent);
-  pointer-events: none;
-  font-family: var(--font-mono, monospace);
 }
 
 /* Phase 3: Non-overlapping formula result — fills the entire cell,
@@ -583,13 +536,6 @@
   cursor: grabbing;
 }
 
-/* Header checkbox for task items — slightly smaller than task-card size */
-.colItemCheck {
-  width: 14px;
-  height: 14px;
-  font-size: 10px;
-}
-
 /* Insertion indicator while reordering (box-shadow → no layout shift) */
 .colItemDropBefore {
   box-shadow: 0 -2px 0 0 var(--accent);
@@ -597,20 +543,6 @@
 
 .colListDropEnd {
   box-shadow: inset 0 -2px 0 0 var(--accent);
-}
-
-/* Collapsed-task summary note — first glance at what the task says */
-.colItemSummary {
-  /* left-aligned with the title: header pad 6 + grip 10 + gap 5 + check 14 + gap 5 */
-  padding: 0 8px 6px 40px;
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--text-3);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
 }
 
 .colItemTitle {
@@ -707,48 +639,6 @@
   border-top: 1px solid var(--border);
   background: var(--surface);
   overflow: hidden;
-}
-
-.colItemTaskRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  cursor: pointer;
-}
-
-.colItemText {
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: var(--text-2);
-  font-size: 12px;
-  line-height: 1.5;
-  outline: none;
-  resize: none;
-  font-family: var(--font-ui);
-  box-sizing: border-box;
-}
-
-.colItemText:focus {
-  color: var(--text-1);
-}
-
-.colItemDone {
-  text-decoration: line-through;
-  opacity: 0.5;
-}
-
-.colItemLink {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 11px;
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.colItemLink:hover {
-  text-decoration: underline;
 }
 
 /* Column add button */
@@ -2046,4 +1936,18 @@
   text-align: center;
   font-size: 12px;
   color: var(--nx-danger);
+}
+
+/* Suspense fallback while the lazily-loaded Leaflet chunk arrives.
+   Sized from the card's stored height so the card doesn't collapse and
+   snap back open as the chunk resolves. */
+.mapLoading {
+  display: grid;
+  place-items: center;
+  background: var(--nx-bg-panel);
+  border-top: 1px solid var(--border);
+  color: var(--text-3);
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
 }

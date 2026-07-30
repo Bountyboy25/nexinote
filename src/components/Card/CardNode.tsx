@@ -1,7 +1,5 @@
 import { memo } from 'react'
-import {
-  useCanvasStore, useSelectedIds, useConnectFrom, useDropColumnId, useDraggingCardId,
-} from '@/store'
+import { useCanvasStore } from '@/store'
 import { useCardDrag } from '@/hooks/useCardDrag'
 import { CardContent } from './CardContent'
 import { Icon, type IconName } from '@/UI/Icon'
@@ -50,13 +48,6 @@ interface CardNodeProps { card: Card }
 // Store-driven state (selection, connect mode) still updates normally
 // because those subscriptions live inside the component.
 export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
-  const selectedIds   = useSelectedIds()
-  const connectFromId = useConnectFrom()
-  const dropColumnId  = useDropColumnId()
-  // Confirms a press-and-hold actually engaged — without a visible change
-  // the hold feels like nothing happened. Flips twice per drag, so the
-  // extra render is negligible.
-  const draggingCardId = useDraggingCardId()
   const {
     updateCard, deleteCard, duplicateCard, toggleLock,
     addConnector, setConnectFrom, setActiveTool,
@@ -65,9 +56,24 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
   // press-and-hold for presses that content components swallow.
   const { onMouseDown, onMouseDownCapture } = useCardDrag(card)
 
-  const isSelected      = selectedIds.has(card.id)
-  const isConnectMode   = connectFromId !== null
-  const isConnectSource = connectFromId === card.id
+  // Each of these subscribes to a BOOLEAN about *this* card rather than to
+  // the raw store value, and that distinction is the difference between
+  // re-rendering one card and re-rendering all of them.
+  //
+  // selectedIds is the clearest case: it's a Set rebuilt on every
+  // selection change, so a component reading the Set itself re-renders on
+  // every click anywhere on the board. Reading `.has(card.id)` yields a
+  // boolean that zustand compares with Object.is, so only the two cards
+  // whose selection actually flipped re-render. Same reasoning for the
+  // drag/drop-target ids, which are broadcast to every card as a string.
+  //
+  // isConnectMode is genuinely global — every card changes appearance
+  // when connect mode opens — so a board-wide re-render there is correct.
+  const isSelected      = useCanvasStore(s => s.selectedIds.has(card.id))
+  const isConnectMode   = useCanvasStore(s => s.connectFromId !== null)
+  const isConnectSource = useCanvasStore(s => s.connectFromId === card.id)
+  const isDropTarget    = useCanvasStore(s => s.dropColumnId === card.id)
+  const isDragging      = useCanvasStore(s => s.draggingCardId === card.id)
 
   // Click while in connect mode → complete the connection
   const onCardClick = (e: React.MouseEvent) => {
@@ -79,7 +85,11 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
       setActiveTool('select')
       return
     }
-    addConnector(connectFromId!, card.id)
+    // Read fresh rather than subscribing: the id is only needed at the
+    // moment of the click, and subscribing to it would re-render every
+    // card on the board each time connect mode changed target.
+    const fromId = useCanvasStore.getState().connectFromId
+    if (fromId) addConnector(fromId, card.id)
     setConnectFrom(null)
     setActiveTool('select')
   }
@@ -97,9 +107,9 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
     isSelected      ? styles.selected      : '',
     isConnectSource ? styles.connectSource  : '',
     isConnectMode && !isConnectSource ? styles.connectTarget : '',
-    dropColumnId === card.id ? styles.dropTarget : '',
+    isDropTarget ? styles.dropTarget : '',
     card.locked ? styles.locked : '',
-    draggingCardId === card.id ? styles.dragging : '',
+    isDragging ? styles.dragging : '',
     // Document cards are the smallest type on the board, so their shell
     // tightens to match — see .compact in the stylesheet.
     card.type === 'document' ? styles.compact : '',

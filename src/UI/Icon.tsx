@@ -16,7 +16,7 @@ import type { ReactNode, SVGProps } from 'react'
 export type IconName =
   | 'select' | 'note' | 'document' | 'task' | 'table' | 'media' | 'link'
   | 'column' | 'connect' | 'select-all' | 'close' | 'trash'
-  | 'reset-view' | 'templates' | 'settings'
+  | 'reset-view' | 'settings'
   | 'chevron-down' | 'chevron-right' | 'grip'
   | 'sketch' | 'color' | 'audio' | 'video' | 'heading' | 'comment'
   | 'map' | 'board' | 'pin' | 'eraser' | 'undo' | 'plus'
@@ -144,15 +144,6 @@ const GLYPHS: Record<IconName, ReactNode> = {
       <path d="M2.5 12h3" />
       <path d="M18.5 12h3" />
       <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
-    </>
-  ),
-
-  // Layout blocks
-  templates: (
-    <>
-      <rect x="3.5" y="3.5" width="17" height="7" rx="1.5" />
-      <rect x="3.5" y="13.5" width="10" height="7" rx="1.5" />
-      <rect x="16.5" y="13.5" width="4" height="7" rx="1.5" />
     </>
   ),
 

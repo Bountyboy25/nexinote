@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import * as L from 'leaflet'
+// Imported HERE rather than in main.tsx so Leaflet's stylesheet is part
+// of this lazily-loaded chunk instead of the global bundle.
+import 'leaflet/dist/leaflet.css'
 import { nanoid } from 'nanoid'
 import { useCanvasStore } from '@/store'
 import { Icon } from '@/UI/Icon'

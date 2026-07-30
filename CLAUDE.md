@@ -83,6 +83,18 @@ same scrutiny.
 `CardNode` is `memo`'d on purpose — dragging replaces only that card's object, so other
 cards bail out on the shallow prop check instead of re-rendering per mousemove.
 
+**Subscribe to booleans, not store values.** `CardNode` reads
+`useCanvasStore(s => s.selectedIds.has(card.id))` rather than `useSelectedIds()`. The
+difference is board-wide: `selectedIds` is a `Set` rebuilt on every selection change, so
+reading the Set itself re-renders *every* card on any click. The same applies to
+`dropColumnId` and `draggingCardId`, which are broadcast to all cards as a string. Any new
+per-card store read should follow this pattern.
+
+Map cards are **lazily loaded** ([CardContent.tsx](src/components/Card/CardContent.tsx)):
+Leaflet is ~154KB JS + ~16KB CSS, a third of the bundle, and most boards have no map. Its
+stylesheet is imported inside `MapCardContent` — *not* `main.tsx` — so it travels with the
+async chunk. Adding another heavy third-party card type should do the same.
+
 ### Dragging a card
 
 Two entry points, both from [useCardDrag](src/hooks/useCardDrag.ts), and the distinction
