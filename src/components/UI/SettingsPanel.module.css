@@ -111,6 +111,10 @@
 }
 
 .footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 14px 24px;
   border-top: 1px solid var(--border);
 }

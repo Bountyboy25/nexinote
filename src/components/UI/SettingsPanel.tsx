@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { useCanvasStore, useSettings, useCards, useConnectors } from '@/store'
+import { usePwa } from '@/hooks/usePwa'
+import { FeedbackPanel } from './FeedbackPanel'
+import { APP_VERSION } from '@/utils/feedback'
 import { ThemeSwitcher } from '@/UI/ThemeSwitcher'
 import { ReactorGauge } from '@/UI/ReactorGauge'
 import { Toggle } from '@/UI/Toggle'
@@ -27,6 +31,8 @@ interface Props {
 }
 
 export function SettingsPanel({ onClose, onOpenTemplates }: Props) {
+  const [showFeedback, setShowFeedback] = useState(false)
+  const { canInstall, installed, offlineReady, updateReady, install, update } = usePwa()
   const settings = useSettings()
   const cards = useCards()
   const connectors = useConnectors()
@@ -93,12 +99,72 @@ export function SettingsPanel({ onClose, onOpenTemplates }: Props) {
               </button>
             </div>
           )}
+
+          {/* ── Feedback ── */}
+          <div className={styles.row}>
+            <div className={styles.rowInfo}>
+              <div className={styles.rowLabel}>Send feedback</div>
+              <div className={styles.rowDesc}>
+                Report a bug, suggest an idea, or say what felt confusing.
+                Nothing you wrote on a board is ever included.
+              </div>
+            </div>
+            <button className={styles.rowAction} onClick={() => setShowFeedback(true)}>
+              Feedback
+            </button>
+          </div>
+
+          {/* ── Install ──
+              Only offered when the browser actually has a prompt to show.
+              Firefox and desktop Safari don't, so a permanently dead
+              "Install" button would be worse than none. */}
+          {canInstall && (
+            <div className={styles.row}>
+              <div className={styles.rowInfo}>
+                <div className={styles.rowLabel}>Install Nexinote</div>
+                <div className={styles.rowDesc}>
+                  Adds it to your machine as a standalone app with its own window
+                  and icon. Works fully offline — your boards already live on this
+                  device.
+                </div>
+              </div>
+              <button className={styles.rowAction} onClick={install}>
+                Install
+              </button>
+            </div>
+          )}
+
+          {/* ── Update ──
+              registerType is 'prompt', not 'autoUpdate': swapping the
+              running code under someone mid-sentence risks losing an
+              unsaved editor that hasn't blurred yet. */}
+          {updateReady && (
+            <div className={styles.row}>
+              <div className={styles.rowInfo}>
+                <div className={styles.rowLabel}>Update available</div>
+                <div className={styles.rowDesc}>
+                  A newer version is downloaded and ready. Reloading now is safe —
+                  your boards are stored on this device, not in the app bundle.
+                </div>
+              </div>
+              <button className={styles.rowAction} onClick={update}>
+                Reload
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.footer}>
           <span className={styles.footerNote}>Settings are saved automatically</span>
+          <span className={styles.footerNote}>
+            v{APP_VERSION}
+            {installed && ' · installed'}
+            {offlineReady && ' · offline ready'}
+          </span>
         </div>
       </div>
+
+      {showFeedback && <FeedbackPanel onClose={() => setShowFeedback(false)} />}
     </div>
   )
 }

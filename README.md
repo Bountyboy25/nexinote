@@ -27,6 +27,76 @@ npm run preview
 
 ---
 
+## Installing it as an app
+
+Nexinote is a PWA, so it installs from the browser with no download and no
+installer — and because every board already lives in `localStorage`, an
+installed copy works with no network at all.
+
+**To install:** open the hosted app and either use the install icon in
+your browser's address bar, or go to **Settings → Install**. You get a
+standalone window, a real app icon, and offline launch.
+
+The Install row only appears when the browser actually offers a prompt.
+Chrome, Edge and other Chromium browsers do; Firefox and desktop Safari
+don't, so it stays hidden there rather than showing a dead button. On
+iOS, use Safari's **Share → Add to Home Screen**.
+
+Updates are **offered, not forced** (Settings → Update available). This is
+a note-taking app, and swapping the running code mid-sentence risks losing
+an editor that hasn't saved yet — so you pick the moment.
+
+### Hosting it for testers
+
+Any static host works; the build output in `dist/` is entirely static.
+
+```bash
+npm run build      # → dist/
+```
+
+A service worker requires **HTTPS** (or `localhost`). GitHub Pages,
+Netlify, Cloudflare Pages and Vercel all provide it for free. If you serve
+from a subpath rather than a domain root, set Vite's `base` and the
+manifest's `start_url`/`scope` to match, or the service worker won't
+resolve its own assets.
+
+> Want real signed `.exe` / `.dmg` installers instead? That's a Tauri or
+> Electron wrapper around this same build — a separate pipeline, much
+> larger artifacts, and code-signing certificates for distribution. The
+> PWA is the fast path to getting the app in front of people.
+
+### Regenerating the icons
+
+```bash
+npm run icons      # → public/icon-*.png
+```
+
+`scripts/generate-icons.mjs` draws the mark analytically and encodes PNGs
+using only Node's built-in `zlib`, so there's no image-processing
+dependency to install. Edit the artwork in that file and re-run.
+
+---
+
+## Feedback
+
+Settings → **Feedback** opens a form that posts to a Google Sheet you own,
+via a Google Apps Script web app. Setup is a five-minute, one-time job and
+needs your own Google account: see **[feedback/README.md](feedback/README.md)**.
+
+The form has category-specific suggested prompts, because "send feedback"
+with an empty box mostly returns "it's good, thanks".
+
+**What's sent:** the message, category, optional email, and technical
+context that makes a report actionable — app version, browser, screen
+size, theme, and *counts* of boards and cards.
+
+**What's never sent:** anything written on a board. No note text, card
+titles, board names, sketch strokes, images or map pins. If the endpoint
+isn't configured or can't be reached, the message can still be copied to
+the clipboard so nothing anyone wrote is lost.
+
+---
+
 ## Features
 
 - **Infinite canvas** — pan, zoom-to-cursor, and a live minimap that highlights the card
