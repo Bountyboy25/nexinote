@@ -7,6 +7,11 @@
 ───────────────────────────────────────────────────────────── */
 
 .card {
+  /* A drag starting on a card belongs to the card. Also suppresses iOS's
+     long-press callout, which would otherwise fire mid press-and-hold and
+     offer to copy the text under the finger. */
+  touch-action: none;
+  -webkit-touch-callout: none;
   position: absolute;
   min-height: 120px;
   background: var(--nx-bg-raised);

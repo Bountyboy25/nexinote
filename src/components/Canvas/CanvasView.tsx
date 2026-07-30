@@ -3,6 +3,7 @@ import { useCanvasStore, useCards, useCamera, useDraggingCardId } from '@/store'
 import { useKeyboard }   from '@/hooks/useKeyboard'
 import { useCanvasPan }  from '@/hooks/useCanvasPan'
 import { useCanvasZoom } from '@/hooks/useCanvasZoom'
+import { useCanvasTouch } from '@/hooks/useCanvasTouch'
 import { CardNode }       from '@/components/Card/CardNode'
 import { ConnectorLayer } from './ConnectorLayer'
 import { screenToWorld, getViewportCenter, WORLD_BOUNDS }  from '@/utils/canvas'
@@ -25,6 +26,9 @@ export function CanvasView() {
   const { spaceHeld } = useKeyboard(canvasRef)
   useCanvasPan(canvasRef, spaceHeld)
   useCanvasZoom(canvasRef)
+  // Touch equivalents of pan and zoom — without these the canvas is
+  // immovable on a phone, where there is no space bar or wheel.
+  useCanvasTouch(canvasRef)
 
   // ── Create an image card and stream the (downscaled) source in ──
   const addImageCard = useCallback((worldX: number, worldY: number, file: File, index = 0) => {

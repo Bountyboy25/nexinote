@@ -29,41 +29,66 @@ npm run preview
 
 ## Installing it as an app
 
-Nexinote is a PWA, so it installs from the browser with no download and no
-installer — and because every board already lives in `localStorage`, an
+Nexinote is a PWA: it installs from the browser with no download and no
+installer, and because every board already lives in `localStorage`, an
 installed copy works with no network at all.
 
-**To install:** open the hosted app and either use the install icon in
-your browser's address bar, or go to **Settings → Install**. You get a
-standalone window, a real app icon, and offline launch.
+### On your phone
 
-The Install row only appears when the browser actually offers a prompt.
-Chrome, Edge and other Chromium browsers do; Firefox and desktop Safari
-don't, so it stays hidden there rather than showing a dead button. On
-iOS, use Safari's **Share → Add to Home Screen**.
+1. **Publish it first.** A service worker requires HTTPS, so a phone
+   can't install from `localhost` or a LAN IP. See *Deploying* below —
+   the included GitHub Actions workflow does it in one push.
+2. Open the published URL on the phone.
+3. **Android / Chrome:** tap the **Install app** prompt, or ⋮ → *Add to
+   Home screen*. You can also use **Settings → Install** inside the app.
+4. **iPhone / Safari:** tap **Share** → **Add to Home Screen**. iOS
+   doesn't support the install prompt, so this is the only route — the
+   in-app Install row stays hidden there rather than showing a button
+   that can't work.
 
-Updates are **offered, not forced** (Settings → Update available). This is
-a note-taking app, and swapping the running code mid-sentence risks losing
-an editor that hasn't saved yet — so you pick the moment.
+It then launches from your home screen in its own window, with no
+browser chrome, and opens offline.
 
-### Hosting it for testers
+**Touch is supported:** drag with one finger on empty canvas to pan,
+pinch with two to zoom, drag a card to move it, and **press and hold**
+to grab a card from on top of its own text. The minimap hides on small
+screens and the toolbar wraps to fit.
 
-Any static host works; the build output in `dist/` is entirely static.
+> Phone-sized screens are usable but the app is still designed for a
+> large canvas — a tablet is a much better experience than a phone.
+
+### On a desktop
+
+Use the install icon in the address bar, or **Settings → Install**. The
+row only appears when the browser actually offers a prompt: Chromium
+browsers do, Firefox and desktop Safari don't.
+
+Updates are **offered, not forced** (Settings → *Update available*). This
+is a note-taking app, and swapping the running code mid-sentence risks
+losing an editor that hasn't saved yet — so you pick the moment.
+
+### Deploying
+
+A workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+builds and publishes to GitHub Pages on every push to `main`.
+
+**One-time setup:** repo **Settings → Pages → Source = GitHub Actions**.
+Optionally add a repository secret `VITE_FEEDBACK_ENDPOINT` so deployed
+builds can submit feedback.
+
+Your app lands at `https://<user>.github.io/<repo>/`. The workflow sets
+`BASE_PATH` from the repo name automatically — that matters because a
+project site is served from a subpath, and a service worker can only
+control URLs at or below its own path. To publish before merging to
+`main`, run the workflow by hand from the **Actions** tab.
+
+Any other static host works too; if you serve from a domain root, no
+`BASE_PATH` is needed:
 
 ```bash
-npm run build      # → dist/
+npm run build                      # domain root
+BASE_PATH=/nexinote/ npm run build # served from /nexinote/
 ```
-
-A service worker requires **HTTPS** (or `localhost`). GitHub Pages,
-Netlify, Cloudflare Pages and Vercel all provide it for free. If you serve
-from a subpath rather than a domain root, set Vite's `base` and the
-manifest's `start_url`/`scope` to match, or the service worker won't
-resolve its own assets.
-
-> Want real signed `.exe` / `.dmg` installers instead? That's a Tauri or
-> Electron wrapper around this same build — a separate pipeline, much
-> larger artifacts, and code-signing certificates for distribution. The
-> PWA is the fast path to getting the app in front of people.
 
 ### Regenerating the icons
 

@@ -182,3 +182,38 @@
 }
 
 /* Tooltips: global Nuclear Nexus [data-tip] bubble — see styles/global.css */
+
+/* ─────────────────────────────────────────────────────────────
+   Phone widths
+   The dock is ~716px at 17 buttons, so below roughly a tablet it has
+   to wrap. Wrapping rather than scrolling is deliberate: `overflow`
+   on the toolbar would clip the hover dropdowns, which are absolutely
+   positioned children of it.
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    /* Stay clear of the screen edges and the 56px side rail */
+    max-width: calc(100vw - 24px);
+    bottom: max(12px, env(safe-area-inset-bottom));
+    border-radius: 14px;
+  }
+
+  .btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* A separator inside a wrapped row reads as a broken divider */
+  .sep {
+    display: none;
+  }
+
+  .connectBanner {
+    bottom: auto;
+    top: 62px;
+    max-width: calc(100vw - 24px);
+    font-size: 12px;
+  }
+}

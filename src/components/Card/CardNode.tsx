@@ -54,7 +54,7 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
   } = useCanvasStore.getState()
   // Two handlers on purpose — see useCardDrag. The capture one arms
   // press-and-hold for presses that content components swallow.
-  const { onMouseDown, onMouseDownCapture } = useCardDrag(card)
+  const { onPointerDown, onPointerDownCapture } = useCardDrag(card)
 
   // Each of these subscribes to a BOOLEAN about *this* card rather than to
   // the raw store value, and that distinction is the difference between
@@ -120,8 +120,8 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
       className={classNames}
       data-card={card.id}
       style={{ left: card.x, top: card.y, width: card.width }}
-      onMouseDownCapture={onMouseDownCapture}
-      onMouseDown={onMouseDown}
+      onPointerDownCapture={onPointerDownCapture}
+      onPointerDown={onPointerDown}
       onClick={isConnectMode ? onCardClick : undefined}
     >
       {/* ── HEADER ───────────────────────────────────────── */}

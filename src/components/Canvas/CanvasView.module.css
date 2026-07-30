@@ -1,4 +1,9 @@
 .canvas {
+  /* The canvas handles pan and pinch itself (useCanvasTouch). Without
+     this the browser scrolls and rubber-bands the page underneath every
+     gesture, and preventDefault alone can't stop a scroll that has
+     already begun. */
+  touch-action: none;
   position: fixed;
   inset: 0;
   overflow: hidden;

@@ -272,6 +272,27 @@ at `3500`. Keep new overlays consistent with this scale.
 JSON. Images arrive via click-to-upload, canvas drag & drop, or paste
 ([CanvasView.tsx](src/components/Canvas/CanvasView.tsx)).
 
+### Touch / pointer input
+
+Card dragging uses **pointer events** ([useCardDrag](src/hooks/useCardDrag.ts)), not mouse
+events — touch never fires `mousemove` (browsers synthesize mouse events only *after* a tap
+completes), so a mouse-event drag is simply inert on a phone. One code path now covers
+mouse, touch and pen.
+
+Consequence worth knowing: content components `stopPropagation()` on **mousedown**, which no
+longer blocks the card root's `pointerdown`. The editable-target guard in the bubble handler
+is therefore load-bearing, not defensive — remove it and every tap on an input starts a drag.
+
+Canvas pan/pinch is separate ([useCanvasTouch](src/hooks/useCanvasTouch.ts)) and uses native
+**touch events**, because `TouchEvent.touches` gives the whole set a pinch needs, where
+pointer events would mean pairing up tracked pointers by hand.
+
+`touch-action: none` on `.canvas` and `.card` is required, not cosmetic: without it the
+browser scrolls the page instead of letting the gesture through. It also means the browser
+does *not* fire `pointercancel` when a second finger lands, so `useCanvasTouch` explicitly
+broadcasts `CANCEL_DRAG_EVENT` on pinch start — otherwise a card already in hand keeps
+tracking finger one and gets flung across the board.
+
 ### PWA / distribution
 
 The app is installable via [vite-plugin-pwa](vite.config.ts) (`generateSW`). Workbox

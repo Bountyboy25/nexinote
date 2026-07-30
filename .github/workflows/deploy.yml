@@ -1,0 +1,64 @@
+name: Deploy to GitHub Pages
+
+# Builds the app and publishes dist/ to GitHub Pages, which serves it over
+# HTTPS — a hard requirement for a service worker, and therefore for
+# installing Nexinote as an app.
+#
+# One-time setup in the repo: Settings → Pages → Source = "GitHub Actions".
+# Optional: Settings → Secrets and variables → Actions → new repository
+# secret VITE_FEEDBACK_ENDPOINT, so deployed builds can post feedback.
+
+on:
+  push:
+    branches: [main]
+  # Lets you publish any branch by hand from the Actions tab, which is
+  # how you'd preview this before merging.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race. `cancel-in-progress: false` so a queued
+# deploy still completes rather than being dropped.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        env:
+          # A project site lives at /<repo>/, not the domain root. Derived
+          # from the repo name so a fork or rename doesn't break it.
+          BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_FEEDBACK_ENDPOINT: ${{ secrets.VITE_FEEDBACK_ENDPOINT }}
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

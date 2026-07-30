@@ -24,14 +24,24 @@ import type { Card } from '@/types'
 //
 // So there are two ways in, and the hook exposes a handler for each:
 //
-//   onMouseDown        (bubble)  — plain card surface. Drags at once,
-//                                  exactly as it always has.
-//   onMouseDownCapture (capture) — arms a press-and-hold. Capture
-//                                  phase is essential: sixteen content
-//                                  components call stopPropagation() on
-//                                  mousedown to protect their editors,
-//                                  so a bubble-phase listener on the
-//                                  card root never sees those presses.
+//   onPointerDown        (bubble)  — plain card surface. Drags at once.
+//   onPointerDownCapture (capture) — arms a press-and-hold. Capture
+//                                    phase is essential: sixteen content
+//                                    components call stopPropagation() on
+//                                    mousedown/pointerdown to protect
+//                                    their editors, so a bubble-phase
+//                                    listener on the card root never sees
+//                                    those presses.
+//
+// ── Pointer events, not mouse events ──────────────────────
+// One code path covers mouse, touch and pen. Touch never fires
+// mousemove — browsers only synthesise mouse events AFTER a tap
+// completes — so a mouse-event drag is simply inert on a phone.
+// The card also sets touch-action: none, without which the browser
+// scrolls the page instead of letting the card move.
+//
+// The press-and-hold below turns out to be exactly the right mobile
+// idiom too: long-press-to-move is what a touch user already expects.
 //
 // The capture handler never calls preventDefault or stopPropagation, so
 // it is purely additive — a short click still focuses and places a caret
@@ -79,6 +89,10 @@ const HOLD_SLOP = 5
 
 // Fallback height if the card element can't be measured.
 const DEFAULT_CARD_H = 160
+
+// Broadcast by useCanvasTouch when a pinch begins, to abandon any card
+// drag already in flight.
+export const CANCEL_DRAG_EVENT = 'nx-cancel-card-drag'
 
 // A column accepts every card type EXCEPT another column — nesting
 // containers has no sensible layout and no obvious way back out.
@@ -167,7 +181,7 @@ export function useCardDrag(card: Card) {
     // otherwise smear a selection across the card as the pointer moves.
     document.body.classList.add('nx-dragging')
 
-    const onMouseMove = (ev: MouseEvent) => {
+    const onPointerMove = (ev: PointerEvent) => {
       const d = drag.current
       if (!d.active) return
 
@@ -197,9 +211,14 @@ export function useCardDrag(card: Card) {
       endDragRef.current = null
       drag.current.active = false
       document.body.classList.remove('nx-dragging')
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', finish)
+      document.removeEventListener('pointermove', onPointerMove)
+      document.removeEventListener('pointerup', finish)
+      // A touch drag is cancelled outright if the browser decides to take
+      // over the gesture (or a second finger arrives for a pinch). Without
+      // this the card would stay stuck to a pointer that never releases.
+      document.removeEventListener('pointercancel', finish)
       window.removeEventListener('blur', finish)
+      window.removeEventListener(CANCEL_DRAG_EVENT, finish)
     }
 
     function finish() {
@@ -215,22 +234,30 @@ export function useCardDrag(card: Card) {
       detach()
     }
 
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', finish)
-    // If focus leaves the window mid-drag, the mouseup can land somewhere
+    document.addEventListener('pointermove', onPointerMove)
+    document.addEventListener('pointerup', finish)
+    document.addEventListener('pointercancel', finish)
+    // If focus leaves the window mid-drag, the release can land somewhere
     // we never hear about and the card would keep following the cursor on
     // return. Treat losing focus as a release.
     window.addEventListener('blur', finish)
+    // A second finger landing means the user is pinching to zoom, not
+    // dragging. touch-action: none stops the browser firing its own
+    // pointercancel, so the canvas gesture handler tells us directly —
+    // otherwise the card would keep tracking finger one throughout the
+    // pinch and end up flung across the board.
+    window.addEventListener(CANCEL_DRAG_EVENT, finish)
     endDragRef.current = detach
   }, [])
 
   // ── Path 1 (bubble): plain card surface → drag immediately ──
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    // button 0 is left-click for a mouse and the only value touch reports.
+    if (e.button !== 0 || !e.isPrimary) return
 
     // Editable targets are the hold path's business, never this one.
     //
-    // In practice every content component wraps itself in a mousedown
+    // In practice every content component wraps itself in a pointer/mouse
     // stopPropagation, so a press on an input shouldn't reach here at
     // all — but relying on that makes correct behaviour depend on all
     // sixteen of them remembering. Without this guard, one card type
@@ -252,8 +279,8 @@ export function useCardDrag(card: Card) {
   }, [beginDrag])
 
   // ── Path 2 (capture): anywhere on the card → hold to drag ──
-  const onMouseDownCapture = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return
+  const onPointerDownCapture = useCallback((e: React.PointerEvent) => {
+    if (e.button !== 0 || !e.isPrimary) return
     if (drag.current.active) return
 
     const target = e.target as HTMLElement
@@ -279,11 +306,12 @@ export function useCardDrag(card: Card) {
     const cancel = () => {
       cancelHoldRef.current = null
       if (timer) { clearTimeout(timer); timer = null }
-      document.removeEventListener('mousemove', track)
-      document.removeEventListener('mouseup', cancel)
+      document.removeEventListener('pointermove', track)
+      document.removeEventListener('pointerup', cancel)
+      document.removeEventListener('pointercancel', cancel)
     }
 
-    function track(ev: MouseEvent) {
+    function track(ev: PointerEvent) {
       lastX = ev.clientX
       lastY = ev.clientY
       // Moved before the hold matured → this is a text selection.
@@ -302,10 +330,11 @@ export function useCardDrag(card: Card) {
       beginDrag(lastX, lastY, additive)
     }, HOLD_MS)
 
-    document.addEventListener('mousemove', track)
-    document.addEventListener('mouseup', cancel)
+    document.addEventListener('pointermove', track)
+    document.addEventListener('pointerup', cancel)
+    document.addEventListener('pointercancel', cancel)
     cancelHoldRef.current = cancel
   }, [beginDrag])
 
-  return { onMouseDown, onMouseDownCapture }
+  return { onPointerDown, onPointerDownCapture }
 }

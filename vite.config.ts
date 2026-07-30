@@ -8,6 +8,15 @@ import { readFileSync } from 'node:fs'
 // wrong build the first time package.json was bumped.
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8')) as { version: string }
 
+// Where the app will be served from. GitHub Pages puts a project site at
+// /<repo>/, not the domain root, and a service worker can only control
+// URLs at or below its own path — so this has to be right or an installed
+// copy silently fails to find its own assets.
+//
+// Set BASE_PATH=/nexinote/ for a Pages build; anything served from a
+// domain root (Netlify, Cloudflare Pages, a custom domain) needs nothing.
+const base = process.env.BASE_PATH ?? '/'
+
 // ─────────────────────────────────────────────────────────────
 // The `@` alias is declared HERE and in tsconfig.json — changing one
 // requires changing the other.
@@ -19,6 +28,7 @@ const pkg = JSON.parse(readFileSync('./package.json', 'utf-8')) as { version: st
 // ─────────────────────────────────────────────────────────────
 
 export default defineConfig({
+  base,
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
@@ -36,8 +46,11 @@ export default defineConfig({
         // installed copy reads as an application rather than a tab.
         display: 'standalone',
         orientation: 'any',
-        start_url: '/',
-        scope: '/',
+        // Must track `base`: an installed app launches start_url directly,
+        // and a scope that doesn't cover the app's own URLs stops the
+        // service worker from controlling it.
+        start_url: base,
+        scope: base,
         // Matches --nx-bg / --nx-core from the default Cherenkov theme,
         // so the splash screen and title bar don't flash a foreign color
         // before the app paints.
@@ -65,7 +78,7 @@ export default defineConfig({
         // it above the default limit would silently drop it from the
         // precache and break map cards offline-first.
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        navigateFallback: 'index.html',
+        navigateFallback: base + 'index.html',
         runtimeCaching: [
           {
             // Map tiles: show what has already been seen when offline,

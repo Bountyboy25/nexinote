@@ -37,3 +37,10 @@
 .canvas {
   display: block;
 }
+
+/* On a phone the toolbar wraps to two rows and the minimap has nowhere
+   left to sit without covering the board. It is an orientation aid for
+   large canvases on large screens, so it steps aside entirely. */
+@media (max-width: 760px) {
+  .minimap { display: none; }
+}

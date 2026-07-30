@@ -2,7 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- The canvas implements its own pan and pinch-zoom, so the browser's
+         page zoom is disabled: two zoom systems fighting over the same
+         pinch makes the board impossible to control. viewport-fit=cover
+         lets the canvas run under the notch/home indicator on phones. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <title>Nexinote</title>
 
     <!-- Installable-app metadata. The manifest itself is generated at
