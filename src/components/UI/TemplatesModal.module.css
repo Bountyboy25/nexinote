@@ -5,19 +5,19 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55); /* spec: modal backdrop = 55% black */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
 }
 
 .modal {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  border-radius: 20px; /* spec: modals = radius 20 */
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), 0 0 24px var(--nx-core-soft);
   width: min(560px, calc(100vw - 40px));
   max-height: calc(100vh - 80px);
   overflow: hidden;
@@ -27,15 +27,25 @@
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 16px;
   padding: 20px 24px 16px;
   border-bottom: 1px solid var(--border);
 }
 
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
 .title {
-  font-size: 16px;
+  font-family: var(--nx-font-display);
+  font-size: 17px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--text-1);
   margin: 0;
 }
@@ -84,7 +94,7 @@
   background: var(--surface-3);
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 106, 245, 0.15);
+  box-shadow: 0 6px 20px var(--nx-core-soft);
 }
 
 .emoji {
@@ -102,4 +112,122 @@
   font-size: 11px;
   color: var(--text-3);
   line-height: 1.4;
+}
+
+/* ── Decline path (welcome mode) ──
+   Declining is a real choice, so it gets a real button rather than
+   leaving the X in the corner as the only way out. */
+.skipRow {
+  display: flex;
+  justify-content: center;
+  padding: 0 24px 22px;
+}
+
+.skipBtn {
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.skipBtn:hover {
+  border-color: var(--nx-core);
+  color: var(--nx-core);
+  background: var(--nx-core-soft);
+}
+
+/* ── Destructive confirmation ──
+   Replaces the grid rather than layering over it: at the moment of a
+   board-erasing decision, the templates behind it are a distraction. */
+.warning {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 28px 28px 24px;
+}
+
+.warnIcon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  font-size: 22px;
+  color: var(--nx-danger);
+  background: color-mix(in srgb, var(--nx-danger) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--nx-danger) 45%, transparent);
+}
+
+.warnTitle {
+  margin: 4px 0 0;
+  font-family: var(--nx-font-display, var(--font-ui));
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-1);
+}
+
+.warnBody {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.warnBody strong { color: var(--text-1); }
+
+.warnNote {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.warnActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.warnCancel,
+.warnConfirm {
+  padding: 8px 18px;
+  border-radius: 9px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+/* Cancel is the visually dominant option — the safe path should be the
+   easy one to hit. */
+.warnCancel {
+  border: 1px solid var(--nx-core);
+  background: var(--nx-core-soft);
+  color: var(--nx-core);
+}
+
+.warnCancel:hover {
+  background: color-mix(in srgb, var(--nx-core) 22%, transparent);
+}
+
+.warnConfirm {
+  border: 1px solid color-mix(in srgb, var(--nx-danger) 50%, transparent);
+  background: transparent;
+  color: var(--nx-danger);
+}
+
+.warnConfirm:hover {
+  background: color-mix(in srgb, var(--nx-danger) 14%, transparent);
+  border-color: var(--nx-danger);
 }

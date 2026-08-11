@@ -1,0 +1,94 @@
+/* ============================================================
+   Nexinote — Nuclear Nexus base tokens
+   Import once in main.tsx: import './styles/nuclear-base.css'
+   Fonts: add to index.html <head>:
+   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+   ============================================================ */
+
+:root {
+  /* Defaults (Cherenkov) so first paint has values before initTheme() */
+  --nx-bg: #060b14;
+  --nx-bg-raised: #0c1524;
+  --nx-bg-panel: #101c30;
+  --nx-ink: #dbe9ff;
+  --nx-ink-dim: #7e93b8;
+  --nx-core: #3ec6ff;
+  --nx-core-hot: #8fe3ff;
+  --nx-core-soft: rgba(62, 198, 255, 0.14);
+  --nx-core-glow: rgba(62, 198, 255, 0.45);
+  --nx-hazard: #ffb454;
+  --nx-danger: #ff5470;
+  --nx-line: rgba(126, 147, 184, 0.22);
+  --nx-grid: rgba(62, 198, 255, 0.05);
+
+  /* Document "paper" — the writing surface inverts the theme so long-form
+     text is always dark-on-light (see themes.ts for per-theme values) */
+  --nx-doc-paper: #eef4fd;
+  --nx-doc-ink: #14202f;
+  --nx-doc-accent: #0b78b8;
+
+  /* Type roles */
+  --nx-font-display: 'Rajdhani', system-ui, sans-serif;
+  --nx-font-body: 'Space Grotesk', system-ui, sans-serif;
+  --nx-font-mono: 'Share Tech Mono', monospace;
+
+  /* Motion */
+  --nx-ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+  --nx-speed: 0.25s;
+}
+
+/* Global color transition, toggled by applyTheme() during a swap only */
+.nx-theme-transition,
+.nx-theme-transition *,
+.nx-theme-transition *::before,
+.nx-theme-transition *::after {
+  transition:
+    background-color 0.6s ease,
+    border-color 0.6s ease,
+    color 0.6s ease,
+    fill 0.6s ease,
+    stroke 0.6s ease,
+    box-shadow 0.6s ease !important;
+}
+
+/* Canvas surface — apply .nx-canvas-surface to CanvasView's root div */
+.nx-canvas-surface {
+  background: var(--nx-bg);
+  background-image:
+    linear-gradient(var(--nx-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--nx-grid) 1px, transparent 1px);
+  background-size: 36px 36px;
+  color: var(--nx-ink);
+  font-family: var(--nx-font-body);
+}
+
+/* Connector glow — apply to <path> strokes in ConnectorLayer */
+.nx-connector {
+  stroke: var(--nx-core);
+  filter: drop-shadow(0 0 4px var(--nx-core-glow));
+}
+.nx-connector-node {
+  fill: var(--nx-core);
+  filter: drop-shadow(0 0 5px var(--nx-core-glow));
+}
+
+/* Selection ring — apply to a selected card wrapper */
+.nx-selected {
+  outline: 2px solid var(--nx-core);
+  outline-offset: 2px;
+  box-shadow: 0 0 18px var(--nx-core-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--nx-core);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

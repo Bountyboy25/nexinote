@@ -1,20 +1,48 @@
 .minimap {
   position: fixed;
-  bottom: 28px;
-  left: 70px;   /* clear the 56px SideTaskbar */
+  /* Sits ABOVE the toolbar row rather than beside it.
+     The toolbar is centred and ~716px wide (bottom: 28px, ~52px tall),
+     so on any viewport under ~1140px its left edge reaches back into
+     this corner — which includes 1920px displays at 175% OS scaling.
+     Clearing it horizontally would depend on viewport width; clearing
+     it vertically always works.
+       28 (toolbar offset) + 52 (toolbar height) + 12 (gap) = 92 */
+  bottom: 92px;
+  /* The 56px SideTaskbar this used to clear is gone (its tools merged
+     into the bottom Toolbar), so the minimap hugs the corner now. */
+  left: 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   overflow: hidden;
   z-index: 999;
   opacity: 0.65;
-  transition: opacity var(--transition);
+  /* Slow by default so the idle fade-out (and the fade back in when a
+     drag starts) reads as ambient rather than as a popup. */
+  transition: opacity 0.8s ease;
   box-shadow: var(--shadow);
 }
 
 .minimap:hover {
   opacity: 1;
+  /* Deliberate hover, though — that should feel immediate. */
+  transition: opacity 0.15s ease;
+}
+
+/* Faded out after 30s without a drag. pointer-events: none matters —
+   an invisible overlay that still swallowed canvas clicks would be a
+   dead zone in the bottom-left corner of the board. */
+.idle {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .canvas {
   display: block;
+}
+
+/* On a phone the toolbar wraps to two rows and the minimap has nowhere
+   left to sit without covering the board. It is an orientation aid for
+   large canvases on large screens, so it steps aside entirely. */
+@media (max-width: 760px) {
+  .minimap { display: none; }
 }

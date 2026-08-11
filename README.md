@@ -1,6 +1,8 @@
-# Canvas App — Phase 1
+# nexinote
 
-A Milanote-inspired infinite canvas built with Vite, React, TypeScript, and Zustand.
+A Milanote-inspired infinite canvas for visual note-taking — built with Vite, React, TypeScript, and Zustand.
+
+Arrange notes, documents, task lists, tables, images, links, and columns freely on an infinite board, connect them with arrows, and organize everything across multiple boards. Everything is saved automatically to your browser's local storage.
 
 ---
 
@@ -11,10 +13,200 @@ A Milanote-inspired infinite canvas built with Vite, React, TypeScript, and Zust
 npm install
 
 # 2. Start the dev server
-npm run dev
+npm run dev          # → http://localhost:5173
 
-# 3. Open http://localhost:5173
+# 3. Type-check + production build
+npm run build        # tsc (type-check only) + vite build → dist/
+
+# 4. Preview the production build
+npm run preview
 ```
+
+> `tsc` runs with `noEmit` — it only type-checks. Vite produces the actual
+> bundle in `dist/`. No compiled `.js` files are written next to the sources.
+
+---
+
+## Installing it as an app
+
+Nexinote is a PWA: it installs from the browser with no download and no
+installer, and because every board already lives in `localStorage`, an
+installed copy works with no network at all.
+
+### On your phone
+
+1. **Publish it first.** A service worker requires HTTPS, so a phone
+   can't install from `localhost` or a LAN IP. See *Deploying* below —
+   the included GitHub Actions workflow does it in one push.
+2. Open the published URL on the phone.
+3. **Android / Chrome:** tap the **Install app** prompt, or ⋮ → *Add to
+   Home screen*. You can also use **Settings → Install** inside the app.
+4. **iPhone / Safari:** tap **Share** → **Add to Home Screen**. iOS
+   doesn't support the install prompt, so this is the only route — the
+   in-app Install row stays hidden there rather than showing a button
+   that can't work.
+
+It then launches from your home screen in its own window, with no
+browser chrome, and opens offline.
+
+**Touch is supported:** drag with one finger on empty canvas to pan,
+pinch with two to zoom, drag a card to move it, and **press and hold**
+to grab a card from on top of its own text. The minimap hides on small
+screens and the toolbar wraps to fit.
+
+> Phone-sized screens are usable but the app is still designed for a
+> large canvas — a tablet is a much better experience than a phone.
+
+### On a desktop
+
+Use the install icon in the address bar, or **Settings → Install**. The
+row only appears when the browser actually offers a prompt: Chromium
+browsers do, Firefox and desktop Safari don't.
+
+Updates are **offered, not forced** (Settings → *Update available*). This
+is a note-taking app, and swapping the running code mid-sentence risks
+losing an editor that hasn't saved yet — so you pick the moment.
+
+### Deploying
+
+A workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+builds and publishes to GitHub Pages on every push to `main`.
+
+**One-time setup:** repo **Settings → Pages → Source = GitHub Actions**.
+Optionally add a repository secret `VITE_FEEDBACK_ENDPOINT` so deployed
+builds can submit feedback.
+
+Your app lands at `https://<user>.github.io/<repo>/`. The workflow sets
+`BASE_PATH` from the repo name automatically — that matters because a
+project site is served from a subpath, and a service worker can only
+control URLs at or below its own path. To publish before merging to
+`main`, run the workflow by hand from the **Actions** tab.
+
+Any other static host works too; if you serve from a domain root, no
+`BASE_PATH` is needed:
+
+```bash
+npm run build                      # domain root
+BASE_PATH=/nexinote/ npm run build # served from /nexinote/
+```
+
+### Regenerating the icons
+
+```bash
+npm run icons      # → public/icon-*.png
+```
+
+`scripts/generate-icons.mjs` draws the mark analytically and encodes PNGs
+using only Node's built-in `zlib`, so there's no image-processing
+dependency to install. Edit the artwork in that file and re-run.
+
+---
+
+## Feedback
+
+Settings → **Feedback** opens a form that posts to a Google Sheet you own,
+via a Google Apps Script web app. Setup is a five-minute, one-time job and
+needs your own Google account: see **[feedback/README.md](feedback/README.md)**.
+
+The form has category-specific suggested prompts, because "send feedback"
+with an empty box mostly returns "it's good, thanks".
+
+**What's sent:** the message, category, optional email, and technical
+context that makes a report actionable — app version, browser, screen
+size, theme, and *counts* of boards and cards.
+
+**What's never sent:** anything written on a board. No note text, card
+titles, board names, sketch strokes, images or map pins. If the endpoint
+isn't configured or can't be reached, the message can still be copied to
+the clipboard so nothing anyone wrote is lost.
+
+---
+
+## Features
+
+- **Infinite canvas** — pan, zoom-to-cursor, and a live minimap that highlights the card
+  you're dragging and fades away when you leave it alone
+- **Multiple boards** — a gallery of boards, each with its own cards + connectors, and
+  **sub-boards** nested inside a board via a board card
+- **15 card types** — note, document, task list, table, image, link, column, sketch, color,
+  audio, video, heading, comment, map, and board
+- **Connectors** — SVG arrows between cards with 6 anchor points (optionally animated)
+- **Image upload** — click-to-upload, **drag & drop onto the canvas**, or **paste from the clipboard**; large images are downscaled automatically so they fit in local storage
+- **Document editor** — documents open in a focused, full-page writing view (Milanote-style)
+- **Lock cards** — pin a card's position so it can't be nudged while you work around it
+  (Ctrl/Cmd+L or the padlock in the card header). Contents stay fully editable
+- **Board icons** — give any board or sub-board a built-in glyph and accent color, or
+  upload your own image, so a gallery of projects reads at a glance
+- **Templates** — offered automatically the first time you open a board or sub-board, and
+  available any time from Settings. Applying one replaces the board, so it always warns
+  first when there's work to lose
+- **Auto-save** — every change is persisted to `localStorage` immediately
+
+---
+
+## Card Types
+
+| Card | What it's for |
+|------|---------------|
+| 📝 **Note** | Short rich-text note, edited inline on the card |
+| 📄 **Document** | Long-form writing — the smallest card: a custom icon + word count, opens into a full-page editor |
+| ✅ **Task** | Checklist with square / circle / star checkbox styles + progress bar |
+| 📊 **Table** | Editable grid of cells |
+| 🖼️ **Image** | Uploaded (downscaled & embedded) or linked by URL; cover / contain fit |
+| 🔗 **Link** | URL with a description |
+| ▤ **Column** | A container that stacks whole cards of any type (except other columns) |
+| ✏️ **Sketch** | Freehand drawing — pens, any color, nib sizes, eraser, undo, resizable, focus view |
+| 🎨 **Color** | A swatch with hex, picker, presets, click-to-copy, and a contrast preview |
+| 🔊 **Audio** | A small uploaded clip (≤2MB) or a track link |
+| 🎬 **Video** | YouTube / Vimeo / direct `.mp4` link — never embedded in storage |
+| 🅷 **Heading** | Section title for a region of the board — 3 sizes, 3 alignments |
+| 💬 **Comment** | Append-only thread of timestamped remarks |
+| 🗺️ **Map** | Real OpenStreetMap slippy map — search a place, drop and label pins |
+| 🗂️ **Board** | A board nested inside this one, to keep a big project uncluttered |
+
+### Sketch, color, and the storage budget
+
+Sketches are stored as **vector strokes**, not a canvas image — so they stay sharp at 400%
+zoom and cost a fraction of the space. That matters because everything shares one ~5MB
+`localStorage` budget, which is also why audio uploads are capped and video is link-only.
+
+### Columns hold real cards
+
+Drop **any** card onto a column — a table, a map, a sketch, a sub-board — and it moves in
+whole. Nothing is flattened or converted: a table dropped into a column is still an editable
+table. Columns are the one thing a column won't take, since containers inside containers have
+no sensible layout. Rows collapse to keep long stacks tidy (collapsed cards aren't rendered
+at all, so a column of maps stays fast), and the ↳ button lifts a card back onto the board.
+
+### Sub-boards
+
+A **board card** holds a real board inside the current one. Click it to descend; the top bar
+grows a breadcrumb trail to climb back out. Nested boards never appear in the main gallery,
+so a project can hold a dozen of them without turning the landing screen into a wall of
+tiles. Deleting a board deletes everything nested inside it (you'll be told how much);
+deleting just the *card* releases its board back to the gallery instead of destroying it.
+
+### Notes vs. Documents
+
+A **note** is a small card you type into directly on the canvas — good for short
+thoughts. A **document** behaves like a file: on the board it's just an icon and a
+word count, and **clicking it** launches a focused full-page editor with a
+formatting toolbar. Keeping the contents out of the tile is deliberate — a board
+full of documents should read as a shelf of files, not a wall of 12px text.
+
+Because the icon is the only thing telling one document from another at a glance,
+it's **customizable**: hover a document card and click the swatch button to pick any
+glyph, accent color, or your own uploaded image — the same picker boards use. Document
+cards are the smallest type on the canvas, sized to the icon rather than to content
+they no longer display.
+
+### Drawing up close
+
+Sketch cards have a **focus view** (the ⌖ button in the pen tray, Esc to leave): the
+same drawing, magnified to fill most of the screen, so fine strokes are actually
+workable. It's a magnifier, not a separate canvas — strokes stay exactly where they
+were. The pen tray also has a **color picker** beside the six theme pens for choosing
+any color at all.
 
 ---
 
@@ -22,83 +214,59 @@ npm run dev
 
 ```
 src/
-├── main.tsx              Entry point — mounts React into index.html
-├── App.tsx               Root component — assembles all sections
+├── main.tsx                Entry point — mounts React into index.html
+├── App.tsx                 Root — routes between board gallery and canvas
 │
 ├── types/
-│   └── index.ts          TypeScript shapes (Card, Camera, Store)
-│                         ↑ Every other file imports from here
+│   └── index.ts            All TypeScript shapes (Card union, Board, Store…)
 │
 ├── store/
-│   └── index.ts          Zustand store — single source of truth
-│                         ↑ Components read/write state here
+│   └── index.ts            Zustand store — single source of truth + localStorage
 │
 ├── utils/
-│   └── canvas.ts         Pure math functions (screen↔world conversion)
-│                         ↑ Used by hooks and components
+│   ├── canvas.ts           Pure math (screen↔world, zoom, fit-to-cards)
+│   ├── image.ts            Read + downscale uploaded images to data URLs
+│   └── text.ts             HTML → plain text + word count helpers
 │
 ├── hooks/
-│   ├── useKeyboard.ts    Global keyboard shortcuts
-│   ├── useCanvasPan.ts   Space+drag / middle-click panning
-│   ├── useCanvasZoom.ts  Scroll-to-zoom toward cursor
-│   └── useCardDrag.ts    Per-card drag with zoom-corrected delta
+│   ├── useKeyboard.ts      Global keyboard shortcuts
+│   ├── useCanvasPan.ts     Space+drag / middle-click panning
+│   ├── useCanvasZoom.ts    Scroll-to-zoom toward cursor
+│   └── useCardDrag.ts      Per-card drag with zoom-corrected delta
 │
-├── components/
-│   ├── Canvas/
-│   │   └── CanvasView.tsx  The viewport + world div + card renderer
-│   ├── Card/
-│   │   └── CardNode.tsx    Individual card (reads its own store slice)
-│   ├── TopBar/
-│   │   └── TopBar.tsx      Navigation bar with zoom display
-│   ├── Toolbar/
-│   │   └── Toolbar.tsx     Bottom floating tool palette
-│   └── MiniMap/
-│       └── MiniMap.tsx     Canvas 2D overview of all cards
-│
-└── styles/
-    └── global.css          CSS design tokens + reset
+└── components/
+    ├── Boards/             Board gallery (create / open / rename / delete)
+    ├── Canvas/             Viewport, world transform, connector layer, drag-drop
+    ├── Card/               Card shell (CardNode) + per-type content components
+    ├── Toolbar/            Bottom floating tool palette
+    ├── SideTaskbar/        Contextual formatting tools for the selection
+    ├── TopBar/             Board name + zoom + navigation
+    ├── MiniMap/            2D overview of all cards
+    └── UI/                 Modals — Templates, Settings, Document editor, Table size
 ```
 
 ---
 
-## Core Concepts Explained
+## Core Concepts
 
 ### The Camera
-The camera is 3 numbers: `{ x, y, zoom }`.
-- `x` / `y` = how far the world has been panned (screen pixels)
-- `zoom` = scale multiplier (1 = 100%, 2 = 200%)
-
-The entire canvas is one CSS transform:
-```
-translate(camera.x px, camera.y px) scale(camera.zoom)
-```
+The camera is 3 numbers: `{ x, y, zoom }`. The entire world is rendered with one
+CSS transform: `translate(camera.x px, camera.y px) scale(camera.zoom)`.
 
 ### Coordinate Systems
-Cards live in **world space**. The screen is **screen space**.
+Cards live in **world space**; the screen is **screen space**. The two conversions
+live in `utils/canvas.ts` and are used everywhere:
 
 ```
-worldX = (screenX - camera.x) / camera.zoom   ← screen → world
-screenX = worldX * camera.zoom + camera.x      ← world → screen
+worldX  = (screenX - camera.x) / camera.zoom   ← screen → world
+screenX = worldX * camera.zoom + camera.x       ← world → screen
 ```
-
-These two formulas are in `utils/canvas.ts` and used everywhere.
 
 ### The Store (Zustand)
-```
-Component reads state → useCards(), useCamera(), etc.
-Component triggers action → addCard(), updateCard(), etc.
-Store updates → subscribed components re-render
-```
-
-No prop drilling. Any component anywhere can access or update any state.
-
-### Custom Hooks
-Each interaction is isolated in a hook:
-- `useCanvasPan` — knows nothing about zoom
-- `useCanvasZoom` — knows nothing about pan
-- `useCardDrag` — knows nothing about canvas pan/zoom
-
-This makes each behavior easy to understand, test, and modify.
+Components read state via selector hooks (`useCards()`, `useCamera()`, …) and
+trigger actions (`addCard()`, `updateCard()`, `openDocument()`, …). The active
+board's cards and connectors are persisted to `localStorage` after every mutation,
+so work is never lost.
 
 ---
 
@@ -106,20 +274,16 @@ This makes each behavior easy to understand, test, and modify.
 
 | Key | Action |
 |-----|--------|
+| Drag a card | Move it — grab any blank part of the card |
+| Press & hold a card | Hold ~0.2s to drag from anywhere, including over its text |
 | Space + drag | Pan the canvas |
 | Scroll | Zoom toward cursor |
-| Double-click canvas | Add note at cursor |
+| Double-click canvas | Add a note at the cursor |
+| Double-click document | Open it in the full-page editor |
+| Drag image onto canvas | Add it as an image card |
+| Paste image | Add it as an image card at the viewport center |
 | Delete / Backspace | Delete selected cards |
-| Ctrl + A | Select all |
-| Ctrl + 0 | Reset view |
-| Escape | Deselect all |
-
----
-
-## Phase 2 Preview (what comes next)
-
-- **Rich text editor** — Tiptap embedded in card body
-- **Table/formula card** — Hyperformula cell engine
-- **Connectors** — SVG arrows between cards
-- **Media cards** — Image upload and display
-- **Templates** — Saved board layouts
+| Ctrl/Cmd + L | Lock / unlock the selected cards in place |
+| Ctrl/Cmd + A | Select all |
+| Ctrl/Cmd + 0 | Reset view |
+| Escape | Deselect all / close the document editor |

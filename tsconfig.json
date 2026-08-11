@@ -8,7 +8,11 @@
     "module": "ESNext",          // Use ES modules (import/export)
     "moduleResolution": "bundler", // Let Vite handle module resolution
     "jsx": "react-jsx",          // Transform JSX → React.createElement
-    
+
+    // Vite bundles the app — tsc is only used for type-checking.
+    // noEmit stops tsc from writing .js files next to the sources.
+    "noEmit": true,
+
     // Strictness — these catch bugs at compile time, not runtime
     "strict": true,              // Enable all strict type checks
     "noUnusedLocals": true,      // Error on unused variables

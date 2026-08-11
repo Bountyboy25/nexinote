@@ -2,10 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Canvas</title>
+    <!-- The canvas implements its own pan and pinch-zoom, so the browser's
+         page zoom is disabled: two zoom systems fighting over the same
+         pinch makes the board impossible to control. viewport-fit=cover
+         lets the canvas run under the notch/home indicator on phones. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Nexinote</title>
+
+    <!-- Installable-app metadata. The manifest itself is generated at
+         build time by vite-plugin-pwa (see vite.config.ts) and injected
+         here, so it always matches the hashed asset names. -->
+    <meta name="description" content="A Milanote-style infinite canvas for visual note-taking. Boards, cards, sketches and connectors, saved locally in your browser." />
+    <meta name="theme-color" content="#060b14" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Lets iOS run an installed copy without Safari's chrome -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Nexinote" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   </head>
   <body>
     <!--

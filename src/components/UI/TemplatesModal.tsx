@@ -1,21 +1,33 @@
+import { useState } from 'react'
 import { nanoid } from 'nanoid'
-import { useCanvasStore } from '@/store'
+import { useCanvasStore, useCards, useConnectors } from '@/store'
 import { fitCameraToCards } from '@/utils/canvas'
 import type { Card } from '@/types'
 import styles from './TemplatesModal.module.css'
 
-// ─────────────────────────────────────────────────────────────
-// TEMPLATES MODAL — 5 preset board starters
+// ───────────────────────────────────────────────────────
+// TEMPLATES MODAL — preset board starters
 //
-// Each template is a function that returns a Card[].
-// Applying a template:
-//   1. Clears the board
-//   2. Adds all cards from the template
-//   3. Fits camera to the new cards
-// ─────────────────────────────────────────────────────────────
+// Reached two ways, which is why it has two modes:
+//
+//   'welcome' — shown automatically the first time a board or
+//               sub-board is opened. This is the natural moment to
+//               offer a starting layout: the board is empty, so there
+//               is nothing to lose and no warning is needed. Declining
+//               is a first-class option, not a hidden X.
+//   'menu'    — opened deliberately from Settings, on a board that may
+//               already hold work.
+//
+// Applying a template REPLACES the board. When the board has anything
+// on it, the pick routes through an explicit confirmation naming what
+// will be destroyed — the counts come from the live board, not from a
+// generic "are you sure".
+// ───────────────────────────────────────────────────────
 
 interface Props {
   onClose: () => void
+  /** 'welcome' is the automatic first-open offer; 'menu' is deliberate. */
+  mode?: 'welcome' | 'menu'
 }
 
 // ── Template definitions ──────────────────────────────────────
@@ -110,30 +122,32 @@ const TEMPLATES: TemplateDef[] = [
   },
 ]
 
-// ── Component ──────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────
 
-export function TemplatesModal({ onClose }: Props) {
-  const { clearBoard, setCamera, resetView } =
-    useCanvasStore.getState()
+export function TemplatesModal({ onClose, mode = 'menu' }: Props) {
+  const cards      = useCards()
+  const connectors = useConnectors()
+  const { applyTemplate, setCamera, resetView } = useCanvasStore.getState()
 
-  function applyTemplate(templateCards: Card[]) {
+  // Set while a destructive pick is awaiting confirmation.
+  const [pending, setPending] = useState<TemplateDef | null>(null)
+
+  const isWelcome = mode === 'welcome'
+  // Whether picking anything would destroy work. In welcome mode the
+  // board is new, so this is normally false and picks apply straight away.
+  const hasContent = cards.length > 0
+
+  function commit(def: TemplateDef) {
+    const templateCards = def.cards()
+
     if (templateCards.length === 0) {
-      clearBoard()
+      applyTemplate([])
       resetView()
       onClose()
       return
     }
 
-    // Replace the board's cards in a SINGLE store update — the previous
-    // implementation called setState once per card, which triggered an
-    // O(N) cascade of re-renders.
-    useCanvasStore.setState({
-      cards: templateCards,
-      connectors: [],
-      selectedIds: new Set<string>(),
-    })
-
-    // Fit camera to new cards
+    applyTemplate(templateCards)
     setCamera(
       fitCameraToCards(
         templateCards,
@@ -141,8 +155,13 @@ export function TemplatesModal({ onClose }: Props) {
         window.innerHeight - 52,
       ),
     )
-
     onClose()
+  }
+
+  // A pick on a board with work on it stops for confirmation first.
+  function pick(def: TemplateDef) {
+    if (hasContent) setPending(def)
+    else commit(def)
   }
 
   // Backdrop click closes modal
@@ -150,27 +169,78 @@ export function TemplatesModal({ onClose }: Props) {
     if (e.target === e.currentTarget) onClose()
   }
 
+  // In welcome mode the blank option is the "no thanks" button below,
+  // so it would be a duplicate inside the grid.
+  const shown = isWelcome ? TEMPLATES.filter(t => t.id !== 'blank') : TEMPLATES
+
   return (
     <div className={styles.backdrop} onClick={onBackdropClick}>
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Choose a template</h2>
-          <button className={styles.closeBtn} onClick={onClose}>✕</button>
+          <div>
+            <h2 className={styles.title}>
+              {isWelcome ? 'Start with a template?' : 'Choose a template'}
+            </h2>
+            <p className={styles.subtitle}>
+              {isWelcome
+                ? 'Pick a layout to begin with, or start from an empty board.'
+                : 'A template replaces everything currently on this board.'}
+            </p>
+          </div>
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Close">✕</button>
         </div>
 
-        <div className={styles.grid}>
-          {TEMPLATES.map(t => (
-            <button
-              key={t.id}
-              className={styles.card}
-              onClick={() => applyTemplate(t.cards())}
-            >
-              <span className={styles.emoji}>{t.emoji}</span>
-              <span className={styles.name}>{t.name}</span>
-              <span className={styles.desc}>{t.desc}</span>
-            </button>
-          ))}
-        </div>
+        {pending ? (
+          /* ── Destructive confirmation ── */
+          <div className={styles.warning} role="alertdialog" aria-live="assertive">
+            <div className={styles.warnIcon} aria-hidden="true">⚠</div>
+            <h3 className={styles.warnTitle}>This will erase the board</h3>
+            <p className={styles.warnBody}>
+              Applying <strong>{pending.name}</strong> deletes everything currently
+              on this board — {cards.length} card{cards.length === 1 ? '' : 's'}
+              {connectors.length > 0 && (
+                <> and {connectors.length} connector{connectors.length === 1 ? '' : 's'}</>
+              )}
+              . This cannot be undone.
+            </p>
+            <p className={styles.warnNote}>
+              Sub-boards held by any board card are kept, and return to your
+              board gallery.
+            </p>
+            <div className={styles.warnActions}>
+              <button className={styles.warnCancel} onClick={() => setPending(null)}>
+                Cancel
+              </button>
+              <button className={styles.warnConfirm} onClick={() => commit(pending)}>
+                Erase and apply
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className={styles.grid}>
+              {shown.map(t => (
+                <button
+                  key={t.id}
+                  className={styles.card}
+                  onClick={() => pick(t)}
+                >
+                  <span className={styles.emoji}>{t.emoji}</span>
+                  <span className={styles.name}>{t.name}</span>
+                  <span className={styles.desc}>{t.desc}</span>
+                </button>
+              ))}
+            </div>
+
+            {isWelcome && (
+              <div className={styles.skipRow}>
+                <button className={styles.skipBtn} onClick={onClose}>
+                  Start with an empty board
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )

@@ -9,7 +9,8 @@ import styles from './CardTypes.module.css'
 // Cell model (stored as string[][]):
 //   - Starts with '='  → formula cell → plain <input>
 //   - Anything else    → rich text cell → contentEditable <div>
-//     (HTML is stored; execCommand from SideTaskbar formats it)
+//     (HTML is stored; execCommand from the Toolbar's context
+//     tools — SelectionTools — formats it)
 //
 // Formula evaluator strips HTML tags before parsing so a cell
 // containing <b>5</b> still counts as numeric value 5 when
@@ -99,7 +100,8 @@ function displayValue(raw: string, rows: string[][]): string {
 
 // ── Rich text cell ─────────────────────────────────────────────
 // Uses contentEditable so execCommand (bold, color, size, etc.)
-// from the SideTaskbar works on focused cells just like note cards.
+// from the Toolbar's context tools works on focused cells just like
+// note cards.
 
 interface RichCellProps {
   value:   string

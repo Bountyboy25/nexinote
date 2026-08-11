@@ -18,11 +18,24 @@ export type AnchorPoint =
   | 'bot-left' | 'bot-right'
 
 // ── Connector ─────────────────────────────────────────────────
+// Nuclear-themed connector styles:
+//   beam        — Particle Beam: solid Cherenkov line + glow (default)
+//   pulse       — Reactor Pulse: hot animated energy dashes
+//   hazard      — Hazard Tape: amber striped warning line
+//   decay       — Decay Trail: red dotted line, radiation-trefoil head
+//   containment — Containment: double-walled line with a seal end-cap
+export type ConnectorStyle = 'beam' | 'pulse' | 'hazard' | 'decay' | 'containment'
+
 export interface Connector {
   id: string
   fromId: string
   toId: string
-  toAnchor?: AnchorPoint   // Which of the 6 anchor points on the target
+  // LEGACY — only present on boards saved before connectors became
+  // continuous. Attachment is now a live ray/rect intersection computed
+  // per frame in ConnectorLayer, so this field is written by nothing and
+  // read by nothing; it is kept only so old saved boards still parse.
+  toAnchor?: AnchorPoint
+  style?: ConnectorStyle   // Defaults to 'beam'
 }
 
 // ── Card variants ─────────────────────────────────────────────
@@ -34,6 +47,16 @@ interface BaseCard {
   title: string
   color?: string
   createdAt: number
+  // Pinned in place: no dragging, no resize grips. Deliberately scoped to
+  // POSITION only — a locked card can still be selected, edited, connected
+  // and deleted, so "locked" never means "mysteriously unresponsive".
+  locked?: boolean
+  // Custom header icon — same vocabulary as Board.icon: a GLYPHS key or an
+  // uploaded data URL, plus an accent color. Unset means the card wears its
+  // type's default glyph (CARD_ICONS in CardNode), so existing boards are
+  // untouched. Kept a plain string for the same reasons as Board.icon.
+  icon?: string
+  accent?: string
 }
 
 export interface NoteCard extends BaseCard {
@@ -43,7 +66,14 @@ export interface NoteCard extends BaseCard {
 
 export interface DocumentCard extends BaseCard {
   type: 'document'
-  content: { html: string }
+  content: {
+    html: string
+    // Same vocabulary as Board.icon: a GLYPHS key or an uploaded data URL,
+    // plus an accent color. A board full of documents is a shelf of files,
+    // and files are told apart by their icons.
+    icon?: string
+    accent?: string
+  }
 }
 
 export interface TaskCard extends BaseCard {
@@ -70,6 +100,12 @@ export interface LinkCard extends BaseCard {
 }
 
 // ── Column card ────────────────────────────────────────────────
+
+// LEGACY shape. Columns used to flatten a dropped card into one of
+// three text stubs, which destroyed everything else about it — a table
+// became a title, a task list became loose strings. Boards saved before
+// the change still contain these; migrateLegacyColumns() in the store
+// converts them to real cards on load. Nothing writes this any more.
 export interface ColumnItem {
   id: string
   type: 'note' | 'task' | 'link'
@@ -82,13 +118,113 @@ export interface ColumnItem {
 export interface ColumnCard extends BaseCard {
   type: 'column'
   content: {
-    items: ColumnItem[]
+    // Real, whole cards — a column is a container, not a converter.
+    // Every card type is allowed EXCEPT another column: nesting
+    // containers inside containers has no sensible layout or exit path,
+    // so it is blocked at every entry point (drop, add menu, render).
+    items: Card[]
   }
 }
 
+// ── Sketch card ────────────────────────────────────────────────
+// Strokes are stored as VECTORS, not a rasterized canvas image: a
+// PNG data URL of a 280×220 drawing costs ~40KB of the ~5MB
+// localStorage budget, while the same drawing as points costs well
+// under 1KB — and stays crisp at any zoom.
+export interface SketchStroke {
+  id: string
+  color: string
+  width: number
+  points: number[]   // flat [x0,y0,x1,y1,…] in card-local (unzoomed) px
+}
+
+export interface SketchCard extends BaseCard {
+  type: 'sketch'
+  content: {
+    strokes: SketchStroke[]
+    height: number   // drawing surface height in world px
+  }
+}
+
+// ── Color card ─────────────────────────────────────────────────
+export interface ColorCard extends BaseCard {
+  type: 'color'
+  content: { hex: string; label: string }
+}
+
+// ── Audio card ─────────────────────────────────────────────────
+// src is either a remote URL or a data URL from a small upload
+// (see AUDIO_MAX_BYTES in utils/media.ts).
+export interface AudioCard extends BaseCard {
+  type: 'audio'
+  content: { src: string; fileName: string }
+}
+
+// ── Video card ─────────────────────────────────────────────────
+// URL only — an embedded video would exhaust localStorage on its own.
+export interface VideoCard extends BaseCard {
+  type: 'video'
+  content: { url: string }
+}
+
+// ── Heading card ───────────────────────────────────────────────
+export type HeadingLevel = 1 | 2 | 3
+export type HeadingAlign = 'left' | 'center' | 'right'
+
+export interface HeadingCard extends BaseCard {
+  type: 'heading'
+  content: { text: string; level: HeadingLevel; align: HeadingAlign }
+}
+
+// ── Comment card ───────────────────────────────────────────────
+export interface CommentEntry {
+  id: string
+  text: string
+  createdAt: number
+}
+
+export interface CommentCard extends BaseCard {
+  type: 'comment'
+  content: { entries: CommentEntry[] }
+}
+
+// ── Map card ───────────────────────────────────────────────────
+export interface MapPin {
+  id: string
+  lat: number
+  lng: number
+  label: string
+}
+
+export interface MapCard extends BaseCard {
+  type: 'map'
+  content: {
+    center: { lat: number; lng: number }
+    zoom: number
+    pins: MapPin[]
+    height: number   // map viewport height in world px
+  }
+}
+
+// ── Board card ─────────────────────────────────────────────────
+// A window into a CHILD board (Board.parentId points back here).
+// boardId is null only in the impossible-but-typed case where the
+// child board was deleted out from under the card.
+export interface BoardCard extends BaseCard {
+  type: 'board'
+  content: { boardId: string | null }
+}
+
 // Discriminated union — TypeScript narrows via card.type
-export type Card = NoteCard | TaskCard | TableCard | MediaCard | LinkCard | DocumentCard | ColumnCard
-export type CardType = 'note' | 'task' | 'table' | 'media' | 'link' | 'document' | 'column'
+export type Card =
+  | NoteCard | TaskCard | TableCard | MediaCard | LinkCard | DocumentCard | ColumnCard
+  | SketchCard | ColorCard | AudioCard | VideoCard | HeadingCard | CommentCard
+  | MapCard | BoardCard
+
+export type CardType =
+  | 'note' | 'task' | 'table' | 'media' | 'link' | 'document' | 'column'
+  | 'sketch' | 'color' | 'audio' | 'video' | 'heading' | 'comment'
+  | 'map' | 'board'
 
 // ── Board ─────────────────────────────────────────────────────
 export interface Board {
@@ -98,6 +234,23 @@ export interface Board {
   connectors: Connector[]
   createdAt: number
   updatedAt: number
+  // Set when this board lives inside a board card on another board.
+  // Root boards leave it null/undefined — the gallery shows only those,
+  // which is the whole point of nesting: sub-boards don't add clutter.
+  parentId?: string | null
+  // Key into GLYPHS (see UI/glyphs.tsx), or a data: URL for an uploaded
+  // image. Stored as a plain string rather than a union so a board saved
+  // with a glyph that a later build renames or removes falls back to the
+  // default instead of failing to load — and so the same field can carry
+  // a custom image without a second shape.
+  icon?: string
+  // CSS color for the icon — a theme var like var(--nx-core), or a hex.
+  accent?: string
+  // Set once the "start with a template?" prompt has been shown for this
+  // board, whether it was accepted or declined. Boards are offered a
+  // template exactly once, when first entered — re-asking every time you
+  // open an empty board would be nagging, not helpful.
+  templatePrompted?: boolean
 }
 
 // ── App Settings ──────────────────────────────────────────────
@@ -113,16 +266,7 @@ export interface Camera {
 }
 
 // ── Active tool ───────────────────────────────────────────────
-export type ActiveTool =
-  | 'select'
-  | 'note'
-  | 'document'
-  | 'task'
-  | 'table'
-  | 'media'
-  | 'link'
-  | 'column'
-  | 'connect'
+export type ActiveTool = CardType | 'select' | 'connect'
 
 // ── Full store shape ──────────────────────────────────────────
 export interface CanvasStore {
@@ -136,12 +280,17 @@ export interface CanvasStore {
   activeTool: ActiveTool
   connectFromId: string | null
   draggingCardId: string | null
+  dropColumnId: string | null   // column currently hovered while dragging a card
+  openDocId: string | null      // Document card currently open in the full-page editor
   settings: AppSettings
 
   // ── Board actions ────────────────────────────────────────
-  createBoard: (name: string) => Board
+  // parentId turns the new board into a sub-board (see Board.parentId).
+  createBoard: (name: string, parentId?: string | null) => Board
   openBoard: (id: string) => void
   renameBoard: (id: string, name: string) => void
+  setBoardIcon: (id: string, icon: string, accent?: string) => void
+  // Cascades: deleting a board also deletes every board nested inside it.
   deleteBoard: (id: string) => void
   backToBoards: () => void
   updateBoardName: (name: string) => void
@@ -153,9 +302,19 @@ export interface CanvasStore {
   deleteSelected: () => void
   duplicateCard: (id: string) => void
   clearBoard: () => void
+  // Replace the active board's entire contents with a template. This is
+  // destructive by definition — callers are responsible for warning first.
+  applyTemplate: (cards: Card[]) => void
+  // Record that this board has been offered a template, so it is only
+  // ever asked once.
+  markTemplatePrompted: (boardId: string) => void
+  // Pin/unpin a card's position. With no id, toggles every selected card
+  // (all to locked unless every one is already locked).
+  toggleLock: (id?: string) => void
 
   // ── Connector actions ─────────────────────────────────────
-  addConnector: (fromId: string, toId: string) => void
+  addConnector: (fromId: string, toId: string, style?: ConnectorStyle) => void
+  updateConnector: (id: string, patch: Partial<Omit<Connector, 'id'>>) => void
   deleteConnector: (id: string) => void
   setConnectFrom: (id: string | null) => void
 
@@ -166,6 +325,24 @@ export interface CanvasStore {
 
   // ── Drag tracking ─────────────────────────────────────────
   setDraggingCard: (id: string | null) => void
+  setDropColumn: (id: string | null) => void
+  // Move a canvas card INTO a column card, whole. The card keeps its type
+  // and all its content; it just stops being positioned on the canvas
+  // (its connectors are dropped, since it no longer has a place to anchor).
+  absorbCardIntoColumn: (cardId: string, columnId: string) => void
+  // The inverse — lift an embedded card back out onto the canvas beside
+  // its column. Without this, dropping a card into a column would trap it.
+  ejectFromColumn: (columnId: string, cardId: string) => void
+  // Create a new card directly inside a column.
+  addCardToColumn: (columnId: string, type: CardType, options?: Record<string, unknown>) => void
+  // Delete an embedded card. Goes through the store (not a plain content
+  // patch) so a board card nested in a column still releases its
+  // sub-board to the gallery on the way out.
+  removeFromColumn: (columnId: string, cardId: string) => void
+
+  // ── Document editor ───────────────────────────────────────
+  openDocument: (id: string) => void
+  closeDocument: () => void
 
   // ── Camera actions ───────────────────────────────────────
   setCamera: (camera: Partial<Camera>) => void

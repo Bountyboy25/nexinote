@@ -1,7 +1,8 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55); /* spec: modal backdrop = 55% black */
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,8 +12,8 @@
 .panel {
   background: var(--surface);
   border: 1px solid var(--border-h);
-  border-radius: var(--radius);
-  width: 400px;
+  border-radius: 20px; /* spec: modals = radius 20 */
+  width: 460px;  /* room for the reactor gauge */
   max-width: 90vw;
   box-shadow: var(--shadow-lg);
   display: flex;
@@ -29,8 +30,10 @@
 }
 
 .title {
-  font-size: 16px;
+  font-family: var(--nx-font-display);
+  font-size: 17px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--text-1);
 }
 
@@ -74,6 +77,26 @@
   min-width: 0;
 }
 
+/* Trailing action for a settings row (e.g. Templates → Browse) */
+.rowAction {
+  flex: none;
+  padding: 7px 16px;
+  border: 1px solid var(--nx-core);
+  border-radius: 9px;
+  background: var(--nx-core-soft);
+  color: var(--nx-core);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.rowAction:hover {
+  background: color-mix(in srgb, var(--nx-core) 22%, transparent);
+  box-shadow: 0 0 10px var(--nx-core-soft);
+}
+
 .rowLabel {
   font-size: 14px;
   font-weight: 500;
@@ -87,42 +110,11 @@
   line-height: 1.5;
 }
 
-/* Toggle switch */
-.toggle {
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
-  border: none;
-  background: var(--surface2);
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
-  transition: background 0.2s;
-  padding: 0;
-}
-
-.toggleOn {
-  background: var(--accent);
-}
-
-.toggleThumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  transition: transform 0.2s;
-  display: block;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-.toggleOn .toggleThumb {
-  transform: translateX(20px);
-}
-
 .footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 14px 24px;
   border-top: 1px solid var(--border);
 }

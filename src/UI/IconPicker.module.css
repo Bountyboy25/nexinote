@@ -1,0 +1,116 @@
+/* ─────────────────────────────────────────────────────────────
+   BOARD ICON PICKER — popover anchored to its trigger
+   ───────────────────────────────────────────────────────────── */
+
+/* Portaled to <body>, so this is viewport-fixed and positioned from the
+   trigger's measured rect — see BoardIconPicker.tsx. */
+.popover {
+  position: fixed;
+  z-index: 3600;
+  width: 214px;
+  padding: 8px;
+  background: var(--nx-bg-panel);
+  border: 1px solid var(--nx-line);
+  border-radius: 10px;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.55),
+    0 0 14px var(--nx-core-soft);
+  animation: pickerIn 0.14s var(--nx-ease-spring);
+  cursor: default;
+}
+
+@keyframes pickerIn {
+  from { opacity: 0; transform: scale(0.94) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.title {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--nx-ink-dim);
+  padding: 2px 3px 6px;
+}
+
+.title + .accents,
+.grid + .title {
+  margin-top: 2px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+}
+
+.cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s var(--nx-ease-spring);
+}
+
+.cell:hover {
+  background: var(--nx-core-soft);
+  transform: scale(1.08);
+}
+
+.cellOn {
+  border-color: var(--nx-core);
+  background: var(--nx-core-soft);
+}
+
+/* Upload tile — dashed so it reads as "add your own" rather than as
+   one more preset glyph. */
+.upload {
+  border-style: dashed;
+  border-color: var(--nx-line);
+  color: var(--nx-ink-dim);
+}
+
+.upload:hover {
+  border-color: var(--nx-core);
+  color: var(--nx-core);
+}
+
+.upload:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.file { display: none; }
+
+.error {
+  margin: 0;
+  padding: 4px 3px 0;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--nx-danger);
+}
+
+.accents {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  padding-bottom: 2px;
+}
+
+.accent {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--nx-line);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s var(--nx-ease-spring);
+}
+
+.accent:hover { transform: scale(1.18); }
+
+.accentOn {
+  box-shadow: 0 0 0 2px var(--nx-bg-panel), 0 0 0 3px var(--nx-core);
+}

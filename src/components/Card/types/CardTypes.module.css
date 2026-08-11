@@ -9,33 +9,6 @@
   height: 100%;
 }
 
-.richToolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  padding: 4px 6px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-}
-
-.fmtBtn {
-  padding: 2px 6px;
-  font-size: 11px;
-  font-weight: 600;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  cursor: pointer;
-  color: var(--text-2);
-  line-height: 1.4;
-  transition: background 0.1s, color 0.1s;
-}
-
-.fmtBtn:hover {
-  background: var(--surface-3);
-  color: var(--text-1);
-}
-
 .richEditor {
   flex: 1;
   padding: 8px 10px;
@@ -99,7 +72,7 @@
 .checkStyleActive {
   border-color: var(--accent) !important;
   color: var(--accent) !important;
-  background: rgba(124, 106, 245, 0.1);
+  background: color-mix(in srgb, var(--nx-core) 10%, transparent);
 }
 
 /* Custom checkbox shapes */
@@ -125,7 +98,7 @@
 .checkSquare.customCheckDone {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
 }
 
 .checkCircle {
@@ -137,7 +110,7 @@
 .checkCircle.customCheckDone {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
 }
 
 .checkStar {
@@ -149,7 +122,7 @@
 }
 
 .checkStar.customCheckDone {
-  color: #f59e0b;
+  color: var(--nx-hazard);
 }
 
 /* Text styling when done */
@@ -204,14 +177,6 @@
   opacity: 0.5;
 }
 
-.checkbox {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  cursor: pointer;
-  accent-color: var(--accent);
-}
-
 .checkText {
   flex: 1;
   border: none;
@@ -260,7 +225,7 @@
 
 .addBtn {
   background: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
   border: none;
   border-radius: 4px;
   padding: 4px 8px;
@@ -340,18 +305,6 @@
   min-height: 16px;
 }
 
-.cellResult {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 6px;
-  font-size: 12px;
-  color: var(--accent);
-  pointer-events: none;
-  font-family: var(--font-mono, monospace);
-}
-
 /* Phase 3: Non-overlapping formula result — fills the entire cell,
    clicking it re-focuses the edit mode. */
 .cellResultDisplay {
@@ -391,87 +344,94 @@
   background: var(--surface-3);
 }
 
-/* ── Document Card ──────────────────────────────────────────── */
-.documentCard {
+/* ── Document Card (compact tile) ───────────────────────────── */
+/* ── Document tile ───────────────────────────────────────────
+   Icon + word count only, sized to be the SMALLEST card on the board.
+   The excerpt preview this replaced turned every document card into a
+   block of unreadable 12px text; the contents belong in the editor,
+   which is one click away. */
+.docTile {
   position: relative;
-  min-height: 200px;
-  max-height: 480px;
-  overflow: hidden;
-  background: #fafaf8;
   display: flex;
   flex-direction: column;
-}
-
-/* Red left margin line — classic notebook style */
-.documentCard::before {
-  content: '';
-  position: absolute;
-  left: 36px;
-  top: 0; bottom: 0;
-  width: 1px;
-  background: rgba(239, 68, 68, 0.25);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* Ruled lines — fixed-height rows behind the text */
-.documentLines {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  padding: 8px 10px 8px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.documentLine {
-  height: 24px;
-  flex-shrink: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.documentEditor {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  padding: 8px 14px 8px 44px;  /* left-padded past the margin line */
-  font-size: 13px;
-  line-height: 24px;   /* matches documentLine height */
-  color: #1a1a1a;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 8px 11px;
+  cursor: pointer;
   outline: none;
-  overflow-y: auto;
-  min-height: 200px;
-  max-height: 480px;
-  font-family: 'Georgia', 'Times New Roman', serif;
+  transition: background var(--transition);
+}
+
+.docTile:hover,
+.docTile:focus-visible {
+  background: color-mix(in srgb, var(--nx-core) 6%, transparent);
+}
+
+.docTileIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--nx-line);
+  background: var(--nx-bg-panel);
+  transition: border-color var(--transition), box-shadow var(--transition),
+              transform var(--transition);
+}
+
+.docTile:hover .docTileIcon,
+.docTile:focus-visible .docTileIcon {
+  border-color: var(--nx-core);
+  box-shadow: 0 0 12px var(--nx-core-soft);
+  transform: translateY(-1px);
+}
+
+/* An untouched document reads as an outline, not a filled file */
+.docTileIconEmpty {
+  border-style: dashed;
+  opacity: 0.75;
+}
+
+.docTileCount {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+/* Icon picker trigger. Hover-only and absolutely positioned, so
+   customizing costs the resting tile no space at all — the point of
+   this card is to be small. */
+.docTileEdit {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 5px;
   background: transparent;
-  word-break: break-word;
+  color: var(--text-3);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition), color var(--transition),
+              background var(--transition);
 }
 
-.documentEditor::-webkit-scrollbar        { width: 3px; }
-.documentEditor::-webkit-scrollbar-track  { background: transparent; }
-.documentEditor::-webkit-scrollbar-thumb  { background: rgba(0,0,0,0.15); border-radius: 2px; }
+.docTile:hover .docTileEdit,
+.docTileEdit:focus-visible { opacity: 1; }
 
-.documentEditor[data-placeholder]:empty::before {
-  content: attr(data-placeholder);
-  color: #bbb;
-  pointer-events: none;
-  font-style: italic;
+.docTileEdit:hover {
+  background: var(--nx-core-soft);
+  border-color: var(--nx-core);
+  color: var(--nx-core);
 }
-
-.documentEditor p,
-.documentEditor div { margin: 0; }
-
-/* Heading styles inside document editor */
-.documentEditor h1 { font-size: 18px; font-weight: 700; line-height: 24px; color: #111; margin: 0; }
-.documentEditor h2 { font-size: 15px; font-weight: 700; line-height: 24px; color: #222; margin: 0; }
-.documentEditor h3 { font-size: 13px; font-weight: 700; line-height: 24px; color: #333; margin: 0; }
-.documentEditor ul,
-.documentEditor ol { padding-left: 18px; margin: 0; }
-.documentEditor li { line-height: 24px; }
-.documentEditor strong { font-weight: 700; }
-.documentEditor em     { font-style: italic; }
-.documentEditor u      { text-decoration: underline; }
 
 /* ── Column Card ────────────────────────────────────────────── */
 .column {
@@ -499,7 +459,7 @@
 
 .colProgress {
   font-size: 10px;
-  color: var(--accent-g, #34d399);
+  color: var(--accent-g);
   font-weight: 600;
 }
 
@@ -545,9 +505,44 @@
 }
 
 .colItemIcon {
-  font-size: 13px;
   flex-shrink: 0;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  color: var(--card-accent, var(--text-2));
+}
+
+/* Reorder grip — appears on row hover, arms HTML5 drag */
+.colItemGrip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-3);
+  cursor: grab;
+  opacity: 0;
+  margin-left: -2px;
+  transition: opacity var(--transition), color var(--transition);
+}
+
+.colItem:hover .colItemGrip {
+  opacity: 1;
+}
+
+.colItemGrip:hover {
+  color: var(--text-1);
+}
+
+.colItemGrip:active {
+  cursor: grabbing;
+}
+
+/* Insertion indicator while reordering (box-shadow → no layout shift) */
+.colItemDropBefore {
+  box-shadow: 0 -2px 0 0 var(--accent);
+}
+
+.colListDropEnd {
+  box-shadow: inset 0 -2px 0 0 var(--accent);
 }
 
 .colItemTitle {
@@ -564,14 +559,24 @@
 
 .colItemExpand {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   background: transparent;
   border: none;
   color: var(--text-3);
-  font-size: 9px;
   cursor: pointer;
   padding: 2px 3px;
   border-radius: 3px;
   transition: all var(--transition);
+}
+
+.colItemExpand svg {
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.colItemChevronOpen {
+  transform: rotate(180deg);
 }
 
 .colItemExpand:hover {
@@ -581,10 +586,11 @@
 
 .colItemDelete {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   background: transparent;
   border: none;
   color: var(--text-3);
-  font-size: 11px;
   cursor: pointer;
   padding: 2px 3px;
   border-radius: 3px;
@@ -597,56 +603,42 @@
 }
 
 .colItemDelete:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  background: color-mix(in srgb, var(--nx-danger) 15%, transparent);
+  color: var(--nx-danger);
 }
 
+/* Eject — lift the embedded card back onto the canvas. Sits next to
+   delete and reveals on hover the same way, so a row never shows four
+   buttons at rest. */
+.colItemEject {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 2px 3px;
+  border-radius: 3px;
+  opacity: 0;
+  transition: all var(--transition);
+}
+
+.colItem:hover .colItemEject {
+  opacity: 1;
+}
+
+.colItemEject:hover {
+  background: var(--nx-core-soft);
+  color: var(--nx-core);
+}
+
+/* Holds a WHOLE embedded card (any type), so it only supplies the
+   separator and surface — each card type brings its own padding. */
 .colItemBody {
   border-top: 1px solid var(--border);
-  padding: 6px 8px;
   background: var(--surface);
-}
-
-.colItemTaskRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  cursor: pointer;
-}
-
-.colItemText {
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: var(--text-2);
-  font-size: 12px;
-  line-height: 1.5;
-  outline: none;
-  resize: none;
-  font-family: var(--font-ui);
-  box-sizing: border-box;
-}
-
-.colItemText:focus {
-  color: var(--text-1);
-}
-
-.colItemDone {
-  text-decoration: line-through;
-  opacity: 0.5;
-}
-
-.colItemLink {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 11px;
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.colItemLink:hover {
-  text-decoration: underline;
+  overflow: hidden;
 }
 
 /* Column add button */
@@ -673,14 +665,14 @@
 .colAddBtn:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(124, 106, 245, 0.05);
+  background: color-mix(in srgb, var(--nx-core) 5%, transparent);
 }
 
 .colAddMenu {
   position: absolute;
   bottom: calc(100% + 4px);
   left: 0; right: 0;
-  background: rgba(14, 14, 18, 0.97);
+  background: color-mix(in srgb, var(--nx-bg-raised) 97%, transparent);
   border: 1px solid var(--border-h);
   border-radius: 8px;
   overflow: hidden;
@@ -708,4 +700,1254 @@
   background: var(--surface-2);
 }
 
+/* ── Link ───────────────────────────────────────────────────── */
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 12px;
+}
+
+.linkIcon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--card-accent, var(--accent));
+}
+
+.linkUrl {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  outline: none;
+}
+
+.linkUrl:focus {
+  border-color: var(--accent);
+}
+
+.linkDesc {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: var(--font-ui);
+  outline: none;
+  resize: none;
+}
+
+.linkDesc:focus {
+  border-color: var(--accent);
+  color: var(--text-1);
+}
+
+.linkOpen {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 2px 0;
+}
+
+.linkOpen:hover {
+  text-decoration: underline;
+}
+
 /* ── Media ──────────────────────────────────────────────────── */
+.media {
+  display: flex;
+  flex-direction: column;
+}
+
+.mediaImgWrap {
+  width: 100%;
+  height: 180px;
+  background: var(--surface-2);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mediaImg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mediaControls {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+}
+
+.mediaBtn {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.mediaBtn:hover {
+  background: var(--surface-3);
+  color: var(--text-1);
+  border-color: var(--border-h);
+}
+
+.mediaEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.mediaUploadZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 22px 12px;
+  border: 1.5px dashed var(--border-h);
+  border-radius: 8px;
+  color: var(--text-3);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition);
+}
+
+.mediaUploadZone:hover,
+.mediaUploadZoneActive {
+  border-color: var(--accent);
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--nx-core) 8%, transparent);
+}
+
+.mediaUploadZoneActive {
+  background: var(--nx-core-soft);
+}
+
+.mediaUploadIcon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.mediaOr {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mediaUrlInput {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  outline: none;
+  font-family: var(--font-ui);
+}
+
+.mediaUrlInput:focus {
+  border-color: var(--accent);
+}
+
+.mediaFileInput {
+  display: none;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   SKETCH CARD
+   ═════════════════════════════════════════════════════════════ */
+.sketch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.sketchTools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.sketchPens {
+  display: flex;
+  gap: 4px;
+}
+
+.sketchPen {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s var(--nx-ease-spring), box-shadow 0.12s;
+}
+
+.sketchPen:hover { transform: scale(1.18); }
+
+.sketchPenOn {
+  border-color: var(--nx-ink);
+  box-shadow: 0 0 0 2px var(--nx-bg-panel), 0 0 0 3px var(--accent);
+}
+
+.sketchWidths {
+  display: flex;
+  gap: 2px;
+}
+
+.sketchWidth {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sketchWidth span {
+  display: block;
+  border-radius: 50%;
+  background: var(--text-2);
+}
+
+.sketchWidth:hover { background: var(--surface-3); }
+
+.sketchWidthOn {
+  border-color: var(--accent);
+  background: var(--nx-core-soft);
+}
+
+.sketchWidthOn span { background: var(--accent); }
+
+.sketchActions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.sketchBtn {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.sketchBtn:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text-1);
+}
+
+.sketchBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.sketchBtnOn {
+  border-color: var(--nx-hazard);
+  color: var(--nx-hazard);
+  background: color-mix(in srgb, var(--nx-hazard) 12%, transparent);
+}
+
+/* The surface is a WRAPPER div, not the svg itself: toLocal() recovers
+   the screen-to-local scale from its offsetWidth vs its client rect,
+   and only a plain element reports offsetWidth reliably. */
+.sketchSurface {
+  position: relative;
+  width: 100%;
+  background:
+    linear-gradient(var(--nx-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--nx-grid) 1px, transparent 1px),
+    var(--nx-bg-panel);
+  background-size: 20px 20px, 20px 20px, auto;
+  cursor: crosshair;
+  overflow: hidden;
+  touch-action: none;   /* pointer events drive drawing, not scrolling */
+}
+
+.sketchSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sketchErasing { cursor: cell; }
+
+.sketchHint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+/* ── Custom pen ──
+   The native colour input is invisible and stretched over its swatch,
+   so the swatch is what you see and the OS picker still anchors to it. */
+.sketchPenCustom {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  /* A ring marks it as "any colour" rather than one more preset. */
+  box-shadow: inset 0 0 0 1.5px var(--nx-bg-panel);
+}
+
+.sketchPenInput {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  opacity: 0;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ── Focus view ──
+   A magnifier, not a separate mode: the same surface at the same
+   coordinates, scaled up so fine strokes are workable. */
+.sketchAway {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.sketchFocusBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3400;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--nx-bg) 78%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: sketchFocusIn 0.16s ease;
+}
+
+@keyframes sketchFocusIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sketchFocusPanel {
+  display: flex;
+  flex-direction: column;
+  max-width: 96vw;
+  max-height: 94vh;
+  background: var(--nx-bg-raised);
+  border: 1px solid var(--nx-core);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 26px var(--nx-core-soft);
+  overflow: hidden;
+}
+
+.sketchFocusHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sketchFocusTitle {
+  font-family: var(--nx-font-display, var(--font-ui));
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-1);
+}
+
+.sketchFocusZoom {
+  font-family: var(--nx-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.sketchFocusStage {
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow: auto;
+}
+
+.sketchResize,
+.mapResize {
+  height: 9px;
+  cursor: ns-resize;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  touch-action: none;
+}
+
+.sketchResize::after,
+.mapResize::after {
+  content: '';
+  width: 26px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border-h);
+}
+
+.sketchResize:hover::after,
+.mapResize:hover::after { background: var(--accent); }
+
+/* ═════════════════════════════════════════════════════════════
+   COLOR CARD
+   ═════════════════════════════════════════════════════════════ */
+.color {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.colorSwatch {
+  position: relative;
+  height: 86px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+
+.colorSwatch:hover { box-shadow: 0 0 0 2px var(--accent); }
+
+.colorAa {
+  font-family: var(--font-ui);
+  font-size: 26px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.colorCopied {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.colorSwatch:hover .colorCopied { opacity: 0.7; }
+.colorCopied[data-on] { opacity: 1; }
+
+.colorRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.colorPickWrap {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.colorPickDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+/* The native swatch is invisible; the label is the visible target, but
+   the input must stay in the layout for the OS picker to anchor to it. */
+.colorPick {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.colorHex,
+.colorLabel {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 12px;
+  outline: none;
+}
+
+.colorHex {
+  font-family: var(--font-mono);
+  text-transform: lowercase;
+}
+
+.colorLabel { font-family: var(--font-ui); }
+
+.colorHex:focus,
+.colorLabel:focus { border-color: var(--accent); }
+
+.colorPresets {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+}
+
+.colorPreset {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s var(--nx-ease-spring);
+}
+
+.colorPreset:hover { transform: scale(1.15); }
+.colorPresetOn { box-shadow: 0 0 0 2px var(--nx-bg-panel), 0 0 0 3px var(--accent); }
+
+/* ═════════════════════════════════════════════════════════════
+   HEADING CARD
+   ═════════════════════════════════════════════════════════════ */
+.heading {
+  display: flex;
+  flex-direction: column;
+}
+
+.headingText {
+  padding: 10px 12px;
+  color: var(--text-1);
+  font-family: var(--nx-font-display, var(--font-ui));
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  outline: none;
+  word-break: break-word;
+}
+
+.headingText[data-level='1'] { font-size: 30px; }
+.headingText[data-level='2'] { font-size: 22px; }
+.headingText[data-level='3'] {
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.headingText[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.headingTools {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.heading:hover .headingTools,
+.headingText:focus ~ .headingTools { opacity: 1; }
+
+.headingGroup { display: flex; gap: 2px; }
+
+.headingBtn {
+  min-width: 24px;
+  height: 21px;
+  padding: 0 5px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.headingBtn:hover { background: var(--surface-3); color: var(--text-1); }
+
+.headingBtnOn {
+  border-color: var(--accent);
+  background: var(--nx-core-soft);
+  color: var(--accent);
+}
+
+/* ═════════════════════════════════════════════════════════════
+   COMMENT CARD
+   ═════════════════════════════════════════════════════════════ */
+.comment {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px 10px;
+}
+
+.commentList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.commentEntry {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border-left: 2px solid var(--accent);
+}
+
+.commentHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.commentTime {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.commentDel {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s;
+}
+
+.commentEntry:hover .commentDel { opacity: 1; }
+.commentDel:hover { color: var(--nx-danger); }
+
+.commentText {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-1);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.commentEmpty {
+  margin: 0;
+  padding: 10px 2px;
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.commentCompose {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.commentInput {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 12.5px;
+  font-family: var(--font-ui);
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+.commentInput:focus { border-color: var(--accent); }
+
+.commentPost {
+  align-self: flex-end;
+  padding: 5px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--nx-core-soft);
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.14s, opacity 0.14s;
+}
+
+.commentPost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.commentPost:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   AUDIO CARD
+   ═════════════════════════════════════════════════════════════ */
+.audio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.audioPlayer {
+  width: 100%;
+  height: 34px;
+}
+
+.audioEmbed {
+  width: 100%;
+  height: 120px;
+  border: 0;
+  border-radius: var(--radius-sm);
+}
+
+.audioMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.audioName {
+  font-size: 11.5px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audioBtn,
+.videoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.audioBtn:hover,
+.videoBtn:hover {
+  color: var(--nx-danger);
+  border-color: var(--nx-danger);
+}
+
+.audioEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.audioDrop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 18px 10px;
+  border: 1px dashed var(--border-h);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.14s, background 0.14s, color 0.14s;
+}
+
+.audioDrop small {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.audioDrop:hover,
+.audioDropActive {
+  border-color: var(--accent);
+  color: var(--text-1);
+  background: var(--nx-core-soft);
+}
+
+.audioOr {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.audioUrl,
+.videoUrl {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.audioUrl:focus,
+.videoUrl:focus { border-color: var(--accent); }
+
+.hiddenFile { display: none; }
+
+.mediaError {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--nx-danger);
+}
+
+/* ═════════════════════════════════════════════════════════════
+   VIDEO CARD
+   ═════════════════════════════════════════════════════════════ */
+.video {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.videoFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
+.videoFrame iframe,
+.videoFrame video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.videoEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  aspect-ratio: 16 / 9;
+  border: 1px dashed var(--border-h);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.videoEmpty small {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.videoBar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   MAP CARD
+   ═════════════════════════════════════════════════════════════ */
+.map {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.mapBar {
+  display: flex;
+  gap: 5px;
+  padding: 7px 8px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.mapSearch {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-3);
+  color: var(--text-1);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.mapSearch:focus { border-color: var(--accent); }
+
+.mapBtn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 11.5px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+
+.mapBtn:hover:not(:disabled) {
+  color: var(--text-1);
+  border-color: var(--border-h);
+}
+
+.mapBtn:disabled { opacity: 0.4; cursor: default; }
+
+.mapBtnOn {
+  border-color: var(--accent);
+  background: var(--nx-core-soft);
+  color: var(--accent);
+}
+
+.mapHost {
+  width: 100%;
+  background: var(--surface-2);
+}
+
+.mapHostArmed { cursor: crosshair; }
+
+/* Leaflet ships its own global chrome — retint it so a map card doesn't
+   punch a bright hole in a dark board. */
+.mapHost :global(.leaflet-container) {
+  background: var(--surface-2);
+  font-family: var(--font-ui);
+  font-size: 11px;
+}
+
+.mapHost :global(.leaflet-control-attribution) {
+  background: color-mix(in srgb, var(--nx-bg-panel) 82%, transparent);
+  color: var(--text-3);
+  font-size: 9px;
+}
+
+.mapHost :global(.leaflet-control-attribution a) { color: var(--text-2); }
+
+.mapHost :global(.leaflet-bar a) {
+  background: var(--nx-bg-panel);
+  color: var(--text-1);
+  border-bottom-color: var(--border);
+}
+
+.mapHost :global(.leaflet-bar a:hover) {
+  background: var(--surface-3);
+  color: var(--accent);
+}
+
+/* Pin marker — a themed teardrop drawn entirely in CSS, which also
+   sidesteps Leaflet's default marker images breaking under bundlers. */
+.mapPinIcon {
+  position: relative;
+}
+
+.mapPinIcon i {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--nx-core);
+  border: 1.5px solid var(--nx-bg);
+  box-shadow: 0 0 6px var(--nx-core-glow);
+}
+
+.mapMsg {
+  margin: 0;
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--nx-hazard);
+}
+
+.mapPins {
+  list-style: none;
+  margin: 0;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 150px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+}
+
+.mapPinRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mapPinGo,
+.mapPinDel {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+
+.mapPinGo:hover { color: var(--accent); background: var(--surface-3); }
+.mapPinDel:hover { color: var(--nx-danger); background: var(--surface-3); }
+
+.mapPinLabel {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-1);
+  border-radius: 4px;
+  padding: 3px 5px;
+  font-size: 11.5px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.mapPinLabel:hover { background: var(--surface-2); }
+.mapPinLabel:focus { border-color: var(--accent); background: var(--surface-2); }
+
+/* ═════════════════════════════════════════════════════════════
+   BOARD CARD (nested board)
+   ═════════════════════════════════════════════════════════════ */
+.boardCard {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.boardPreview {
+  height: 92px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(var(--nx-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--nx-grid) 1px, transparent 1px),
+    var(--surface-2);
+  background-size: 16px 16px, 16px 16px, auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.boardCard:hover .boardPreview { border-color: var(--accent); }
+
+.boardThumb {
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+}
+
+.boardEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.boardNameRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Anchor for the icon picker popover */
+.boardIconWrap {
+  position: relative;
+  flex: none;
+}
+
+.boardIconBtn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.boardIconBtn:hover {
+  background: var(--surface-2);
+  border-color: var(--border-h);
+}
+
+.boardName {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-1);
+  border-radius: 5px;
+  padding: 3px 5px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  outline: none;
+}
+
+.boardName:hover { background: var(--surface-2); }
+.boardName:focus { border-color: var(--accent); background: var(--surface-2); }
+
+.boardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.boardMeta {
+  font-family: var(--nx-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.boardOpen {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 9px;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  background: var(--nx-core-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.14s;
+}
+
+.boardOpen:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+.boardMissing {
+  margin: 0;
+  padding: 18px 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--nx-danger);
+}
+
+/* Suspense fallback while the lazily-loaded Leaflet chunk arrives.
+   Sized from the card's stored height so the card doesn't collapse and
+   snap back open as the chunk resolves. */
+.mapLoading {
+  display: grid;
+  place-items: center;
+  background: var(--nx-bg-panel);
+  border-top: 1px solid var(--border);
+  color: var(--text-3);
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
