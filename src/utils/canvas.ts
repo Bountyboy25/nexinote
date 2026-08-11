@@ -98,17 +98,38 @@ export const WORLD_BOUNDS = {
   maxY: WORLD_LIMIT,
 }
 
-// Keep a card's whole footprint inside WORLD_BOUNDS. Takes the card's
-// size so the bottom-right corner is held in, not just the origin.
-export function clampCardToWorld(
+// ── Screen-edge bounds ────────────────────────────────────────
+//
+// TopBar height in screen px. Also the default camera Y — see resetView
+// and fitCameraToCards, which bake the same 52.
+export const TOPBAR_H = 52
+
+// Keep a card's whole footprint inside the VISIBLE canvas (the viewport
+// below the TopBar), in world coordinates. A drag therefore stops at the
+// screen edge instead of carrying the card somewhere off-screen — to
+// place a card further out, pan the canvas and drag again.
+//
+// Intersected with WORLD_BOUNDS so a fully zoomed-out viewport can't be
+// used to sneak past the world limit. When the card is BIGGER than the
+// visible area (deep zoom, huge column), the max bound collapses below
+// the min — Math.max keeps min ≤ max, pinning the card's top-left corner
+// on screen rather than producing a reversed clamp that jitters.
+export function clampCardToView(
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
+  camera: Camera
 ): { x: number; y: number } {
+  const tl = screenToWorld(0, TOPBAR_H, camera)
+  const br = screenToWorld(window.innerWidth, window.innerHeight, camera)
+  const minX = Math.max(tl.x, WORLD_BOUNDS.minX)
+  const minY = Math.max(tl.y, WORLD_BOUNDS.minY)
+  const maxX = Math.min(br.x, WORLD_BOUNDS.maxX)
+  const maxY = Math.min(br.y, WORLD_BOUNDS.maxY)
   return {
-    x: clamp(x, WORLD_BOUNDS.minX, WORLD_BOUNDS.maxX - width),
-    y: clamp(y, WORLD_BOUNDS.minY, WORLD_BOUNDS.maxY - height),
+    x: clamp(x, minX, Math.max(minX, maxX - width)),
+    y: clamp(y, minY, Math.max(minY, maxY - height)),
   }
 }
 

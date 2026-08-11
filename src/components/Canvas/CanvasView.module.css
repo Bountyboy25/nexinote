@@ -52,17 +52,21 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* ── Drag boundary ──
-   The limit cards are clamped to (WORLD_BOUNDS in utils/canvas.ts),
-   shown only while a card is being dragged. Sits inside .world so it
-   pans and zooms with the board; the border WIDTH is set inline in
-   screen px / zoom so it stays hairline-thin at every zoom level. */
-.worldBounds {
+/* ── Drag fence ──
+   The screen-edge limit a dragged card is clamped to (clampCardToView
+   in utils/canvas.ts). Fixed to the viewport — top edge sits under the
+   52px TopBar to match the clamp — and shown only while a card is
+   being dragged. z-index 4: above the world (2), below the drop
+   overlay (5) and all fixed chrome. */
+.dragFence {
   position: absolute;
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--nx-hazard) 45%, transparent);
-  border-radius: 24px;
+  top: 52px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px dashed color-mix(in srgb, var(--nx-hazard) 55%, transparent);
   pointer-events: none;
+  z-index: 4;
 }
 
 .world {

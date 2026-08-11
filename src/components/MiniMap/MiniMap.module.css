@@ -8,7 +8,9 @@
      it vertically always works.
        28 (toolbar offset) + 52 (toolbar height) + 12 (gap) = 92 */
   bottom: 92px;
-  left: 70px;   /* clear the 56px SideTaskbar */
+  /* The 56px SideTaskbar this used to clear is gone (its tools merged
+     into the bottom Toolbar), so the minimap hugs the corner now. */
+  left: 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   overflow: hidden;

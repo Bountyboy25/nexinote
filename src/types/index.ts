@@ -51,6 +51,12 @@ interface BaseCard {
   // POSITION only — a locked card can still be selected, edited, connected
   // and deleted, so "locked" never means "mysteriously unresponsive".
   locked?: boolean
+  // Custom header icon — same vocabulary as Board.icon: a GLYPHS key or an
+  // uploaded data URL, plus an accent color. Unset means the card wears its
+  // type's default glyph (CARD_ICONS in CardNode), so existing boards are
+  // untouched. Kept a plain string for the same reasons as Board.icon.
+  icon?: string
+  accent?: string
 }
 
 export interface NoteCard extends BaseCard {

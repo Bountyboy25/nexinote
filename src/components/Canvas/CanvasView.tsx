@@ -6,7 +6,7 @@ import { useCanvasZoom } from '@/hooks/useCanvasZoom'
 import { useCanvasTouch } from '@/hooks/useCanvasTouch'
 import { CardNode }       from '@/components/Card/CardNode'
 import { ConnectorLayer } from './ConnectorLayer'
-import { screenToWorld, getViewportCenter, WORLD_BOUNDS }  from '@/utils/canvas'
+import { screenToWorld, getViewportCenter }  from '@/utils/canvas'
 import { fileToImageDataURL, isImageSrc }    from '@/utils/image'
 import styles from './CanvasView.module.css'
 
@@ -16,10 +16,10 @@ export function CanvasView() {
   const draggingCardId = useDraggingCardId()
   const { addCard, updateCard, deselectAll } = useCanvasStore.getState()
 
-  // The SideTaskbar (position: fixed, z-index 500) overlays the left
-  // edge of the canvas. The canvas intentionally does NOT shift to make
-  // room for it — shifting caused all content (and connector arrows) to
-  // jump sideways each time a card was selected.
+  // Fixed chrome (TopBar, the bottom Toolbar, the minimap) overlays the
+  // canvas. The canvas intentionally does NOT shift to make room for any
+  // of it — shifting caused all content (and connector arrows) to jump
+  // sideways each time a card was selected.
   const canvasRef = useRef<HTMLDivElement>(null)
   const [dropActive, setDropActive] = useState(false)
 
@@ -136,30 +136,17 @@ export function CanvasView() {
       <ConnectorLayer />
       <div className={styles.grid} style={gridStyle} />
       <div className={styles.world} style={worldTransform}>
-        {/* The edge cards can't be dragged past. Only drawn while a drag
-            is in progress — the rest of the time it is a 24,000px box
-            nobody needs to see, and it would just add noise. */}
-        {draggingCardId && (
-          <div
-            className={styles.worldBounds}
-            style={{
-              left:   WORLD_BOUNDS.minX,
-              top:    WORLD_BOUNDS.minY,
-              width:  WORLD_BOUNDS.maxX - WORLD_BOUNDS.minX,
-              height: WORLD_BOUNDS.maxY - WORLD_BOUNDS.minY,
-              // Keep the outline one screen pixel thick at any zoom;
-              // scaled by the world transform it would otherwise vanish
-              // when zoomed out and turn into a slab when zoomed in.
-              borderWidth: 2 / camera.zoom,
-            }}
-            aria-hidden="true"
-          />
-        )}
-
         {cards.map(card => (
           <CardNode key={card.id} card={card} />
         ))}
       </div>
+
+      {/* The edge a dragged card can't pass (clampCardToView in
+          utils/canvas.ts): the visible screen, below the TopBar. Drawn
+          in SCREEN space — it belongs to the viewport, not the world —
+          and only while a drag is in progress, so it reads as a fence
+          around the gesture rather than permanent chrome. */}
+      {draggingCardId && <div className={styles.dragFence} aria-hidden="true" />}
       {dropActive && (
         <div className={styles.dropHint}>
           <span>🖼️ Drop image to add it to the board</span>

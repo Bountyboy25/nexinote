@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useCanvasStore } from '@/store'
-import { clampCardToWorld } from '@/utils/canvas'
+import { clampCardToView } from '@/utils/canvas'
 import type { Card } from '@/types'
 
 // ─────────────────────────────────────────────────────────────
@@ -50,8 +50,10 @@ import type { Card } from '@/types'
 // what keeps click-and-drag text selection inside an input working.
 //
 // ── Bounds ───────────────────────────────────────────────────
-// Positions are clamped to WORLD_BOUNDS so a fast drag can't fling a
-// card into empty space where it is effectively lost.
+// Positions are clamped to the VISIBLE canvas (clampCardToView): the
+// drag stops at the screen edges, so a card can never be flung
+// somewhere off-screen where it is effectively lost. Pan the canvas to
+// carry a card further. The same clamp also enforces WORLD_BOUNDS.
 // ─────────────────────────────────────────────────────────────
 
 interface DragState {
@@ -193,11 +195,12 @@ export function useCardDrag(card: Card) {
       const dx = (ev.clientX - d.startMouseX) / zoom
       const dy = (ev.clientY - d.startMouseY) / zoom
 
-      s.updateCard(cardRef.current.id, clampCardToWorld(
+      s.updateCard(cardRef.current.id, clampCardToView(
         d.startCardX + dx,
         d.startCardY + dy,
         cardRef.current.width,
         d.cardH,
+        s.camera,
       ))
 
       // Track the column under the pointer so it can light up as a drop

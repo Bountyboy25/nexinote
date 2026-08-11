@@ -3,12 +3,21 @@ import { useCanvasStore, useActiveTool, useCamera, useConnectFrom } from '@/stor
 import { getViewportCenter } from '@/utils/canvas'
 import { Icon, type IconName } from '@/UI/Icon'
 import { TableSizeDialog }  from '@/components/UI/TableSizeDialog'
+import { SelectionTools } from './SelectionTools'
 import type { CardType } from '@/types'
 import styles from './Toolbar.module.css'
 
 // ─────────────────────────────────────────────────────────────
-// TOOLBAR — bottom-center tool dock
+// TOOLBAR — THE bottom-center dock, and the app's only tool bar
 //
+// One bar, two modes, swapped on selection:
+//   • BUILD (nothing selected) — card creation tools + board actions
+//   • CONTEXT (a card selected) — that card's tools (SelectionTools),
+//     which used to live in a separate left-edge SideTaskbar. Two bars
+//     meant two chrome regions fighting for space and attention; one
+//     bar that adapts is the same information in one place.
+//
+// Build-mode notes:
 //   • Related card types share one button with a hover dropdown
 //     (Note → note/document/heading/comment, Media → image/audio/
 //     video) so fifteen card types don't become fifteen buttons
@@ -43,6 +52,15 @@ export function Toolbar() {
   const activeTool    = useActiveTool()
   const camera        = useCamera()
   const connectFromId = useConnectFrom()
+
+  // The first selected card, or undefined. Selected NARROWLY — the
+  // selector returns one card object, so the bar re-renders when that
+  // card (or the selection) changes, not on every board mutation.
+  // Multi-select follows the old SideTaskbar rule: first card wins.
+  const selectedCard = useCanvasStore(s => {
+    const id: string | undefined = s.selectedIds.values().next().value
+    return id ? s.cards.find(c => c.id === id) : undefined
+  })
 
   const [showTableDialog, setShowTableDialog] = useState(false)
   const [openMenu, setOpenMenu]               = useState<'note' | 'media' | null>(null)
@@ -143,6 +161,11 @@ export function Toolbar() {
       )}
 
       <div className={styles.toolbar}>
+        {selectedCard ? (
+          /* ── CONTEXT MODE — tools for the selected card ── */
+          <SelectionTools card={selectedCard} />
+        ) : (
+        <>
         {/* ── Card type tools ── */}
         <div className={styles.group}>
           {/* Select */}
@@ -271,6 +294,8 @@ export function Toolbar() {
             aria-label="Reset view"
           ><Icon name="reset-view" /></button>
         </div>
+        </>
+        )}
       </div>
 
       {/* Modals */}

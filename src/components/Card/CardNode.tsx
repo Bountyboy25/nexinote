@@ -1,8 +1,10 @@
-import { memo } from 'react'
+import { memo, useRef, useState } from 'react'
 import { useCanvasStore } from '@/store'
 import { useCardDrag } from '@/hooks/useCardDrag'
 import { CardContent } from './CardContent'
 import { Icon, type IconName } from '@/UI/Icon'
+import { GlyphIcon } from '@/UI/glyphs'
+import { IconPicker } from '@/UI/IconPicker'
 import type { Card } from '@/types'
 import styles from './CardNode.module.css'
 
@@ -55,6 +57,12 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
   // Two handlers on purpose — see useCardDrag. The capture one arms
   // press-and-hold for presses that content components swallow.
   const { onPointerDown, onPointerDownCapture } = useCardDrag(card)
+
+  // Header icon customization — same registry + picker boards use.
+  // The picker portals to document.body (see IconPicker) because the card
+  // clips overflow and inherits the world's scale().
+  const iconBtnRef = useRef<HTMLButtonElement>(null)
+  const [pickingIcon, setPickingIcon] = useState(false)
 
   // Each of these subscribes to a BOOLEAN about *this* card rather than to
   // the raw store value, and that distinction is the difference between
@@ -126,7 +134,33 @@ export const CardNode = memo(function CardNode({ card }: CardNodeProps) {
     >
       {/* ── HEADER ───────────────────────────────────────── */}
       <div className={styles.header}>
-        <span className={styles.icon}><Icon name={CARD_ICONS[card.type]} size={15} /></span>
+        {/* The type glyph doubles as a button that opens the icon picker,
+            so every card can wear its own icon — unset falls back to the
+            type default. pointerdown is stopped so pressing it never
+            doubles as a drag start. */}
+        <button
+          ref={iconBtnRef}
+          className={styles.iconBtn}
+          onClick={e => { e.stopPropagation(); setPickingIcon(v => !v) }}
+          onMouseDown={e => e.stopPropagation()}
+          onPointerDown={e => e.stopPropagation()}
+          title="Change card icon"
+          aria-label="Change card icon"
+        >
+          {card.icon
+            ? <GlyphIcon name={card.icon} accent={card.accent} size={15} />
+            : <Icon name={CARD_ICONS[card.type]} size={15} />}
+        </button>
+
+        {pickingIcon && (
+          <IconPicker
+            icon={card.icon}
+            accent={card.accent}
+            anchorRef={iconBtnRef}
+            onPick={(icon, accent) => updateCard(card.id, { icon, accent })}
+            onClose={() => setPickingIcon(false)}
+          />
+        )}
 
         <input
           className={styles.title}

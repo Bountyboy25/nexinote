@@ -4,7 +4,6 @@ import { CanvasView }   from '@/components/Canvas/CanvasView'
 import { TopBar }       from '@/components/TopBar/TopBar'
 import { Toolbar }      from '@/components/Toolbar/Toolbar'
 import { MiniMap }      from '@/components/MiniMap/MiniMap'
-import { SideTaskbar }  from '@/components/SideTaskbar/SideTaskbar'
 import { BoardsView }   from '@/components/Boards/BoardsView'
 import { SettingsPanel } from '@/components/UI/SettingsPanel'
 import { TemplatesModal } from '@/components/UI/TemplatesModal'
@@ -17,8 +16,9 @@ import { DocumentEditorModal } from '@/components/UI/DocumentEditorModal'
 //   null        → BoardsView (gallery)
 //   <boardId>   → Canvas (editor)
 //
-// The SideTaskbar is mounted globally (inside canvas view)
-// and shows context-specific tools for the selected card.
+// The Toolbar is the app's single tool dock: it shows build tools
+// normally and swaps to the selected card's context tools
+// (SelectionTools) when a card is selected.
 //
 // Templates are offered here rather than from a toolbar button: the
 // useful moment to choose a starting layout is when you first walk into
@@ -57,7 +57,6 @@ export function App() {
   return (
     <>
       <TopBar onOpenSettings={() => setShowSettings(true)} />
-      <SideTaskbar />
       <CanvasView />
       <Toolbar />
       <MiniMap />

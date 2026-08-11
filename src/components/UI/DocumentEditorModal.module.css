@@ -190,7 +190,10 @@
   padding: 0;
 }
 
-/* ── Editor ── */
+/* ── Editor ──
+   The writing surface is "paper": --nx-doc-* tokens invert the theme
+   (light page, dark ink on the dark themes) so words never fight the
+   reactor glow for contrast. Chrome around it stays theme-colored. */
 .editor {
   flex: 1;
   overflow-y: auto;
@@ -198,14 +201,15 @@
   font-family: var(--nx-font-body);
   font-size: 15px;
   line-height: 1.7;
-  color: var(--nx-ink);
+  background: var(--nx-doc-paper);
+  color: var(--nx-doc-ink);
   outline: none;
   word-break: break-word;
 }
 
 .editor[data-placeholder]:empty::before {
   content: attr(data-placeholder);
-  color: color-mix(in srgb, var(--nx-ink-dim) 60%, transparent);
+  color: color-mix(in srgb, var(--nx-doc-ink) 45%, transparent);
   font-style: italic;
   pointer-events: none;
 }
@@ -227,15 +231,15 @@
 .editor blockquote {
   margin: 0 0 0.7em;
   padding: 4px 16px;
-  border-left: 3px solid var(--nx-core);
-  color: var(--nx-ink-dim);
+  border-left: 3px solid var(--nx-doc-accent);
+  color: color-mix(in srgb, var(--nx-doc-ink) 70%, transparent);
   font-style: italic;
 }
 
 .editor pre {
   margin: 0 0 0.7em;
   padding: 10px 14px;
-  background: var(--nx-bg-panel);
+  background: color-mix(in srgb, var(--nx-doc-ink) 7%, var(--nx-doc-paper));
   border-radius: 6px;
   font-family: var(--nx-font-mono);
   font-size: 14px;
@@ -243,20 +247,23 @@
 }
 
 .editor a {
-  color: var(--nx-core);
+  color: var(--nx-doc-accent);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .editor hr {
   border: none;
-  border-top: 1px solid var(--nx-line);
+  border-top: 1px solid color-mix(in srgb, var(--nx-doc-ink) 20%, transparent);
   margin: 1em 0;
 }
 
 .editor::-webkit-scrollbar        { width: 8px; }
 .editor::-webkit-scrollbar-track  { background: transparent; }
-.editor::-webkit-scrollbar-thumb  { background: var(--nx-line); border-radius: 4px; }
+.editor::-webkit-scrollbar-thumb  {
+  background: color-mix(in srgb, var(--nx-doc-ink) 22%, transparent);
+  border-radius: 4px;
+}
 
 /* ── Footer ── */
 .footer {

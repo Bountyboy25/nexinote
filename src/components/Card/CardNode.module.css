@@ -228,13 +228,29 @@
   border-bottom: 1px solid var(--nx-line);
 }
 
-.icon {
+/* Type glyph, now a button: click opens the icon picker. Styled to sit
+   as quietly as the old <span> until hovered. */
+.iconBtn {
   flex-shrink: 0;
   line-height: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   /* Monoline glyph tinted with this card type's accent bar color */
   color: var(--card-accent, var(--nx-ink-dim));
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 2px;
+  margin: -2px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.iconBtn:hover {
+  background: var(--nx-core-soft);
+  border-color: var(--nx-core);
+  box-shadow: 0 0 8px var(--nx-core-soft);
 }
 
 .title {

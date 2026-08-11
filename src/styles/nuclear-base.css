@@ -21,6 +21,12 @@
   --nx-line: rgba(126, 147, 184, 0.22);
   --nx-grid: rgba(62, 198, 255, 0.05);
 
+  /* Document "paper" — the writing surface inverts the theme so long-form
+     text is always dark-on-light (see themes.ts for per-theme values) */
+  --nx-doc-paper: #eef4fd;
+  --nx-doc-ink: #14202f;
+  --nx-doc-accent: #0b78b8;
+
   /* Type roles */
   --nx-font-display: 'Rajdhani', system-ui, sans-serif;
   --nx-font-body: 'Space Grotesk', system-ui, sans-serif;

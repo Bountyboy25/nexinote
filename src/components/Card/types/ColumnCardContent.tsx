@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCanvasStore } from '@/store'
 import { Icon, type IconName } from '@/UI/Icon'
+import { GlyphIcon } from '@/UI/glyphs'
 import { CardContent } from '../CardContent'
 import type { Card, ColumnCard, CardType } from '@/types'
 import styles from './CardTypes.module.css'
@@ -119,8 +120,11 @@ function ItemRow({
           <Icon name="grip" size={12} />
         </span>
 
+        {/* A card carried into the column keeps its custom icon */}
         <span className={styles.colItemIcon}>
-          <Icon name={ROW_ICONS[item.type]} size={13} />
+          {item.icon
+            ? <GlyphIcon name={item.icon} accent={item.accent} size={13} />
+            : <Icon name={ROW_ICONS[item.type]} size={13} />}
         </span>
 
         <input

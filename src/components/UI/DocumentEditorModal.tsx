@@ -158,14 +158,17 @@ export function DocumentEditorModal() {
 
   // Seed the color pickers from the active theme tokens
   // (input[type=color] needs a literal #rrggbb, so resolve at mount;
-  //  fallbacks mirror the Cherenkov defaults in nuclear-base.css)
+  //  fallbacks mirror the Cherenkov defaults in nuclear-base.css).
+  // The text color seeds from the PAPER ink, not the theme ink — the
+  // writing surface is light even on dark themes, where --nx-ink is
+  // near-white and would vanish against it.
   const pickerDefaults = useMemo(() => {
     const css = getComputedStyle(document.documentElement)
     const pick = (name: string, fallback: string) => {
       const v = css.getPropertyValue(name).trim()
       return /^#[0-9a-fA-F]{6}$/.test(v) ? v : fallback
     }
-    return { ink: pick('--nx-ink', '#dbe9ff'), hazard: pick('--nx-hazard', '#ffb454') }
+    return { ink: pick('--nx-doc-ink', '#14202f'), hazard: pick('--nx-hazard', '#ffb454') }
   }, [])
 
   if (!openDocId || !card) return null

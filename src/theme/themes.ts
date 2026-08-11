@@ -32,6 +32,12 @@ export const THEMES: Record<ThemeKey, NuclearTheme> = {
       '--nx-danger': '#ff5470',
       '--nx-line': 'rgba(126,147,184,0.22)',
       '--nx-grid': 'rgba(62,198,255,0.05)',
+      // Document "paper" — deliberately the INVERSE of the theme surface.
+      // The full-page editor is for reading, and light-on-glow theme ink
+      // was hard to see; paper stays high-contrast under every theme.
+      '--nx-doc-paper': '#eef4fd',
+      '--nx-doc-ink': '#14202f',
+      '--nx-doc-accent': '#0b78b8',
     },
   },
   reactor: {
@@ -52,6 +58,9 @@ export const THEMES: Record<ThemeKey, NuclearTheme> = {
       '--nx-danger': '#ff6b57',
       '--nx-line': 'rgba(131,161,137,0.22)',
       '--nx-grid': 'rgba(93,252,141,0.05)',
+      '--nx-doc-paper': '#eff9f1',
+      '--nx-doc-ink': '#132218',
+      '--nx-doc-accent': '#0f8a44',
     },
   },
   meltdown: {
@@ -72,6 +81,9 @@ export const THEMES: Record<ThemeKey, NuclearTheme> = {
       '--nx-danger': '#ff3d5a',
       '--nx-line': 'rgba(176,141,125,0.22)',
       '--nx-grid': 'rgba(255,122,61,0.05)',
+      '--nx-doc-paper': '#fdf3ea',
+      '--nx-doc-ink': '#2b1a10',
+      '--nx-doc-accent': '#b34a14',
     },
   },
   isotope: {
@@ -92,6 +104,10 @@ export const THEMES: Record<ThemeKey, NuclearTheme> = {
       '--nx-danger': '#e0355c',
       '--nx-line': 'rgba(28,32,48,0.14)',
       '--nx-grid': 'rgba(124,77,255,0.05)',
+      // Isotope is already light, so its paper is plain white enamel.
+      '--nx-doc-paper': '#ffffff',
+      '--nx-doc-ink': '#1c2030',
+      '--nx-doc-accent': '#5a2fe0',
     },
   },
 };

@@ -27,7 +27,7 @@ dependencies are `zustand`, `nanoid`, and `leaflet` (map cards only).
 ### Routing is store state, not a router
 
 [App.tsx](src/App.tsx) branches on `activeBoardId`: `null` → `BoardsView` gallery,
-otherwise the canvas editor (TopBar + SideTaskbar + CanvasView + Toolbar + MiniMap +
+otherwise the canvas editor (TopBar + CanvasView + Toolbar + MiniMap +
 DocumentEditorModal). `openBoard()` / `backToBoards()` are the only navigation.
 
 ### The store
@@ -113,10 +113,14 @@ selection inside an input. Elements running their own drag gesture (resize grips
 row grip) opt out with `data-no-card-drag`; the sketch and map surfaces are excluded already
 because the hold only arms over text-editable targets.
 
-Card positions are clamped to `WORLD_BOUNDS` (±12,000 world px, in
-[utils/canvas.ts](src/utils/canvas.ts)) so a fast drag can't fling a card somewhere it can
-never be found. `CanvasView` draws that boundary only while a drag is in progress, with
-`borderWidth` divided by zoom so it stays hairline at every scale.
+Card positions are clamped to the **visible screen** during a drag (`clampCardToView` in
+[utils/canvas.ts](src/utils/canvas.ts)): the drag stops at the viewport edges (below the
+52px TopBar), so a card can never be flung off-screen where it is effectively lost — pan
+the canvas to carry a card further. The clamp is intersected with `WORLD_BOUNDS` (±12,000
+world px) so a zoomed-out viewport can't sneak past the world limit, and it degrades
+gracefully when the card is bigger than the viewport (the top-left corner stays pinned
+on screen). `CanvasView` draws the fence (`.dragFence`, screen-space, dashed hazard)
+only while a drag is in progress.
 
 A drag also ends on `window.blur`. Without it, a mouseup that happens outside the window is
 never heard and the card keeps following the cursor when focus returns.
@@ -170,12 +174,15 @@ card, forming a tree. Consequences worth knowing before touching board code:
   (`promoteOrphanedSubBoards`), so the work resurfaces in the gallery rather than vanishing.
   `deleteCard`, `deleteSelected`, and `clearBoard` all route through it.
 
-### Icons (boards and documents)
+### Icons (boards, documents, and every card)
 
-Boards carry `icon` + `accent`; document cards carry the same pair on `content`. Both draw
-from one registry, [UI/glyphs.tsx](src/UI/glyphs.tsx) — **adding an icon is a single entry
-in `GLYPHS`**, and it appears in the picker automatically. The names are deliberately
-generic (`GLYPHS`, `GlyphIcon`, `IconPicker`) because this is no longer board-only.
+Boards carry `icon` + `accent`; **so does `BaseCard`**, so any card's header glyph can be
+customized (the header icon in `CardNode` is a button that opens the picker; unset falls
+back to the type default in `CARD_ICONS`). Document cards additionally carry the pair on
+`content` for their body tile. All draw from one registry,
+[UI/glyphs.tsx](src/UI/glyphs.tsx) — **adding an icon is a single entry in `GLYPHS`**, and
+it appears in the picker automatically. The names are deliberately generic (`GLYPHS`,
+`GlyphIcon`, `IconPicker`) because this is no longer board-only.
 
 `icon` is typed `string`, not a union of the current keys, for two reasons: a board saved
 with a glyph a later build renames still loads (falling back to `DEFAULT_GLYPH`), and the
@@ -210,6 +217,17 @@ Apply goes through the store's `applyTemplate`, not a raw `setState`. The old pa
 by closing the tab was never saved) and `promoteOrphanedSubBoards` (wiping a board card
 stranded its child board).
 
+### One toolbar, two modes
+
+The bottom [Toolbar](src/components/Toolbar/Toolbar.tsx) is the app's **only** tool dock
+and swaps its contents on selection: build tools (card creation, board actions) when
+nothing is selected, and the selected card's context tools
+([SelectionTools.tsx](src/components/Toolbar/SelectionTools.tsx) — note/document
+formatting, table rows/cols, task and column actions, duplicate/delete/done) when a card
+is. It replaced a separate left-edge SideTaskbar; the selector in `Toolbar` reads one
+narrow card object, not `useCards()`, so the bar doesn't re-render on unrelated board
+mutations. Multi-select shows tools for the first selected card.
+
 ### Overlay geometry
 
 Fixed-position chrome shares the bottom of the screen, and the toolbar's width grew with the
@@ -219,22 +237,25 @@ which includes a 1920px display at 175% OS scaling. The minimap therefore clears
 *vertically* (`bottom: 92px` = toolbar offset + height + gap), which holds at every width.
 Prefer that reasoning over widening gaps when placing new overlays.
 
-Do not add `overflow` to the toolbar to constrain it: its hover dropdowns are absolutely
-positioned children and would be clipped.
+Do not add `overflow` to the toolbar to constrain it: its hover dropdowns **and the
+context-mode color/size panels** are absolutely positioned children and would be clipped.
 
 ### Rich text
 
 Notes, tables, and documents are `contentEditable` divs formatted with
-`document.execCommand`. The commands are issued from
-[SideTaskbar](src/components/SideTaskbar/SideTaskbar.tsx) and
+`document.execCommand`. The commands are issued from the Toolbar's context tools
+([SelectionTools.tsx](src/components/Toolbar/SelectionTools.tsx)) and
 [DocumentEditorModal](src/components/UI/DocumentEditorModal.tsx), which use
 `onMouseDown` + `preventDefault()` so the DOM selection survives the click. Card editors
 `stopPropagation()` on mousedown/keydown so typing doesn't trigger card drag or global
 shortcuts. Editor HTML is set once on mount and saved on blur — do not make it a
 controlled input.
 
-SideTaskbar dropdowns are `createPortal`'d into `document.body`: the taskbar uses
-`backdrop-filter`, which makes it a containing block for `position: fixed` children.
+The document editor's **writing surface is "paper"**: `--nx-doc-paper` / `--nx-doc-ink` /
+`--nx-doc-accent` tokens (defined per theme in [themes.ts](src/theme/themes.ts)) invert
+the theme — a light page with dark ink on the dark themes — so long-form text never
+fights the reactor glow for contrast. The modal's chrome stays theme-colored; anything
+drawn *inside* the editor surface must use the `--nx-doc-*` tokens, not `--nx-ink`.
 
 ### Theming
 
@@ -261,9 +282,9 @@ Check which one an import means before adding to either.
 
 ### Layering
 
-Arrows sit at `z-index: 1`, the world/cards at `2`, SideTaskbar at `500`, chrome
-(TopBar/Toolbar) at `1000`, connector and settings popovers at `3000`, the document editor
-at `3500`. Keep new overlays consistent with this scale.
+Arrows sit at `z-index: 1`, the world/cards at `2`, chrome (TopBar/Toolbar) at `1000`,
+connector and settings popovers at `3000`, the document editor at `3500`. Keep new
+overlays consistent with this scale.
 
 ### Images
 
