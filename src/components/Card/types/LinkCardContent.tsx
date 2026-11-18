@@ -1,4 +1,5 @@
 import { useCanvasStore } from '@/store'
+import { Icon } from '@/UI/Icon'
 import type { LinkCard } from '@/types'
 import styles from './CardTypes.module.css'
 
@@ -26,7 +27,7 @@ export function LinkCardContent({ card }: Props) {
 
   return (
     <div className={styles.link} onMouseDown={e => e.stopPropagation()}>
-      <div className={styles.linkIcon}>🔗</div>
+      <div className={styles.linkIcon}><Icon name="link" size={20} /></div>
 
       <input
         className={styles.linkUrl}

@@ -1,7 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './App'
+// Leaflet's own stylesheet — required for map cards to lay out their
+// tiles and controls. Loaded globally so every map card shares it.
+import './styles/nuclear-base.css'
 import './styles/global.css'
+import { initTheme } from './store/useThemeStore'
+
+// Hydrate the persisted Nuclear Nexus theme onto <html> before first paint
+initTheme()
 
 // ─────────────────────────────────────────────────────────────
 // ENTRY POINT — The very first file that runs

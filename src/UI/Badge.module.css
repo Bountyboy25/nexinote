@@ -1,0 +1,30 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--nx-font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid;
+  transition: all 0.3s ease;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.stable { color: var(--nx-core); border-color: var(--nx-core); background: var(--nx-core-soft); }
+.caution { color: var(--nx-hazard); border-color: var(--nx-hazard); background: color-mix(in srgb, var(--nx-hazard) 8%, transparent); }
+.critical { color: var(--nx-danger); border-color: var(--nx-danger); background: color-mix(in srgb, var(--nx-danger) 8%, transparent); }
+
+.critical .dot { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.7; }
+}

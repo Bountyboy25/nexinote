@@ -1,82 +1,222 @@
 /* ─────────────────────────────────────────────────────────────
-   CSS MODULES — Scoped styles
-   
-   A CSS Module file is imported as an object:
-     import styles from './CardNode.module.css'
-     <div className={styles.card}>
-   
-   Vite transforms class names to unique hashes:
-     .card → .CardNode_card__xK2p9
-   
-   This means zero class name collisions — ever.
-   Unlike global CSS, you can use short names like .card
-   without worrying about conflicts elsewhere.
+   CARD NODE — Nuclear Nexus canvas card
+   Design language from the Nuclear Nexus UI kit (.nx-card):
+   raised reactor panel, 16px radius, hover lift + core glow,
+   left accent bar per card type, connector node dot on the
+   right edge. All colors read --nx-* theme tokens.
 ───────────────────────────────────────────────────────────── */
 
 .card {
+  /* A drag starting on a card belongs to the card. Also suppresses iOS's
+     long-press callout, which would otherwise fire mid press-and-hold and
+     offer to copy the text under the finger. */
+  touch-action: none;
+  -webkit-touch-callout: none;
   position: absolute;
   min-height: 120px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--nx-bg-raised);
+  border: 1px solid var(--nx-line);
+  border-radius: 16px;
   box-shadow: var(--shadow);
   cursor: grab;
   display: flex;
   flex-direction: column;
   overflow: hidden;  /* clips ::before accent bar to card's border-radius */
   transition:
-    border-color var(--transition),
-    box-shadow var(--transition),
-    transform var(--transition);
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s ease;
   will-change: transform;  /* GPU layer hint — smoother animations */
 }
 
 .card:hover {
-  border-color: var(--border-h);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+  border-color: var(--nx-core);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25), 0 0 14px var(--nx-core-soft);
+  transform: translateY(-3px);
 }
 
 /* selected — shown when this card's ID is in selectedIds */
 .selected {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 2px rgba(124, 106, 245, 0.25), var(--shadow-lg) !important;
+  border-color: var(--nx-core) !important;
+  box-shadow: 0 0 0 2px var(--nx-core-soft), 0 0 18px var(--nx-core-soft), var(--shadow-lg) !important;
   z-index: 10;
 }
 
 /* ── Card type accents (left border color) ── */
-.note     { --card-accent: var(--accent); }
-.document { --card-accent: #a78bfa; }  /* soft violet — long-form writing */
-.task     { --card-accent: var(--accent-g, #34d399); }
-.table    { --card-accent: #f59e0b; }
-.media    { --card-accent: #fb923c; }
-.link     { --card-accent: #3b82f6; }
-.column   { --card-accent: #e879f9; }  /* fuchsia — container card */
+.note     { --card-accent: var(--nx-core); }
+.document { --card-accent: var(--nx-core-hot); }  /* hot core — long-form writing */
+.task     { --card-accent: var(--accent-g); }
+.table    { --card-accent: var(--nx-hazard); }
+.media    { --card-accent: color-mix(in srgb, var(--nx-hazard) 70%, var(--nx-ink)); }
+.link     { --card-accent: color-mix(in srgb, var(--nx-core) 55%, var(--nx-ink)); }
+.column   { --card-accent: var(--nx-ink-dim); }  /* neutral — container card */
+.sketch   { --card-accent: var(--nx-core-hot); }
+.color    { --card-accent: var(--nx-hazard); }
+.audio    { --card-accent: color-mix(in srgb, var(--nx-core) 70%, var(--nx-hazard)); }
+.video    { --card-accent: var(--nx-danger); }
+.heading  { --card-accent: var(--nx-ink); }
+.comment  { --card-accent: color-mix(in srgb, var(--nx-core) 45%, var(--nx-ink-dim)); }
+.map      { --card-accent: var(--accent-g); }
+.board    { --card-accent: var(--nx-core); }
+
+/* ── Compact shell (document cards) ──
+   A document tile is an icon and a word count, so the shell around it
+   has to shrink too — otherwise the chrome would be bigger than the
+   content and the "smallest card on the board" wouldn't be. The min
+   height, header and footer all tighten; the footer keeps its labels
+   because they still fit at this width. */
+.compact {
+  min-height: 0;
+}
+
+.compact .header {
+  padding: 6px 7px 6px 10px;
+  gap: 5px;
+}
+
+.compact .title {
+  font-size: 11.5px;
+}
+
+.compact .footer {
+  padding: 4px 6px;
+  gap: 3px;
+}
+
+.compact .btn {
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+}
+
+/* The connector dot is sized for a full card; scale it with the shell. */
+.compact::after {
+  width: 9px;
+  height: 9px;
+}
+
+/* ── Being dragged ──
+   Lifts the card off the board and kills its transitions. The lift is
+   the confirmation that a press-and-hold engaged; the transition reset
+   matters because position updates land every mousemove and a
+   transition on transform would make the card lag the cursor. */
+.dragging {
+  z-index: 30;
+  transition: none !important;
+  transform: scale(1.02);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--nx-core),
+    0 0 22px var(--nx-core-soft) !important;
+}
+
+.dragging:hover {
+  transform: scale(1.02);
+}
+
+/* ── Locked — position pinned, contents still live ──
+   The card keeps its normal hover glow so it doesn't read as disabled,
+   but loses the grab cursor and the hover lift: nothing suggests it can
+   be moved, because it can't. */
+.locked {
+  cursor: default;
+}
+
+.locked:hover {
+  transform: none;
+}
+
+/* Corner tick so a locked card is identifiable without hovering it */
+.locked::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 14px solid var(--nx-hazard);
+  border-left: 14px solid transparent;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+/* Lock toggle in its engaged state */
+.lockOn {
+  color: var(--nx-hazard) !important;
+  border-color: color-mix(in srgb, var(--nx-hazard) 55%, transparent) !important;
+  background: color-mix(in srgb, var(--nx-hazard) 12%, transparent) !important;
+}
+
+.lockOn:hover {
+  background: color-mix(in srgb, var(--nx-hazard) 22%, transparent) !important;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--nx-hazard) 30%, transparent) !important;
+}
+
+/* ── Column drop-target ring — dragged card hovers this column ── */
+.dropTarget {
+  border-color: var(--nx-core-hot) !important;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--nx-core-hot) 35%, transparent),
+    0 0 22px var(--nx-core-soft) !important;
+}
+
+.dropTarget::before {
+  opacity: 1;
+}
 
 /* ── Connect-mode ring ── */
 .connectSource {
-  border-color: #f59e0b !important;
-  box-shadow: 0 0 0 3px rgba(245,158,11,0.35), var(--shadow-lg) !important;
+  border-color: var(--nx-hazard) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nx-hazard) 35%, transparent), var(--shadow-lg) !important;
 }
 
 .connectTarget:hover {
-  border-color: #34d399 !important;
-  box-shadow: 0 0 0 3px rgba(52,211,153,0.3), var(--shadow-lg) !important;
+  border-color: var(--nx-core-hot) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nx-core-hot) 30%, transparent), var(--shadow-lg) !important;
   cursor: crosshair !important;
 }
 
+/* Left accent bar */
 .card::before {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 3px;
-  background: var(--card-accent, var(--accent));
+  background: var(--card-accent, var(--nx-core));
   opacity: 0.5;
-  transition: opacity var(--transition);
+  transition: opacity var(--transition), box-shadow var(--transition);
 }
 .card:hover::before,
 .selected::before {
   opacity: 1;
+  box-shadow: 0 0 8px var(--card-accent, var(--nx-core));
+}
+
+/* Connector node dot — right edge, glows with the core (.nx-card-node) */
+.card::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translate(50%, -50%);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--nx-core);
+  border: 2px solid var(--nx-bg);
+  box-shadow: 0 0 8px var(--nx-core-glow);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.card:hover::after,
+.selected::after,
+.connectSource::after {
+  opacity: 1;
+}
+.connectSource::after {
+  background: var(--nx-hazard);
+  box-shadow: 0 0 8px var(--nx-hazard);
 }
 
 /* ── Header ── */
@@ -85,24 +225,44 @@
   align-items: center;
   gap: 8px;
   padding: 11px 13px 10px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--nx-line);
 }
 
-.icon {
-  font-size: 14px;
+/* Type glyph, now a button: click opens the icon picker. Styled to sit
+   as quietly as the old <span> until hovered. */
+.iconBtn {
   flex-shrink: 0;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Monoline glyph tinted with this card type's accent bar color */
+  color: var(--card-accent, var(--nx-ink-dim));
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 2px;
+  margin: -2px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.iconBtn:hover {
+  background: var(--nx-core-soft);
+  border-color: var(--nx-core);
+  box-shadow: 0 0 8px var(--nx-core-soft);
 }
 
 .title {
   flex: 1;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-1);
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--nx-ink);
   background: transparent;
   border: none;
   outline: none;
-  font-family: var(--font-ui);
+  font-family: var(--nx-font-display);
   cursor: text;
   min-width: 0;  /* Flex truncation fix */
 }
@@ -112,7 +272,7 @@
   flex-shrink: 0;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--text-3);
   font-size: 13px;
   cursor: pointer;
@@ -122,26 +282,16 @@
 }
 
 .connectBtn:hover {
-  background: var(--surface-3);
-  color: var(--text-1);
-  border-color: var(--border);
+  background: var(--nx-core-soft);
+  color: var(--nx-core);
+  border-color: var(--nx-core);
+  box-shadow: 0 0 8px var(--nx-core-soft);
 }
 
 /* ── Body ── */
 .body {
   flex: 1;
   overflow: hidden;
-}
-
-.content {
-  font-size: 12.5px;
-  line-height: 1.65;
-  color: var(--text-2);
-  outline: none;
-  min-height: 56px;
-  cursor: text;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 
 .content:focus {
@@ -160,7 +310,7 @@
   display: flex;
   gap: 4px;
   padding: 6px 10px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--nx-line);
   opacity: 0;
   transition: opacity var(--transition);
 }
@@ -170,25 +320,27 @@
 }
 
 .btn {
-  font-size: 10.5px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--nx-line);
   background: transparent;
   color: var(--text-2);
   cursor: pointer;
-  font-family: var(--font-ui);
+  font-family: var(--nx-font-mono);
   transition: all var(--transition);
 }
 
 .btn:hover {
-  background: var(--surface2);
-  color: var(--text-1);
-  border-color: var(--border-h);
+  background: var(--nx-core-soft);
+  color: var(--nx-core);
+  border-color: var(--nx-core);
 }
 
 .btnDanger:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.3);
+  background: color-mix(in srgb, var(--nx-danger) 10%, transparent);
+  color: var(--nx-danger);
+  border-color: color-mix(in srgb, var(--nx-danger) 30%, transparent);
 }

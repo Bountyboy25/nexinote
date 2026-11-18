@@ -38,3 +38,7 @@ pnpm-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Generated knowledge-graph output (graphify) — derived from the source,
+# includes a large cache, and is regenerated on demand
+graphify-out/

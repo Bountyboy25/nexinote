@@ -1,0 +1,90 @@
+.rail {
+  position: fixed;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 8px;
+  background: var(--nx-bg-raised);
+  border: 1px solid var(--nx-line);
+  border-radius: 18px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.3);
+  z-index: 90;
+  max-height: calc(100vh - 40px);
+}
+
+.tool {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--nx-ink-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--nx-speed) ease;
+}
+.tool:hover { color: var(--nx-ink); background: var(--nx-core-soft); }
+.tool svg { width: 20px; height: 20px; }
+
+.active {
+  color: var(--nx-core);
+  border-color: var(--nx-core);
+  background: var(--nx-core-soft);
+  box-shadow: 0 0 12px var(--nx-core-glow);
+}
+
+.tip {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  white-space: nowrap;
+  background: var(--nx-bg-panel);
+  border: 1px solid var(--nx-line);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+.tool:hover .tip,
+.tool:focus-visible .tip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.divider { height: 1px; margin: 4px 6px; background: var(--nx-line); }
+.spacer { flex: 1; min-height: 4px; }
+
+.context { display: flex; flex-direction: column; gap: 6px; animation: ctxIn 0.3s var(--nx-ease-spring); }
+@keyframes ctxIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Narrow screens: rail becomes a bottom bar */
+@media (max-width: 640px) {
+  .rail {
+    left: 50%;
+    top: auto;
+    bottom: 14px;
+    transform: translateX(-50%);
+    flex-direction: row;
+    max-width: calc(100vw - 24px);
+    overflow-x: auto;
+  }
+  .context { flex-direction: row; }
+  .divider { width: 1px; height: auto; margin: 6px 4px; }
+  .tip { display: none; }
+}

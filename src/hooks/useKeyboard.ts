@@ -21,7 +21,7 @@ function isTyping(e: KeyboardEvent): boolean {
 export function useKeyboard(canvasRef: React.RefObject<HTMLElement | null>) {
   const spaceHeld = useRef(false)
 
-  const { deleteSelected, selectAll, deselectAll, resetView } =
+  const { deleteSelected, selectAll, deselectAll, resetView, toggleLock } =
     useCanvasStore.getState()
 
   useEffect(() => {
@@ -36,9 +36,15 @@ export function useKeyboard(canvasRef: React.RefObject<HTMLElement | null>) {
         return
       }
 
-      // Escape → deselect all
+      // Escape → cancel connect mode first, otherwise deselect all
       if (e.code === 'Escape') {
-        deselectAll()
+        const { connectFromId, setConnectFrom, setActiveTool } = useCanvasStore.getState()
+        if (connectFromId) {
+          setConnectFrom(null)
+          setActiveTool('select')
+        } else {
+          deselectAll()
+        }
         return
       }
 
@@ -67,6 +73,13 @@ export function useKeyboard(canvasRef: React.RefObject<HTMLElement | null>) {
         resetView()
         return
       }
+
+      // Ctrl/Cmd+L → lock / unlock the selected cards in place
+      if (mod && e.key.toLowerCase() === 'l') {
+        e.preventDefault()
+        toggleLock()
+        return
+      }
     }
 
     const onKeyUp = (e: KeyboardEvent) => {
@@ -82,7 +95,7 @@ export function useKeyboard(canvasRef: React.RefObject<HTMLElement | null>) {
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('keyup', onKeyUp)
     }
-  }, [canvasRef, deleteSelected, selectAll, deselectAll, resetView])
+  }, [canvasRef, deleteSelected, selectAll, deselectAll, resetView, toggleLock])
 
   return { spaceHeld }
 }

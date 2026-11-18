@@ -19,19 +19,108 @@
   overflow: visible;
 }
 
-/* ── Wave animation (flowing dashes) ── */
+/* ── Wave animation (flowing dashes) ──
+   The offset travels exactly one --dash-cycle per iteration; each style
+   sets that var to a whole multiple of its dash period, so the loop wraps
+   with zero visible jump. Speed boost swaps --dash-dur on the same
+   animation (no keyframe change → no restart snap). */
 @keyframes dashFlow {
-  to { stroke-dashoffset: -30; }
+  to { stroke-dashoffset: calc(-1 * var(--dash-cycle, 33px)); }
 }
 
-@keyframes dashFast {
-  to { stroke-dashoffset: -30; }
+.dashFlow {
+  animation: dashFlow var(--dash-dur, 1.6s) linear infinite;
 }
 
-.dashSlow {
-  animation: dashFlow 2s linear infinite;
+/* Ease the drag-speed boost in and out instead of snapping */
+.conPath {
+  transition: stroke-width 0.25s ease, stroke-opacity 0.25s ease;
 }
 
-.dashFast {
-  animation: dashFast 0.5s linear infinite;
+/* ── Connector popup — restyle / sever ── */
+
+/* Invisible click-catcher that closes the menu */
+.menuOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3000;
+}
+
+.menu {
+  position: absolute;
+  z-index: 3001;
+  width: 200px;
+  padding: 6px;
+  background: var(--nx-bg-panel);
+  border: 1px solid var(--nx-line);
+  border-radius: 10px;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.55),
+    0 0 14px var(--nx-core-soft);
+  font-family: var(--nx-font-body);
+  animation: menuIn 0.14s var(--nx-ease-spring);
+}
+
+@keyframes menuIn {
+  from { opacity: 0; transform: scale(0.92) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.menuTitle {
+  font-family: var(--nx-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--nx-ink-dim);
+  padding: 4px 8px 6px;
+  border-bottom: 1px solid var(--nx-line);
+  margin-bottom: 4px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--nx-ink);
+  font-family: var(--nx-font-body);
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--nx-speed), border-color var(--nx-speed);
+}
+
+.menuItem:hover {
+  background: var(--nx-core-soft);
+}
+
+.menuItemActive {
+  border-color: var(--nx-core);
+  background: var(--nx-core-soft);
+  box-shadow: 0 0 8px var(--nx-core-soft);
+}
+
+.menuSever {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-top: 1px solid var(--nx-line);
+  border-radius: 0 0 7px 7px;
+  background: transparent;
+  color: var(--nx-danger);
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--nx-speed);
+}
+
+.menuSever:hover {
+  background: color-mix(in srgb, var(--nx-danger) 12%, transparent);
 }

@@ -6,11 +6,11 @@ import styles from './CardTypes.module.css'
 // ─────────────────────────────────────────────────────────────
 // RICH TEXT CARD — Phase 3
 //
-// Inline formatting toolbar removed; formatting is now handled
-// by the global SideTaskbar. The card only renders a
-// contentEditable area. Formatting still works via
-// document.execCommand() triggered from the SideTaskbar, which
-// uses onMouseDown + e.preventDefault() to preserve selection.
+// Inline formatting toolbar removed; formatting is now handled by
+// the bottom Toolbar's context mode (SelectionTools). The card only
+// renders a contentEditable area. Formatting still works via
+// document.execCommand() triggered from those tools, which use
+// onMouseDown + e.preventDefault() to preserve selection.
 // ─────────────────────────────────────────────────────────────
 
 interface Props { card: NoteCard }

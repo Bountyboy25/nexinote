@@ -1,7 +1,8 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55); /* spec: modal backdrop = 55% black */
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,7 +12,7 @@
 .dialog {
   background: var(--surface);
   border: 1px solid var(--border-h);
-  border-radius: var(--radius);
+  border-radius: 20px; /* spec: modals = radius 20 */
   padding: 24px;
   width: 300px;
   box-shadow: var(--shadow-lg);
@@ -21,8 +22,10 @@
 }
 
 .title {
-  font-size: 15px;
+  font-family: var(--nx-font-display);
+  font-size: 16px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--text-1);
   margin: 0;
 }
@@ -98,9 +101,9 @@
 }
 
 .previewCell {
-  background: rgba(124, 106, 245, 0.15);
+  background: var(--nx-core-soft);
   border-radius: 2px;
-  border: 1px solid rgba(124, 106, 245, 0.25);
+  border: 1px solid color-mix(in srgb, var(--nx-core) 25%, transparent);
 }
 
 .actions {
@@ -130,7 +133,7 @@
   border: none;
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #fff;
+  color: var(--nx-bg);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;

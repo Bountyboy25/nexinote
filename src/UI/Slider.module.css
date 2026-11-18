@@ -1,0 +1,44 @@
+.wrap { display: flex; flex-direction: column; gap: 8px; }
+
+.label {
+  font-family: var(--nx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--nx-ink-dim);
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(90deg, var(--nx-core) var(--pct), var(--nx-bg-panel) var(--pct));
+  border: 1px solid var(--nx-line);
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--nx-core-hot);
+  border: 2px solid var(--nx-bg);
+  box-shadow: 0 0 12px var(--nx-core-glow);
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+.slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--nx-core-hot);
+  border: 2px solid var(--nx-bg);
+  box-shadow: 0 0 12px var(--nx-core-glow);
+  cursor: grab;
+}
+
+.value { font-family: var(--nx-font-mono); color: var(--nx-core); font-size: 13px; }

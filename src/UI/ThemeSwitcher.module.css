@@ -1,0 +1,27 @@
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--nx-bg-raised);
+  border: 1px solid var(--nx-line);
+  color: var(--nx-ink-dim);
+  font-family: var(--nx-font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  transition: all 0.35s ease;
+}
+.chip:hover { border-color: var(--nx-core); color: var(--nx-ink); transform: translateY(-1px); }
+
+.active {
+  border-color: var(--nx-core);
+  color: var(--nx-ink);
+  box-shadow: 0 0 0 1px var(--nx-core), 0 0 18px var(--nx-core-glow);
+}
+
+.swatch { width: 14px; height: 14px; border-radius: 50%; }

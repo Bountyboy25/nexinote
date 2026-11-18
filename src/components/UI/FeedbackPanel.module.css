@@ -1,0 +1,310 @@
+/* ─────────────────────────────────────────────────────────────
+   FEEDBACK PANEL — modal over Settings
+   Sits at 3200: above the settings panel (3000) it was opened from,
+   below the document editor (3500).
+   ───────────────────────────────────────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: color-mix(in srgb, var(--nx-bg) 72%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fbIn 0.15s ease;
+}
+
+@keyframes fbIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 100%);
+  max-height: min(92vh, 860px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 24px var(--nx-core-soft);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--nx-font-display, var(--font-ui));
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-1);
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.close {
+  flex: none;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.close:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 22px 18px;
+  overflow-y: auto;
+}
+
+/* ── Category chips ── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip:hover {
+  border-color: var(--border-h);
+  color: var(--text-1);
+}
+
+.chipOn {
+  border-color: var(--nx-core);
+  background: var(--nx-core-soft);
+  color: var(--nx-core);
+}
+
+/* ── Suggested prompts ── */
+.prompts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.promptsLabel {
+  font-family: var(--nx-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-right: 2px;
+}
+
+.prompt {
+  padding: 4px 9px;
+  border: 1px dashed var(--border-h);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-3);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.prompt:hover {
+  border-style: solid;
+  border-color: var(--nx-core);
+  color: var(--nx-core);
+  background: color-mix(in srgb, var(--nx-core) 7%, transparent);
+}
+
+/* ── Inputs ── */
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.textarea:focus { border-color: var(--nx-core); }
+
+.count {
+  margin-top: -6px;
+  text-align: right;
+  font-family: var(--nx-font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fieldLabel {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus { border-color: var(--nx-core); }
+
+/* ── Disclosure ── */
+.privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+.privacy svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--accent-g, var(--nx-core));
+}
+
+.privacy strong { color: var(--text-2); }
+
+/* ── Result notices ── */
+.notice {
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.noticeGood {
+  border-color: color-mix(in srgb, var(--accent-g) 45%, transparent);
+  background: color-mix(in srgb, var(--accent-g) 10%, transparent);
+  color: var(--text-1);
+}
+
+.noticeBad {
+  border-color: color-mix(in srgb, var(--nx-danger) 45%, transparent);
+  background: color-mix(in srgb, var(--nx-danger) 10%, transparent);
+  color: var(--text-1);
+}
+
+.noticeInfo {
+  border-color: color-mix(in srgb, var(--nx-hazard) 40%, transparent);
+  background: color-mix(in srgb, var(--nx-hazard) 8%, transparent);
+  color: var(--text-2);
+}
+
+/* ── Footer ── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 22px;
+  border-top: 1px solid var(--border);
+}
+
+.footerRight {
+  display: flex;
+  gap: 8px;
+}
+
+.primary,
+.secondary {
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.primary {
+  border: 1px solid var(--nx-core);
+  background: var(--nx-core-soft);
+  color: var(--nx-core);
+}
+
+.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--nx-core) 22%, transparent);
+  box-shadow: 0 0 10px var(--nx-core-soft);
+}
+
+.secondary {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--border-h);
+  color: var(--text-1);
+}
+
+.primary:disabled,
+.secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

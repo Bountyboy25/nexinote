@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push *)",
+      "Bash(python -)",
+      "Bash(git ls-remote *)",
+      "Bash(git mv *)",
+      "PowerShell(npm run build; if \\($?\\) { $job = Start-Job -ScriptBlock { Set-Location 'f:\\\\Nexinote Core'; npm run dev 2>&1 }; Start-Sleep -Seconds 8; Receive-Job $job; Stop-Job $job; Remove-Job $job })"
+    ]
+  }
+}

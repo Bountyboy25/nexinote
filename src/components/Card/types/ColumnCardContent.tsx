@@ -1,109 +1,170 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useCanvasStore } from '@/store'
-import { nanoid } from 'nanoid'
-import type { ColumnCard, ColumnItem } from '@/types'
+import { Icon, type IconName } from '@/UI/Icon'
+import { GlyphIcon } from '@/UI/glyphs'
+import { CardContent } from '../CardContent'
+import type { Card, ColumnCard, CardType } from '@/types'
 import styles from './CardTypes.module.css'
 
 // ─────────────────────────────────────────────────────────────
-// COLUMN CARD CONTENT — Vertical list container
+// COLUMN CARD CONTENT — a container for whole cards
 //
-// Each column item is a mini card (note / task / link).
-// Items are stored embedded in the column card's content —
-// they don't exist on the main canvas.
+// A column holds REAL cards, not flattened text stubs. Every card
+// type is allowed except another column: nesting containers has no
+// sensible layout and no obvious way back out, so it's refused at
+// each entry point (drop, add menu, and defensively when rendering).
+//
+// Because embedded cards are ordinary Card objects rendered by the
+// shared CardContent factory, they behave exactly as they do on the
+// canvas — a table is still editable, a map still pans, a sketch is
+// still drawable. Their edits reach the store through updateCard(),
+// which knows to look inside columns (see store/index.ts).
+//
+//   • Rows collapse/expand; a card that is collapsed isn't mounted,
+//     which keeps a column of maps or videos from costing anything
+//     until it's opened
+//   • Eject lifts a card back onto the canvas beside the column, so
+//     dropping something in is never a one-way trip
+//   • Rows reorder via the grip handle (HTML5 drag & drop); canvas
+//     cards dropped onto the column are absorbed whole (see
+//     useCardDrag + store.absorbCardIntoColumn)
 // ─────────────────────────────────────────────────────────────
 
 interface Props { card: ColumnCard }
 
-const ITEM_ICONS: Record<ColumnItem['type'], string> = {
-  note: '📝',
-  task: '✅',
-  link: '🔗',
+// Everything a column can contain — i.e. every card type but itself.
+// 'table' is absent because it needs the row/column size dialog before
+// it can be created; drag an existing table in instead.
+const ADDABLE: { type: CardType; icon: IconName; label: string }[] = [
+  { type: 'note',     icon: 'note',     label: 'Note' },
+  { type: 'task',     icon: 'task',     label: 'Task list' },
+  { type: 'link',     icon: 'link',     label: 'Link' },
+  { type: 'document', icon: 'document', label: 'Document' },
+  { type: 'heading',  icon: 'heading',  label: 'Heading' },
+  { type: 'comment',  icon: 'comment',  label: 'Comment' },
+  { type: 'media',    icon: 'media',    label: 'Image' },
+  { type: 'audio',    icon: 'audio',    label: 'Audio' },
+  { type: 'video',    icon: 'video',    label: 'Video' },
+  { type: 'sketch',   icon: 'sketch',   label: 'Sketch' },
+  { type: 'color',    icon: 'color',    label: 'Color' },
+  { type: 'map',      icon: 'map',      label: 'Map' },
+  { type: 'board',    icon: 'board',    label: 'Sub-board' },
+]
+
+const ROW_ICONS: Record<CardType, IconName> = {
+  note: 'note', document: 'document', task: 'task', table: 'table',
+  media: 'media', link: 'link', column: 'column', sketch: 'sketch',
+  color: 'color', audio: 'audio', video: 'video', heading: 'heading',
+  comment: 'comment', map: 'map', board: 'board',
 }
 
-const ITEM_PLACEHOLDER: Record<ColumnItem['type'], string> = {
-  note: 'Write a note…',
-  task: 'Describe the task…',
-  link: 'https://',
-}
+// Types that are cheap and usually want to be visible straight away.
+// Heavier ones (maps spin up Leaflet, videos load an iframe) start
+// collapsed so a long column stays fast to open.
+const OPEN_BY_DEFAULT = new Set<CardType>([
+  'note', 'task', 'link', 'color', 'heading', 'comment',
+])
 
-// ── Single item row ───────────────────────────────────────────
+// ── Single embedded card row ──────────────────────────────────
 interface ItemRowProps {
-  item:     ColumnItem
-  onUpdate: (patch: Partial<ColumnItem>) => void
-  onDelete: () => void
+  item:        Card
+  index:       number
+  dragging:    boolean          // some row in this column is mid-drag
+  onTitle:     (title: string) => void
+  onDelete:    () => void
+  onEject:     () => void
+  onDragStart: () => void
+  onDragEnd:   () => void
+  onHover:     (insertIndex: number) => void
+  onDrop:      () => void
+  showDropLine: boolean
 }
 
-function ItemRow({ item, onUpdate, onDelete }: ItemRowProps) {
-  const [expanded, setExpanded] = useState(false)
+function ItemRow({
+  item, index, dragging, onTitle, onDelete, onEject,
+  onDragStart, onDragEnd, onHover, onDrop, showDropLine,
+}: ItemRowProps) {
+  const [expanded, setExpanded] = useState(OPEN_BY_DEFAULT.has(item.type))
+  const [armed, setArmed] = useState(false)   // grip pressed → row draggable
 
   return (
-    <div className={styles.colItem}>
+    <div
+      className={[
+        styles.colItem,
+        showDropLine ? styles.colItemDropBefore : '',
+      ].filter(Boolean).join(' ')}
+      draggable={armed}
+      onDragStart={e => {
+        e.stopPropagation()
+        e.dataTransfer.effectAllowed = 'move'
+        onDragStart()
+      }}
+      onDragEnd={() => { setArmed(false); onDragEnd() }}
+      onDragOver={e => {
+        if (!dragging) return
+        e.preventDefault()
+        e.stopPropagation()
+        const r = e.currentTarget.getBoundingClientRect()
+        onHover(e.clientY < r.top + r.height / 2 ? index : index + 1)
+      }}
+      onDrop={e => { e.preventDefault(); e.stopPropagation(); onDrop() }}
+      onMouseUp={() => setArmed(false)}
+    >
       <div className={styles.colItemHeader}>
-        <span className={styles.colItemIcon}>{ITEM_ICONS[item.type]}</span>
+        <span
+          className={styles.colItemGrip}
+          data-no-card-drag=""
+          title="Drag to reorder"
+          onMouseDown={() => setArmed(true)}
+        >
+          <Icon name="grip" size={12} />
+        </span>
+
+        {/* A card carried into the column keeps its custom icon */}
+        <span className={styles.colItemIcon}>
+          {item.icon
+            ? <GlyphIcon name={item.icon} accent={item.accent} size={13} />
+            : <Icon name={ROW_ICONS[item.type]} size={13} />}
+        </span>
+
         <input
           className={styles.colItemTitle}
           value={item.title}
           placeholder="Title…"
-          onChange={e => onUpdate({ title: e.target.value })}
+          onChange={e => onTitle(e.target.value)}
           onMouseDown={e => e.stopPropagation()}
           onKeyDown={e => e.stopPropagation()}
         />
+
         <button
           className={styles.colItemExpand}
           onClick={() => setExpanded(v => !v)}
           title={expanded ? 'Collapse' : 'Expand'}
         >
-          {expanded ? '▲' : '▼'}
+          <Icon
+            name="chevron-down"
+            size={11}
+            className={expanded ? styles.colItemChevronOpen : ''}
+          />
         </button>
+        <button
+          className={styles.colItemEject}
+          onClick={onEject}
+          title="Move back onto the board"
+          aria-label="Move card back onto the board"
+        ><Icon name="chevron-right" size={11} /></button>
         <button
           className={styles.colItemDelete}
           onClick={onDelete}
-          title="Remove item"
-        >✕</button>
+          title="Delete this card"
+        ><Icon name="close" size={11} /></button>
       </div>
 
+      {/* Collapsed rows don't mount their content at all — that's what
+          keeps a column of maps or videos cheap until it's opened. */}
       {expanded && (
         <div className={styles.colItemBody}>
-          {item.type === 'task' ? (
-            <label className={styles.colItemTaskRow}>
-              <input
-                type="checkbox"
-                checked={!!item.done}
-                onChange={e => onUpdate({ done: e.target.checked })}
-                onMouseDown={e => e.stopPropagation()}
-              />
-              <textarea
-                className={`${styles.colItemText} ${item.done ? styles.colItemDone : ''}`}
-                value={item.text}
-                placeholder={ITEM_PLACEHOLDER[item.type]}
-                rows={2}
-                onChange={e => onUpdate({ text: e.target.value })}
-                onMouseDown={e => e.stopPropagation()}
-                onKeyDown={e => e.stopPropagation()}
-              />
-            </label>
-          ) : (
-            <textarea
-              className={styles.colItemText}
-              value={item.text}
-              placeholder={ITEM_PLACEHOLDER[item.type]}
-              rows={item.type === 'link' ? 1 : 3}
-              onChange={e => onUpdate({ text: e.target.value })}
-              onMouseDown={e => e.stopPropagation()}
-              onKeyDown={e => e.stopPropagation()}
-            />
-          )}
-          {item.type === 'link' && item.text.startsWith('http') && (
-            <a
-              className={styles.colItemLink}
-              href={item.text}
-              target="_blank"
-              rel="noreferrer"
-              onClick={e => e.stopPropagation()}
-            >
-              Open ↗
-            </a>
-          )}
+          <CardContent card={item} />
         </div>
       )}
     </div>
@@ -112,37 +173,64 @@ function ItemRow({ item, onUpdate, onDelete }: ItemRowProps) {
 
 // ── Main component ────────────────────────────────────────────
 export function ColumnCardContent({ card }: Props) {
-  const updateCard = useCanvasStore(s => s.updateCard)
-  const items = card.content.items
-  const addBtnRef = useRef<HTMLDivElement>(null)
+  const { updateCard, ejectFromColumn, addCardToColumn, removeFromColumn } =
+    useCanvasStore.getState()
   const [showAddMenu, setShowAddMenu] = useState(false)
 
-  function setItems(next: ColumnItem[]) {
+  // Row drag & drop (reorder within this column)
+  const [dragId, setDragId]   = useState<string | null>(null)
+  const [overIdx, setOverIdx] = useState<number | null>(null)
+
+  // Defensive: a column should never contain another column, but a
+  // hand-edited or future-migrated board shouldn't be able to send this
+  // component into infinite recursion.
+  const items = card.content.items.filter(i => i.type !== 'column')
+
+  function setItems(next: Card[]) {
     updateCard(card.id, { content: { ...card.content, items: next } })
   }
 
-  function addItem(type: ColumnItem['type']) {
-    const label = type === 'note' ? 'Note' : type === 'task' ? 'Task' : 'Link'
-    setItems([...items, { id: nanoid(), type, title: label, text: '', done: false }])
-    setShowAddMenu(false)
+  function setItemTitle(id: string, title: string) {
+    setItems(items.map(it => it.id === id ? { ...it, title } as Card : it))
   }
 
-  function updateItem(id: string, patch: Partial<ColumnItem>) {
-    setItems(items.map(it => it.id === id ? { ...it, ...patch } : it))
-  }
-
+  // Note this goes through the store rather than setItems() — see
+  // removeFromColumn: a board card leaving a column has to hand its
+  // sub-board back to the gallery.
   function deleteItem(id: string) {
-    setItems(items.filter(it => it.id !== id))
+    removeFromColumn(card.id, id)
   }
 
-  // One pass to compute both progress counters — used to be two filters
-  // building intermediate arrays.
+  function clearDrag() {
+    setDragId(null)
+    setOverIdx(null)
+  }
+
+  function dropRow() {
+    if (dragId === null || overIdx === null) { clearDrag(); return }
+    const fromIdx = items.findIndex(it => it.id === dragId)
+    if (fromIdx === -1) { clearDrag(); return }
+    let toIdx = overIdx
+    if (fromIdx < toIdx) toIdx--
+    if (toIdx !== fromIdx) {
+      const next = [...items]
+      const [moved] = next.splice(fromIdx, 1)
+      next.splice(toIdx, 0, moved)
+      setItems(next)
+    }
+    clearDrag()
+  }
+
+  // One pass for the progress counters — every checklist inside this
+  // column contributes, so the header summarizes the whole stack.
   let completedCount = 0
   let taskCount = 0
   for (const it of items) {
     if (it.type === 'task') {
-      taskCount++
-      if (it.done) completedCount++
+      for (const t of it.content.items) {
+        taskCount++
+        if (t.done) completedCount++
+      }
     }
   }
 
@@ -150,7 +238,9 @@ export function ColumnCardContent({ card }: Props) {
     <div className={styles.column} onMouseDown={e => e.stopPropagation()}>
       {/* ── Item count / progress ── */}
       <div className={styles.colMeta}>
-        <span className={styles.colCount}>{items.length} {items.length === 1 ? 'card' : 'cards'}</span>
+        <span className={styles.colCount}>
+          {items.length} {items.length === 1 ? 'card' : 'cards'}
+        </span>
         {taskCount > 0 && (
           <span className={styles.colProgress}>
             {completedCount}/{taskCount} done
@@ -159,24 +249,41 @@ export function ColumnCardContent({ card }: Props) {
       </div>
 
       {/* ── Item list ── */}
-      <div className={styles.colList}>
+      <div
+        className={`${styles.colList} ${dragId && overIdx === items.length ? styles.colListDropEnd : ''}`}
+        onDragOver={e => {
+          if (!dragId) return
+          e.preventDefault()
+          // Hovering the empty space below the rows → drop at the end
+          if (e.target === e.currentTarget) setOverIdx(items.length)
+        }}
+        onDrop={e => { e.preventDefault(); dropRow() }}
+      >
         {items.length === 0 && (
           <div className={styles.colEmpty}>
-            No cards yet — add one below
+            No cards yet — add one below, or drop any card from the board
           </div>
         )}
-        {items.map(item => (
+        {items.map((item, index) => (
           <ItemRow
             key={item.id}
             item={item}
-            onUpdate={patch => updateItem(item.id, patch)}
+            index={index}
+            dragging={dragId !== null}
+            onTitle={title => setItemTitle(item.id, title)}
             onDelete={() => deleteItem(item.id)}
+            onEject={() => ejectFromColumn(card.id, item.id)}
+            onDragStart={() => setDragId(item.id)}
+            onDragEnd={clearDrag}
+            onHover={setOverIdx}
+            onDrop={dropRow}
+            showDropLine={dragId !== null && overIdx === index && dragId !== item.id}
           />
         ))}
       </div>
 
       {/* ── Add button ── */}
-      <div className={styles.colAddWrap} ref={addBtnRef}>
+      <div className={styles.colAddWrap}>
         <button
           className={styles.colAddBtn}
           onClick={() => setShowAddMenu(v => !v)}
@@ -186,14 +293,15 @@ export function ColumnCardContent({ card }: Props) {
         </button>
         {showAddMenu && (
           <div className={styles.colAddMenu}>
-            {(['note', 'task', 'link'] as ColumnItem['type'][]).map(type => (
+            {ADDABLE.map(({ type, icon, label }) => (
               <button
                 key={type}
                 className={styles.colAddOption}
-                onClick={() => addItem(type)}
+                onClick={() => { addCardToColumn(card.id, type); setShowAddMenu(false) }}
                 onMouseDown={e => e.stopPropagation()}
               >
-                {ITEM_ICONS[type]} {type.charAt(0).toUpperCase() + type.slice(1)}
+                <Icon name={icon} size={14} />
+                <span>{label}</span>
               </button>
             ))}
           </div>

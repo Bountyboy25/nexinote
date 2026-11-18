@@ -1,4 +1,9 @@
 .canvas {
+  /* The canvas handles pan and pinch itself (useCanvasTouch). Without
+     this the browser scrolls and rubber-bands the page underneath every
+     gesture, and preventDefault alone can't stop a scroll that has
+     already begun. */
+  touch-action: none;
   position: fixed;
   inset: 0;
   overflow: hidden;
@@ -11,9 +16,57 @@
 .grid {
   position: absolute;
   inset: 0;
-  /* Radial gradient dots — pure CSS, no images */
-  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+  /* Crossed 1px lines in --nx-grid (spec §4: 36px lattice) */
+  background-image:
+    linear-gradient(var(--dot) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dot) 1px, transparent 1px);
   pointer-events: none;  /* Clicks fall through to canvas */
+}
+
+/* While dragging an image file over the canvas */
+.dropActive::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 2px dashed var(--nx-core);
+  border-radius: var(--radius);
+  background: var(--nx-core-soft);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.dropHint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 22px;
+  background: color-mix(in srgb, var(--nx-bg) 92%, transparent);
+  border: 1px solid var(--border-h);
+  border-radius: var(--radius);
+  color: var(--text-1);
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 6;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ── Drag fence ──
+   The screen-edge limit a dragged card is clamped to (clampCardToView
+   in utils/canvas.ts). Fixed to the viewport — top edge sits under the
+   52px TopBar to match the clamp — and shown only while a card is
+   being dragged. z-index 4: above the world (2), below the drop
+   overlay (5) and all fixed chrome. */
+.dragFence {
+  position: absolute;
+  top: 52px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px dashed color-mix(in srgb, var(--nx-hazard) 55%, transparent);
+  pointer-events: none;
+  z-index: 4;
 }
 
 .world {
